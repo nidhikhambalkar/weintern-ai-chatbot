@@ -1,0 +1,62 @@
+[
+  {
+    "category": "contact",
+    "question": "How can I contact WeIntern support?",
+    "answer": "You can contact WeIntern support through the official WhatsApp group, email support, or the help desk channel. After registration, all official contact details are shared through the onboarding communication."
+  },
+  {
+    "category": "contact",
+    "question": "What is the escalation process?",
+    "answer": "For unresolved issues, please raise the concern formally through the official WeIntern support channel — via WhatsApp or email. Provide your registered name, enrollment details, and a clear description of the issue for faster resolution."
+  },
+  {
+    "category": "contact",
+    "question": "What is the WhatsApp number for WeIntern support?",
+    "answer": "The official WhatsApp support number is shared in the official welcome email and onboarding communication after enrollment. Please check your registered email for the contact details, or reach out via email if you need it before that."
+  },
+  {
+    "category": "contact",
+    "question": "What is the WeIntern support email?",
+    "answer": "The official WeIntern support email is shared in your registration confirmation and onboarding materials. If you did not receive it, please check your spam folder or contact the team through the official WhatsApp channel."
+  },
+  {
+    "category": "contact",
+    "question": "What are the support office hours?",
+    "answer": "WeIntern support is generally available on weekdays during business hours. Specific availability timings may vary, so it is best to check the official communication shared after registration for the latest schedule."
+  },
+  {
+    "category": "contact",
+    "question": "How do I join the WeIntern WhatsApp group?",
+    "answer": "The WeIntern WhatsApp group invite link is shared after your enrollment is confirmed. Check your registered email or onboarding message for the invite link."
+  },
+  {
+    "category": "contact",
+    "question": "How do I contact support for a payment issue?",
+    "answer": "For payment-related concerns, reach out to the support team via the official WeIntern WhatsApp group or email with your payment details, transaction ID, and a description of the issue."
+  },
+  {
+    "category": "contact",
+    "question": "How do I report a technical problem?",
+    "answer": "Technical problems can be reported via the official WeIntern support channel. Share your registered email, the device and browser you are using, and a screenshot or description of the issue for faster resolution."
+  },
+  {
+    "category": "contact",
+    "question": "I have not received any communication after registration. Who do I contact?",
+    "answer": "If you have not received any email or WhatsApp message after registration, please contact the WeIntern support team immediately via the official WhatsApp or email provided during enrollment."
+  },
+  {
+    "category": "contact",
+    "question": "Support team se kaise contact karein?",
+    "answer": "WeIntern support team se official WhatsApp group ya email ke through contact kar sakte hain. Registration ke baad official contact details onboarding message me share ki jaati hain."
+  },
+  {
+    "category": "contact",
+    "question": "WhatsApp support number kya hai?",
+    "answer": "Official WhatsApp support number registration confirmation aur welcome email me share kiya jata hai. Agar nahi mila to email ke through support se request karein."
+  },
+  {
+    "category": "contact",
+    "question": "Support email kya hai?",
+    "answer": "Official support email registration aur onboarding materials me share ki jaati hai. Agar nahi mili to spam folder check karein ya WhatsApp channel ke through contact karein."
+  }
+]
