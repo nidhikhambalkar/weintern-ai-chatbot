@@ -1,35 +1,38 @@
 [
   {
+    "category": "internship",
+    "question": "What internship programs does WeIntern offer?",
+    "answer": "WeIntern offers two internship programs: 1) 6-Month Internship Program (₹7,999) — includes 2 months of industry-oriented training + live project experience + internship certificate + all program certificates + mock interview prep + LinkedIn profile building + 100% placement guarantee + performance-based stipend up to ₹10,000. EMI available in 30:40:30 ratio or 10% discount on one-time payment. 2) 3-Month Internship Program (₹999) — includes industry training + internship certificate + applicable certificates + stipend up to ₹10,000 (subject to project availability) + placement support (100% guarantee not included)."
+  },
+  {
+    "category": "internship",
     "question": "What is the internship process?",
-    "answer": "The internship combines real-world projects, daily tasks, team collaboration, onboarding, attendance tracking, performance evaluation, and structured learning on a chosen domain."
+    "answer": "The WeIntern internship process: 1) Register on we-intern.in and choose your program (6-Month ₹7,999 or 3-Month ₹999). 2) Pay via Razorpay (UPI/cards/net banking). 3) Attend online orientation via Google Meet. 4) Complete 2 months of industry-oriented training (6-Month) or industry training (3-Month). 5) Work on live project experience. 6) Receive certificate and placement support."
   },
   {
-    "question": "Can you explain what is the internship process?",
-    "answer": "The internship combines real-world projects, daily tasks, team collaboration, onboarding, attendance tracking, performance evaluation, and structured learning on a chosen domain."
+    "category": "internship",
+    "question": "What does the 6-month internship include?",
+    "answer": "The 6-Month Internship Program (₹7,999) includes: ✅ 2 months of industry-oriented training ✅ Live project experience ✅ Internship certificate + all applicable program certificates ✅ Mock Interview preparation ✅ Professional LinkedIn profile building ✅ 100% Placement guarantee ✅ Performance-based stipend up to ₹10,000. Payment: EMI in 30:40:30 ratio or 10% discount on one-time full payment."
   },
   {
-    "question": "How does what is the internship process work?",
-    "answer": "The internship combines real-world projects, daily tasks, team collaboration, onboarding, attendance tracking, performance evaluation, and structured learning on a chosen domain."
+    "category": "internship",
+    "question": "What does the 3-month internship include?",
+    "answer": "The 3-Month Internship Program (₹999) includes: ✅ Industry training ✅ Internship certificate + applicable program certificates ✅ Performance-based stipend up to ₹10,000 (subject to project availability and performance) ✅ Placement support (100% placement guarantee is not included, but support is provided). Fee: ₹999 one-time."
   },
   {
-    "question": "I want to know about what is the internship process.",
-    "answer": "The internship combines real-world projects, daily tasks, team collaboration, onboarding, attendance tracking, performance evaluation, and structured learning on a chosen domain."
+    "category": "internship",
+    "question": "Is stipend available?",
+    "answer": "Yes. Both programs offer a performance-based stipend of up to ₹10,000 during the internship/live project phase. For the 3-Month Program, stipend is subject to project availability and performance. For the 6-Month Program, stipend is part of the live project experience phase."
   },
   {
-    "question": "Kya what is the internship process ke baare me jaana chahiye?",
-    "answer": "The internship combines real-world projects, daily tasks, team collaboration, onboarding, attendance tracking, performance evaluation, and structured learning on a chosen domain."
+    "category": "internship",
+    "question": "What is the stipend amount?",
+    "answer": "WeIntern offers a performance-based stipend of up to ₹10,000 during the internship/live project phase. This applies to both the 6-Month Program (₹7,999) and the 3-Month Program (₹999, subject to project availability and performance)."
   },
   {
-    "question": "what is the internship process ko Hindi me samjhao.",
-    "answer": "The internship combines real-world projects, daily tasks, team collaboration, onboarding, attendance tracking, performance evaluation, and structured learning on a chosen domain."
-  },
-  {
-    "question": "क्या what is the internship process के बारे में बताओ?",
-    "answer": "The internship combines real-world projects, daily tasks, team collaboration, onboarding, attendance tracking, performance evaluation, and structured learning on a chosen domain."
-  },
-  {
-    "question": "what is the internship process कैसे काम करता है?",
-    "answer": "The internship combines real-world projects, daily tasks, team collaboration, onboarding, attendance tracking, performance evaluation, and structured learning on a chosen domain."
+    "category": "internship",
+    "question": "How can I explain what is the internship process?",
+    "answer": "The WeIntern internship combines industry-oriented training, live project experience, placement support, certificates, and a stipend. The 6-Month Program (₹7,999) is comprehensive with 100% placement guarantee. The 3-Month Program (₹999) is a shorter, affordable option with placement support."
   },
   {
     "question": "How do I register?",

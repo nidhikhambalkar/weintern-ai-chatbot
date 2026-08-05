@@ -1,82 +1,82 @@
 [
   {
     "category": "fees",
-    "question": "What is the fee structure?",
-    "answer": "WeIntern course fees vary by program: Full Stack Web Development — ₹4,999 (12 weeks), Mobile App Development — ₹5,999 (10 weeks), AI & Automation — ₹6,499 (8 weeks), Cloud Solutions & DevOps — ₹5,499 (10 weeks), UI/UX Design — ₹3,999 (8 weeks), Digital Marketing — ₹2,999 (6 weeks), Data Science & Analytics — ₹6,999 (12 weeks). All fees are one-time and include certificate and live projects."
+    "question": "What are the WeIntern program options?",
+    "answer": "WeIntern offers two main internship programs: 1) 6-Month Internship Program at ₹7,999 — includes 2 months of industry training + live project experience + 100% placement guarantee + mock interviews + LinkedIn profile building + stipend up to ₹10,000. 2) 3-Month Internship Program at ₹999 — includes industry training + internship certificate + stipend up to ₹10,000 (subject to project availability) + placement support (not 100% guaranteed)."
   },
   {
     "category": "fees",
-    "question": "What are the course-wise fees?",
-    "answer": "Course fees at WeIntern: Full Stack Web Development ₹4,999 | Mobile App Development ₹5,999 | AI & Automation ₹6,499 | Cloud Solutions & DevOps ₹5,499 | UI/UX Design ₹3,999 | Digital Marketing ₹2,999 | Data Science & Analytics ₹6,999. These are discounted prices — original prices are higher."
+    "question": "What is the fee for the 6-month internship?",
+    "answer": "The 6-Month Internship Program fee is ₹7,999. Payment options: (a) EMI in a 30:40:30 ratio across three installments, or (b) one-time full payment with a 10% discount. This program includes 2 months of industry-oriented training, live project experience, internship certificate, all applicable program certificates, mock interview preparation, LinkedIn profile building, 100% placement guarantee, and a performance-based stipend up to ₹10,000."
   },
   {
     "category": "fees",
-    "question": "Which payment methods are accepted?",
-    "answer": "WeIntern accepts payments through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), debit cards, credit cards, and net banking. You will receive the payment link during the enrollment process."
+    "question": "What is the fee for the 3-month internship?",
+    "answer": "The 3-Month Internship Program fee is ₹999. This program includes industry training, internship certificate, applicable program certificates, and a performance-based stipend up to ₹10,000 (subject to project availability and performance). Note: 100% placement guarantee is not included, but placement support is provided."
   },
   {
     "category": "fees",
-    "question": "Is EMI available?",
-    "answer": "EMI options may be available through Razorpay depending on your card or bank. Please contact support at +91 74149 74582 or contact.weintern@gmail.com to confirm EMI availability for your preferred program."
+    "question": "Is EMI available for the fee payment?",
+    "answer": "Yes. EMI is available for the 6-Month Internship Program (₹7,999) in a 30:40:30 ratio — 30% upfront, 40% at the midpoint, and 30% at the end. For the 3-Month Program (₹999), one-time payment applies."
   },
   {
     "category": "fees",
-    "question": "Are discounts available?",
-    "answer": "Yes. WeIntern programs are already offered at discounted prices (20% off or more from original prices). Additional discounts or promotional offers may be available during certain enrollment cycles. Contact support at +91 74149 74582 for current offers."
+    "question": "What is the EMI ratio for the internship fee?",
+    "answer": "The EMI payment plan for the 6-Month Internship (₹7,999) is split in a 30:40:30 ratio — meaning 30% is paid at enrollment, 40% during the program, and 30% at the end. Alternatively, a 10% discount is available on one-time full payment."
+  },
+  {
+    "category": "fees",
+    "question": "Is there a discount on one-time payment?",
+    "answer": "Yes. For the 6-Month Internship Program (₹7,999), a 10% discount is available if you choose to pay the full amount at once instead of the EMI plan. Contact support at +91 74149 74582 or contact.weintern@gmail.com to avail this."
+  },
+  {
+    "category": "fees",
+    "question": "What payment methods are accepted?",
+    "answer": "WeIntern accepts payments through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), debit cards, credit cards, and net banking. EMI is available for the 6-Month Program in a 30:40:30 ratio."
+  },
+  {
+    "category": "fees",
+    "question": "What is the difference between the 6-month and 3-month program?",
+    "answer": "6-Month Program (₹7,999): Includes 2 months training + live projects + 100% placement guarantee + mock interviews + LinkedIn profile building + stipend up to ₹10,000. EMI available. 3-Month Program (₹999): Includes training + internship certificate + stipend up to ₹10,000 (subject to project availability) + placement support (not 100% guaranteed)."
+  },
+  {
+    "category": "fees",
+    "question": "Which program should I choose?",
+    "answer": "Choose the 6-Month Program (₹7,999) if you want comprehensive training, live project experience, 100% placement guarantee, mock interview prep, and LinkedIn profile building. Choose the 3-Month Program (₹999) if you want a short industry exposure with a certificate and basic placement support at an affordable price."
   },
   {
     "category": "fees",
     "question": "What is the refund policy?",
-    "answer": "Refund terms depend on the official WeIntern refund policy and the timing of the request. For refund queries, contact the support team at +91 74149 74582 (WhatsApp) or contact.weintern@gmail.com with your enrollment and payment details."
+    "answer": "For refund-related queries, please contact the WeIntern support team at +91 74149 74582 (WhatsApp) or contact.weintern@gmail.com with your enrollment and payment details. Refund terms depend on the official WeIntern policy and timing of the request."
   },
   {
     "category": "fees",
     "question": "Are scholarships available?",
-    "answer": "WeIntern programs are already offered at significantly reduced prices. Scholarship or additional fee support may be available depending on the enrollment cycle. Contact support at contact.weintern@gmail.com to inquire."
+    "answer": "The 3-Month Program at ₹999 is already very affordable. The 6-Month Program at ₹7,999 offers a 10% one-time payment discount. For additional scholarship enquiries, contact contact.weintern@gmail.com or WhatsApp +91 74149 74582."
   },
   {
     "category": "fees",
-    "question": "Is the fee refundable?",
-    "answer": "Refundability depends on the official WeIntern policy and when the refund is requested. Please contact support at +91 74149 74582 or contact.weintern@gmail.com for refund-specific guidance."
+    "question": "Internship ki fees kitni hai?",
+    "answer": "WeIntern ke do programs hain: 1) 6-Month Program — ₹7,999 (EMI 30:40:30 ratio mein ya one-time payment par 10% discount). 2) 3-Month Program — ₹999. Dono mein certificate aur ₹10,000 tak ka stipend milta hai."
   },
   {
     "category": "fees",
-    "question": "How can I pay the internship fee?",
-    "answer": "The fee is paid online through Razorpay. It supports UPI (Google Pay, PhonePe, Paytm), debit/credit cards, and net banking. After submitting the registration form on we-intern.in, you will receive the payment link."
+    "question": "6 mahine ke program ki fees kya hai?",
+    "answer": "6-Month Internship Program ki fees ₹7,999 hai. EMI option: 30:40:30 ratio mein teen installments mein pay karo. Ya ek baar full payment par 10% discount milta hai. Is program mein 2 months training, live project, 100% placement guarantee, mock interview, LinkedIn profile building, aur ₹10,000 tak stipend shamil hai."
   },
   {
     "category": "fees",
-    "question": "What is the cheapest course at WeIntern?",
-    "answer": "The most affordable WeIntern program is Digital Marketing at ₹2,999 (6 weeks), followed by UI/UX Design at ₹3,999 (8 weeks). For the latest offers, visit we-intern.in."
+    "question": "3 mahine ke program ki fees kya hai?",
+    "answer": "3-Month Internship Program sirf ₹999 mein available hai. Isme industry training, internship certificate, aur ₹10,000 tak performance-based stipend milta hai. 100% placement guarantee nahi hai, lekin placement support milta hai."
   },
   {
     "category": "fees",
-    "question": "What does the fee include?",
-    "answer": "The program fee includes full course access, mentor support, live projects with real clients, WeIntern verified certificate, and stipend opportunities upon project completion."
+    "question": "Kya EMI available hai?",
+    "answer": "Haan, 6-Month Program (₹7,999) ke liye EMI 30:40:30 ratio mein available hai — 30% enrollment pe, 40% beech mein, 30% end mein. Ya ek baar full payment pe 10% discount milta hai."
   },
   {
     "category": "fees",
-    "question": "How can I know the latest fee details?",
-    "answer": "Visit the official WeIntern website at we-intern.in for the latest fees and offers. You can also WhatsApp us at +91 74149 74582 or email contact.weintern@gmail.com for current pricing."
-  },
-  {
-    "category": "fees",
-    "question": "Fees ka structure kaise hota hai?",
-    "answer": "WeIntern programs ki fees: Full Stack ₹4,999 | Mobile App ₹5,999 | AI & Automation ₹6,499 | Cloud DevOps ₹5,499 | UI/UX ₹3,999 | Digital Marketing ₹2,999 | Data Science ₹6,999. Sabhi fees one-time hain aur certificate + live projects include hain."
-  },
-  {
-    "category": "fees",
-    "question": "Payment kaise karni hoti hai?",
-    "answer": "Payment Razorpay ke through hoti hai jisme UPI (Google Pay, PhonePe, Paytm), debit/credit card, aur net banking accept kiye jaate hain. we-intern.in par registration ke baad payment link milta hai."
-  },
-  {
-    "category": "fees",
-    "question": "Kya discounts milte hain?",
-    "answer": "Haan, WeIntern programs already discounted prices par available hain. Aur bhi offers ke liye support team se +91 74149 74582 par contact karein ya contact.weintern@gmail.com par email karein."
-  },
-  {
-    "category": "fees",
-    "question": "Kya fee refundable hoti hai?",
-    "answer": "Refund official WeIntern policy aur request timing par depend karta hai. Refund ke liye +91 74149 74582 par WhatsApp karein ya contact.weintern@gmail.com par email karein apni enrollment aur payment details ke saath."
+    "question": "Kya ek baar payment karne par discount milta hai?",
+    "answer": "Haan, 6-Month Program (₹7,999) mein one-time full payment karne par 10% discount milta hai. Avail karne ke liye +91 74149 74582 par WhatsApp karein ya contact.weintern@gmail.com par email karein."
   }
 ]

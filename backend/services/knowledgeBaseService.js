@@ -133,6 +133,26 @@ const TOKEN_MAP = {
   marketing: "domains",
   cybersecurity: "domains",
   cloud: "domains",
+  // Stipend / EMI / Guarantee / LinkedIn
+  stipend: "internship",
+  salary: "internship",
+  earnings: "internship",
+  earn: "internship",
+  emi: "fees",
+  installment: "fees",
+  installments: "fees",
+  discount: "fees",
+  guarantee: "placement",
+  guaranteed: "placement",
+  "100%": "placement",
+  linkedin: "placement",
+  profile: "placement",
+  "6month": "internship",
+  "3month": "internship",
+  "6-month": "internship",
+  "3-month": "internship",
+  "6months": "internship",
+  "3months": "internship",
 };
 
 const CATEGORY_HINTS = {
@@ -417,13 +437,46 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory) {
   }
 
   // Payment method scoring
-  if ((queryTokens.includes("payment") || queryTokens.includes("pay") || queryTokens.includes("upi") || queryTokens.includes("paytm")) && (entryText.includes("payment") || entryText.includes("upi") || entryText.includes("pay"))) {
+  if ((queryTokens.includes("payment") || queryTokens.includes("pay") || queryTokens.includes("upi") || queryTokens.includes("paytm") || queryTokens.includes("razorpay")) && (entryText.includes("payment") || entryText.includes("upi") || entryText.includes("pay") || entryText.includes("razorpay"))) {
     score += 8;
   }
 
   // Domain scoring
   if (queryTokens.includes("domain") && entryText.includes("domain")) {
     score += 8;
+  }
+
+  // Stipend scoring
+  if ((queryTokens.includes("stipend") || queryTokens.includes("salary") || queryTokens.includes("earn") || queryTokens.includes("earnings")) && entryText.includes("stipend")) {
+    score += 12;
+  }
+
+  // EMI / discount scoring
+  if ((queryTokens.includes("emi") || queryTokens.includes("installment") || queryTokens.includes("installments") || queryTokens.includes("ratio")) && (entryText.includes("emi") || entryText.includes("30:40:30") || entryText.includes("installment"))) {
+    score += 12;
+  }
+
+  if ((queryTokens.includes("discount") || queryTokens.includes("one-time") || queryTokens.includes("onetime")) && (entryText.includes("discount") || entryText.includes("one-time"))) {
+    score += 10;
+  }
+
+  // Placement guarantee scoring
+  if ((queryTokens.includes("guarantee") || queryTokens.includes("guaranteed") || queryTokens.includes("100%")) && (entryText.includes("guarantee") || entryText.includes("guaranteed") || entryText.includes("100%"))) {
+    score += 12;
+  }
+
+  // LinkedIn scoring
+  if ((queryTokens.includes("linkedin") || queryTokens.includes("profile")) && (entryText.includes("linkedin") || entryText.includes("profile"))) {
+    score += 10;
+  }
+
+  // 6-month / 3-month program scoring
+  if ((queryTokens.includes("6") || queryTokens.includes("six") || queryTokens.includes("6-month")) && (entryText.includes("6-month") || entryText.includes("6 month") || entryText.includes("₹7,999"))) {
+    score += 10;
+  }
+
+  if ((queryTokens.includes("3") || queryTokens.includes("three") || queryTokens.includes("3-month")) && (entryText.includes("3-month") || entryText.includes("3 month") || entryText.includes("₹999"))) {
+    score += 10;
   }
 
   if (entry.question && normalize(entry.question).includes(queryTokens.join(" "))) {

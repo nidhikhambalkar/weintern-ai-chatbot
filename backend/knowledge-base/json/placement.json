@@ -1,402 +1,92 @@
 [
   {
+    "category": "placement",
     "question": "Does WeIntern provide placement support?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
+    "answer": "Yes. The 6-Month Internship Program (₹7,999) includes 100% placement guarantee with resume review, mock interview preparation, LinkedIn profile building, and job assistance. The 3-Month Program (₹999) includes placement support but does not carry a 100% guarantee."
   },
   {
-    "question": "Can you explain does weintern provide placement support?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
+    "category": "placement",
+    "question": "Is placement 100% guaranteed?",
+    "answer": "100% placement guarantee is included in the 6-Month Internship Program (₹7,999). The 3-Month Program (₹999) provides placement support but does not include a 100% placement guarantee."
   },
   {
-    "question": "How does does weintern provide placement support work?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
+    "category": "placement",
+    "question": "What is included in the placement support?",
+    "answer": "The 6-Month Program includes: Mock Interview preparation, Professional LinkedIn profile building, Resume review and improvement, 100% placement guarantee, and Job assistance. The 3-Month Program includes: Placement support (without 100% guarantee)."
   },
   {
-    "question": "I want to know about does weintern provide placement support.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "Kya does weintern provide placement support ke baare me jaana chahiye?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "does weintern provide placement support ko Hindi me samjhao.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "क्या does weintern provide placement support के बारे में बताओ?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "does weintern provide placement support कैसे काम करता है?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
+    "category": "placement",
     "question": "What is the placement process?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
+    "answer": "The placement process includes: 1) Resume review and professional strengthening. 2) Mock interview preparation. 3) LinkedIn profile building for recruiter visibility. 4) Job assistance and application guidance. Students in the 6-Month Program receive 100% placement guarantee."
   },
   {
-    "question": "Can you explain what is the placement process?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "How does what is the placement process work?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "I want to know about what is the placement process.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "Kya what is the placement process ke baare me jaana chahiye?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "what is the placement process ko Hindi me samjhao.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "क्या what is the placement process के बारे में बताओ?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "what is the placement process कैसे काम करता है?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
+    "category": "placement",
     "question": "Will I get resume review?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
+    "answer": "Yes. The 6-Month Internship Program (₹7,999) includes professional resume review and improvement as part of the placement support package."
   },
   {
-    "question": "Can you explain will i get resume review?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "How does will i get resume review work?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "I want to know about will i get resume review.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "Kya will i get resume review ke baare me jaana chahiye?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "will i get resume review ko Hindi me samjhao.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "क्या will i get resume review के बारे में बताओ?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "will i get resume review कैसे काम करता है?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
+    "category": "placement",
     "question": "Will I get mock interviews?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
+    "answer": "Yes. Mock Interview preparation is a dedicated feature of the 6-Month Internship Program (₹7,999). It helps you practice and improve your performance in real hiring conversations."
   },
   {
-    "question": "Can you explain will i get mock interviews?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
+    "category": "placement",
+    "question": "Will I get LinkedIn profile building?",
+    "answer": "Yes. Professional LinkedIn profile building is included in the 6-Month Internship Program (₹7,999) to help you get noticed by recruiters."
   },
   {
-    "question": "How does will i get mock interviews work?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "I want to know about will i get mock interviews.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "Kya will i get mock interviews ke baare me jaana chahiye?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "will i get mock interviews ko Hindi me samjhao.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "क्या will i get mock interviews के बारे में बताओ?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "will i get mock interviews कैसे काम करता है?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
+    "category": "placement",
     "question": "Will I get job assistance?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
+    "answer": "Yes. Job assistance is included in the 6-Month Program (₹7,999) as part of the placement support, which carries a 100% placement guarantee. The 3-Month Program also provides placement support."
   },
   {
-    "question": "Can you explain will i get job assistance?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
+    "category": "placement",
+    "question": "Is placement guarantee available in the 3-month program?",
+    "answer": "The 3-Month Program (₹999) does not include a 100% placement guarantee, but it does provide placement support. If you want 100% placement guarantee, the 6-Month Program (₹7,999) is the right choice."
   },
   {
-    "question": "How does will i get job assistance work?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
+    "category": "placement",
+    "question": "Which program gives placement guarantee?",
+    "answer": "The 6-Month Internship Program (₹7,999) comes with 100% placement guarantee. It also includes mock interview preparation, resume review, and LinkedIn profile building. The 3-Month Program (₹999) provides placement support without the 100% guarantee."
   },
   {
-    "question": "I want to know about will i get job assistance.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "Kya will i get job assistance ke baare me jaana chahiye?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "will i get job assistance ko Hindi me samjhao.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "क्या will i get job assistance के बारे में बताओ?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "will i get job assistance कैसे काम करता है?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "Will I get career counseling?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "Can you explain will i get career counseling?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "How does will i get career counseling work?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "I want to know about will i get career counseling.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "Kya will i get career counseling ke baare me jaana chahiye?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "will i get career counseling ko Hindi me samjhao.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "क्या will i get career counseling के बारे में बताओ?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "will i get career counseling कैसे काम करता है?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "Are there hiring partners?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "Can you explain are there hiring partners?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "How does are there hiring partners work?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "I want to know about are there hiring partners.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "Kya are there hiring partners ke baare me jaana chahiye?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "are there hiring partners ko Hindi me samjhao.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "क्या are there hiring partners के बारे में बताओ?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "are there hiring partners कैसे काम करता है?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
+    "category": "placement",
     "question": "Can I improve my placement chances?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
+    "answer": "Yes. Complete your live projects, prepare for mock interviews, strengthen your resume, and build your LinkedIn profile. The 6-Month Program (₹7,999) provides dedicated placement support and 100% placement guarantee to maximize your chances."
   },
   {
-    "question": "Can you explain can i improve my placement chances?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "How does can i improve my placement chances work?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "I want to know about can i improve my placement chances.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "Kya can i improve my placement chances ke baare me jaana chahiye?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "can i improve my placement chances ko Hindi me samjhao.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "क्या can i improve my placement chances के बारे में बताओ?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "can i improve my placement chances कैसे काम करता है?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "How do I prepare for placement support?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "Can you explain how do i prepare for placement support?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "How does how do i prepare for placement support work?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "I want to know about how do i prepare for placement support.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "Kya how do i prepare for placement support ke baare me jaana chahiye?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "how do i prepare for placement support ko Hindi me samjhao.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "क्या how do i prepare for placement support के बारे में बताओ?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "how do i prepare for placement support कैसे काम करता है?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
+    "category": "placement",
     "question": "How do I ask for placement help?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
+    "answer": "Reach out to the WeIntern support team at +91 74149 74582 (WhatsApp) or contact.weintern@gmail.com for placement-related assistance. Students in the 6-Month Program have dedicated placement support as part of their program."
   },
   {
-    "question": "Can you explain how do i ask for placement help?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "How does how do i ask for placement help work?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "I want to know about how do i ask for placement help.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "Kya how do i ask for placement help ke baare me jaana chahiye?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "how do i ask for placement help ko Hindi me samjhao.",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "क्या how do i ask for placement help के बारे में बताओ?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "how do i ask for placement help कैसे काम करता है?",
-    "answer": "WeIntern offers placement assistance through support, resume review, mock interviews, job assistance, and career counseling to improve employability."
-  },
-  {
-    "question": "Does WeIntern provide placement support?",
-    "answer": "Yes. WeIntern provides placement assistance through resume support, interview preparation, mock interviews, career guidance, and job-related help."
-  },
-  {
-    "question": "What is the placement process?",
-    "answer": "The placement process usually involves resume review, interview support, skill readiness, job assistance, and guidance on how to apply for opportunities."
-  },
-  {
-    "question": "Will I get resume review support?",
-    "answer": "Yes. Resume support helps students present their skills, projects, and learning in a stronger, more professional way."
-  },
-  {
-    "question": "Will I get mock interviews?",
-    "answer": "Yes. Mock interviews are often used to prepare learners for real hiring conversations and improve their confidence."
-  },
-  {
-    "question": "Will I get job assistance?",
-    "answer": "Yes. Job assistance may include guidance on applying for roles, improving interview readiness, and understanding the job search process."
-  },
-  {
-    "question": "Will I get career counseling?",
-    "answer": "Yes. Career counseling helps students explore roles, assess their direction, and improve their overall career strategy."
-  },
-  {
-    "question": "Are hiring partners involved?",
-    "answer": "Hiring support depends on the program and the official opportunities available through the WeIntern ecosystem."
-  },
-  {
-    "question": "Can placement support improve my job chances?",
-    "answer": "Yes. Better resume quality, mock interview practice, and professional guidance can make students more prepared for hiring opportunities."
-  },
-  {
-    "question": "How can I prepare for placement support?",
-    "answer": "You can stay active in learning, complete projects, improve communication, and make sure your profile and resume are updated."
-  },
-  {
-    "question": "How do I ask for placement help?",
-    "answer": "You can reach out through the official support or communication channels shared by the program team for placement-related assistance."
-  },
-  {
-    "question": "Is placement guaranteed?",
-    "answer": "Placement support is provided to help students improve their readiness, but outcomes depend on factors such as performance, participation, and market conditions."
-  },
-  {
-    "question": "What can I do to improve my placement profile?",
-    "answer": "Focus on practical projects, assignments, communication skills, interview preparation, and resume quality so your profile appears stronger to recruiters."
-  },
-  {
+    "category": "placement",
     "question": "Kya WeIntern me placement support milta hai?",
-    "answer": "Haan, WeIntern placement assistance provide karta hai jisme resume support, interview preparation, mock interviews, aur job-related guidance shamil hoti hai."
+    "answer": "Haan. 6-Month Program (₹7,999) mein 100% placement guarantee ke saath resume review, mock interview, LinkedIn profile building, aur job assistance milta hai. 3-Month Program (₹999) mein placement support milta hai lekin 100% guarantee nahi hai."
   },
   {
-    "question": "Placement process kaise hota hai?",
-    "answer": "Placement process usually resume review, interview preparation, profile readiness, aur job application support ko cover karta hai."
+    "category": "placement",
+    "question": "Kya placement guarantee milti hai?",
+    "answer": "100% placement guarantee sirf 6-Month Internship Program (₹7,999) mein milti hai. 3-Month Program (₹999) mein placement support milta hai lekin 100% guarantee nahi hai."
   },
   {
-    "question": "Kya resume review support milti hai?",
-    "answer": "Haan, resume review ke through students apni skills, projects aur learning experience ko professional format me present kar sakte hain."
+    "category": "placement",
+    "question": "Mock interview milta hai kya?",
+    "answer": "Haan, mock interview preparation 6-Month Program (₹7,999) ka dedicated feature hai. Isse real hiring conversations ke liye practice milti hai."
   },
   {
-    "question": "Mock interviews milte hain kya?",
-    "answer": "Haan, mock interviews students ko real hiring conversations ke liye practice karne me help karte hain."
+    "category": "placement",
+    "question": "LinkedIn profile building milti hai kya?",
+    "answer": "Haan, professional LinkedIn profile building 6-Month Program (₹7,999) mein shamil hai taaki recruiters aapko easily dhundh sakein."
   },
   {
-    "question": "Kya job assistance bhi milti hai?",
-    "answer": "Haan, job assistance me application guidance, interview readiness, aur overall job search direction provide kiya ja sakta hai."
-  },
-  {
-    "question": "Career counseling available hai kya?",
-    "answer": "Haan, career counseling students ko better direction, role clarity, aur future planning me support deta hai."
-  },
-  {
+    "category": "placement",
     "question": "Kya placement guarantee hota hai?",
-    "answer": "Placement support help karti hai, but final outcomes participation, performance, aur market conditions par depend karte hain."
+    "answer": "6-Month Program (₹7,999) mein 100% placement guarantee milti hai. 3-Month Program (₹999) mein placement support milta hai lekin guaranteed placement nahi hoti."
   },
   {
+    "category": "placement",
     "question": "Placement profile improve karne ke liye kya karna chahiye?",
-    "answer": "Students ko projects complete karne, communication improve karne, resume strong karne, aur interview preparation me active rehna chahiye."
+    "answer": "Live projects complete karein, mock interviews ki practice karein, resume strong karein, aur LinkedIn profile build karein. 6-Month Program (₹7,999) mein yeh sab dedicated support ke saath milta hai aur 100% placement guarantee bhi hai."
   }
 ]
