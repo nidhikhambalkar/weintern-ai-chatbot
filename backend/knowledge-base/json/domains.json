@@ -2,76 +2,96 @@
   {
     "category": "domains",
     "question": "What internship domains does WeIntern offer?",
-    "answer": "WeIntern offers internship programs in the following domains: Full Stack Development, Artificial Intelligence & Machine Learning (AI/ML), Data Science, Python Development, Java Development, Web Development, UI/UX Design, Digital Marketing, Cyber Security, and Cloud Computing."
+    "answer": "WeIntern offers the following internship programs: Full Stack Web Development (12 weeks, ₹4,999), Mobile App Development with Flutter (10 weeks, ₹5,999), AI & Automation (8 weeks, ₹6,499), Cloud Solutions & DevOps (10 weeks, ₹5,499), UI/UX Design (8 weeks, ₹3,999), Digital Marketing (6 weeks, ₹2,999), and Data Science & Analytics (12 weeks, ₹6,999)."
   },
   {
     "category": "domains",
     "question": "Which domain is best for me?",
-    "answer": "Choose based on your interests and career goals. For example, if you like building websites, Full Stack or Web Development is a great fit. If you enjoy data analysis, Data Science or AI/ML is a strong option. If you prefer design, UI/UX is recommended. If you want to explore security, Cyber Security is ideal."
+    "answer": "Choose based on your interests: Full Stack Web Development or Data Science for coding + tech roles, Mobile App Development for app building, AI & Automation for AI tools and workflow automation, UI/UX Design for design careers, Digital Marketing for growth and marketing, Cloud & DevOps for infrastructure roles. All programs are in English + Hindi."
   },
   {
     "category": "domains",
     "question": "What is the duration of the internship?",
-    "answer": "WeIntern internship programs are typically available in 1-month, 2-month, and 3-month durations depending on the selected domain and program. The exact duration for your chosen course will be confirmed during the onboarding process."
+    "answer": "Program durations vary by domain: Full Stack Web Development — 12 weeks, Mobile App Development — 10 weeks, AI & Automation — 8 weeks, Cloud Solutions & DevOps — 10 weeks, UI/UX Design — 8 weeks, Digital Marketing — 6 weeks, Data Science & Analytics — 12 weeks."
   },
   {
     "category": "domains",
     "question": "How long is the internship program?",
-    "answer": "Internship duration generally ranges from 1 to 3 months depending on the program and domain selected. Check the official program details or contact support for the exact duration of your chosen course."
+    "answer": "WeIntern internship durations range from 6 weeks to 12 weeks depending on the chosen domain. Digital Marketing is 6 weeks, UI/UX and AI & Automation are 8 weeks, Mobile App and Cloud DevOps are 10 weeks, and Full Stack + Data Science are 12 weeks."
   },
   {
     "category": "domains",
-    "question": "What is the duration of the Full Stack Development internship?",
-    "answer": "The Full Stack Development internship is typically structured as a 1 to 3 month program with hands-on projects covering both frontend and backend technologies. Exact duration is confirmed at enrollment."
+    "question": "What is the Full Stack Web Development course?",
+    "answer": "Full Stack Web Development is a 12-week program priced at ₹4,999. It covers HTML, CSS, JavaScript, React.js, Node.js, Express.js, MongoDB, Git, and deployment. You build 4 real client projects. Certificate and stipend are included. Suitable for beginners."
   },
   {
     "category": "domains",
-    "question": "What is the duration of the AI/ML internship?",
-    "answer": "The AI/ML internship typically runs for 1 to 3 months and covers machine learning concepts, model building, and real-world data projects. Exact duration is confirmed at enrollment."
+    "question": "What is the price of Full Stack Web Development?",
+    "answer": "The Full Stack Web Development program is priced at ₹4,999 (discounted). The program is 12 weeks long and includes a WeIntern certificate, live projects, and stipend opportunities."
   },
   {
     "category": "domains",
-    "question": "What is the duration of the Data Science internship?",
-    "answer": "The Data Science internship generally lasts 1 to 3 months and includes data analysis, visualization, and project work using tools like Python, Pandas, and more."
+    "question": "What is the Mobile App Development course?",
+    "answer": "Mobile App Development with Flutter is a 10-week program priced at ₹5,999. It covers Flutter, Dart, Firebase, REST APIs, Android/iOS publishing. You build 3 real client apps. Intermediate level. Certificate and stipend included."
   },
   {
     "category": "domains",
-    "question": "What is the duration of the Digital Marketing internship?",
-    "answer": "The Digital Marketing internship is typically 1 to 2 months in duration and covers SEO, social media marketing, content strategy, and campaign analysis."
+    "question": "What is the AI and Automation course?",
+    "answer": "AI & Automation is an 8-week program priced at ₹6,499. It covers Python, OpenAI API, LangChain, n8n, Make.com, Pinecone, and FastAPI. You build 3 AI projects including an AI chatbot and business automation pipeline. Certificate and stipend included."
   },
   {
     "category": "domains",
-    "question": "What is the duration of the UI/UX Design internship?",
-    "answer": "The UI/UX Design internship typically lasts 1 to 2 months and covers wireframing, prototyping, Figma, user research, and design systems."
+    "question": "What is the Cloud Computing and DevOps course?",
+    "answer": "Cloud Solutions & DevOps is a 10-week program priced at ₹5,499. It covers AWS, Docker, Kubernetes, GitHub Actions, Jenkins, Linux, Terraform, and Nginx. Real client infrastructure projects included. Certificate and stipend available."
+  },
+  {
+    "category": "domains",
+    "question": "What is the UI UX Design course?",
+    "answer": "UI/UX Design is an 8-week beginner-friendly program priced at ₹3,999. It covers Figma, Adobe XD, FigJam, design thinking, wireframing, prototyping, and design systems. You complete 3 real client design projects. Certificate and stipend included."
+  },
+  {
+    "category": "domains",
+    "question": "What is the Digital Marketing course?",
+    "answer": "Digital Marketing is a 6-week beginner-friendly program priced at ₹2,999. It covers Google Ads, Meta Ads, SEO, content marketing, Canva, Mailchimp, and Google Analytics. You run real client campaigns. Certificate and stipend included."
+  },
+  {
+    "category": "domains",
+    "question": "What is the Data Science course?",
+    "answer": "Data Science & Analytics is a 12-week intermediate program priced at ₹6,999. It covers Python, Pandas, NumPy, Scikit-learn, Matplotlib, Seaborn, Tableau, and SQL. You complete 3 real data projects. Certificate and stipend included."
+  },
+  {
+    "category": "domains",
+    "question": "Which is the cheapest course at WeIntern?",
+    "answer": "The most affordable WeIntern program is Digital Marketing at ₹2,999 (6 weeks), followed by UI/UX Design at ₹3,999 (8 weeks)."
   },
   {
     "category": "domains",
     "question": "Can a beginner join any domain?",
-    "answer": "Yes, most WeIntern programs are beginner-friendly. You do not need prior experience to start. The learning path is structured to take you from basics to practical project-level skills."
+    "answer": "Yes. Full Stack Web Development, UI/UX Design, and Digital Marketing are explicitly beginner-level programs and require no prior experience. Mobile App Development, AI & Automation, Cloud DevOps, and Data Science are intermediate-level — basic programming knowledge is helpful."
   },
   {
     "category": "domains",
-    "question": "Which domains are available for beginners?",
-    "answer": "All domains at WeIntern are designed to be beginner-accessible. Full Stack Development, Python, Digital Marketing, and UI/UX are particularly popular for students with no prior experience."
+    "question": "Do all courses provide certificates?",
+    "answer": "Yes. All WeIntern programs include a WeIntern verified certificate upon successful completion. Certificates can be added to your LinkedIn profile."
   },
   {
     "category": "domains",
-    "question": "What domains are available?",
-    "answer": "WeIntern offers internships in: Full Stack Development, AI/ML, Data Science, Python, Java, Web Development, UI/UX Design, Digital Marketing, Cyber Security, and Cloud Computing."
+    "question": "Is stipend available in all courses?",
+    "answer": "Yes. All WeIntern programs offer stipend opportunities. The stipend is performance-based and is given upon completing real client projects successfully."
   },
   {
     "category": "domains",
-    "question": "Internship kitne months ki hoti hai?",
-    "answer": "WeIntern internship generally 1 month, 2 months, ya 3 months ki hoti hai depending on the program aur chosen domain. Exact duration enrollment ke time confirm hoti hai."
+    "question": "Internship kitne weeks ki hoti hai?",
+    "answer": "Duration domain ke hisaab se vary karta hai: Full Stack aur Data Science — 12 weeks, Mobile App aur Cloud DevOps — 10 weeks, AI & Automation aur UI/UX — 8 weeks, Digital Marketing — 6 weeks."
   },
   {
     "category": "domains",
     "question": "WeIntern me kaunse domains available hain?",
-    "answer": "WeIntern me following domains available hain: Full Stack Development, AI/ML, Data Science, Python, Java, Web Development, UI/UX Design, Digital Marketing, Cyber Security, aur Cloud Computing."
+    "answer": "WeIntern ke available domains: Full Stack Web Development (₹4,999), Mobile App Development (₹5,999), AI & Automation (₹6,499), Cloud Solutions & DevOps (₹5,499), UI/UX Design (₹3,999), Digital Marketing (₹2,999), Data Science & Analytics (₹6,999)."
   },
   {
     "category": "domains",
     "question": "Mujhe kaunsa domain choose karna chahiye?",
-    "answer": "Domain choose karne ke liye apni interest dekhein — coding ke liye Full Stack ya Python, data ke liye Data Science ya AI/ML, design ke liye UI/UX, aur marketing ke liye Digital Marketing best options hain."
+    "answer": "Apni interest ke hisaab se choose karein: website banana chahte hain to Full Stack, app banana chahte hain to Mobile App, AI tools seekhna chahte hain to AI & Automation, design mein interest hai to UI/UX, marketing mein hai to Digital Marketing, aur data mein interest hai to Data Science."
   }
 ]

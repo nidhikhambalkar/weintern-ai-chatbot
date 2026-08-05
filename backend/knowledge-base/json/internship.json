@@ -503,41 +503,51 @@
   {
     "category": "internship",
     "question": "What payment methods are accepted for the internship fee?",
-    "answer": "WeIntern accepts payments through UPI (Google Pay, PhonePe, Paytm), net banking, debit/credit cards, and other digital payment options shared during the enrollment process. The exact payment link or QR code is provided at registration."
+    "answer": "WeIntern accepts payments through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), debit cards, credit cards, and net banking. The payment link is provided during enrollment on we-intern.in."
   },
   {
     "category": "internship",
     "question": "How can I pay the internship fee?",
-    "answer": "The internship fee can be paid online using UPI apps (such as Google Pay, PhonePe, Paytm), debit/credit cards, or net banking. You will receive the payment instructions and link after submitting the registration form."
+    "answer": "The internship fee is paid online through Razorpay. You can use UPI apps (Google Pay, PhonePe, Paytm), debit/credit cards, or net banking. After completing the registration form on we-intern.in, you will receive the payment link."
   },
   {
     "category": "internship",
     "question": "Does WeIntern accept UPI payment?",
-    "answer": "Yes. UPI payment methods including Google Pay, PhonePe, and Paytm are accepted. Payment details are shared during the registration process."
+    "answer": "Yes. Razorpay accepts all major UPI apps including Google Pay, PhonePe, Paytm, and BHIM. Payment links are shared during the registration process on we-intern.in."
+  },
+  {
+    "category": "internship",
+    "question": "How do I register for the internship?",
+    "answer": "To register: 1) Visit we-intern.in and choose your domain. 2) Fill in the registration form with your name, email, phone number, and domain interest. 3) Complete the fee payment via Razorpay (UPI/cards/net banking). 4) Receive enrollment confirmation, WhatsApp group invite, orientation date, and Google Meet link on your registered email and WhatsApp."
+  },
+  {
+    "category": "internship",
+    "question": "What is the registration process?",
+    "answer": "Registration steps: 1) Go to we-intern.in. 2) Select your internship domain. 3) Fill the registration form. 4) Pay the fee via Razorpay. 5) Check your email and WhatsApp for enrollment confirmation, orientation schedule, and Google Meet link."
   },
   {
     "category": "internship",
     "question": "Internship ke liye eligible kaun hota hai?",
-    "answer": "WeIntern internship ke liye students, graduates, aur freshers eligible hain. Kisi bhi stream ke students apply kar sakte hain. Prior experience required nahi hai — sirf seekhne ki ichcha honi chahiye."
+    "answer": "WeIntern internship ke liye students, graduates, aur freshers eligible hain. Kisi bhi stream ke students apply kar sakte hain. Prior experience required nahi hai. Full Stack, UI/UX, aur Digital Marketing beginner-friendly hain."
   },
   {
     "category": "internship",
     "question": "Eligibility criteria kya hai?",
-    "answer": "Koi bhi student ya fresher jisne graduation ya undergraduate program enroll kiya ho ya complete kiya ho, apply kar sakta hai. Most programs beginners ke liye bhi designed hain."
+    "answer": "Koi bhi student ya fresher jisne kisi bhi stream se graduation ya undergraduate program enroll kiya ho ya complete kiya ho, apply kar sakta hai. Basic computer literacy kaafi hai beginners ke liye."
   },
   {
     "category": "internship",
     "question": "Internship kitne mahine ki hoti hai?",
-    "answer": "WeIntern internship 1 mahine, 2 mahine, ya 3 mahine ki hoti hai depending on chosen domain aur program type. Exact duration enrollment ke time confirm hoti hai."
+    "answer": "Duration domain ke hisaab se vary karta hai: Full Stack aur Data Science — 12 weeks, Mobile App aur Cloud DevOps — 10 weeks, AI & Automation aur UI/UX — 8 weeks, Digital Marketing — 6 weeks."
   },
   {
     "category": "internship",
     "question": "Registration kaise karein?",
-    "answer": "Registration ke steps: 1) Apna domain choose karein. 2) Registration form bharen. 3) Official payment method se fee pay karein. 4) Confirmation, onboarding details, orientation date aur Google Meet link email/WhatsApp par milega."
+    "answer": "Registration ke steps: 1) we-intern.in par jayein. 2) Apna domain choose karein. 3) Registration form bharen. 4) Razorpay se fee pay karein (UPI/card/net banking). 5) Email aur WhatsApp par confirmation, orientation date, aur Google Meet link receive karein."
   },
   {
     "category": "internship",
     "question": "Payment kaise karni hoti hai?",
-    "answer": "Internship fee UPI (Google Pay, PhonePe, Paytm), debit/credit card, ya net banking se pay ki ja sakti hai. Payment link ya instructions registration ke baad share ki jaati hain."
+    "answer": "Internship fee Razorpay ke through pay ki jaati hai jisme Google Pay, PhonePe, Paytm, debit/credit card, aur net banking accept kiye jaate hain. we-intern.in par registration ke baad payment link milta hai."
   }
 ]

@@ -2,61 +2,71 @@
   {
     "category": "contact",
     "question": "How can I contact WeIntern support?",
-    "answer": "You can contact WeIntern support through the official WhatsApp group, email support, or the help desk channel. After registration, all official contact details are shared through the onboarding communication."
+    "answer": "You can contact WeIntern support via WhatsApp at +91 74149 74582, or by email at contact.weintern@gmail.com. Both channels are monitored during business hours."
   },
   {
     "category": "contact",
-    "question": "What is the escalation process?",
-    "answer": "For unresolved issues, please raise the concern formally through the official WeIntern support channel — via WhatsApp or email. Provide your registered name, enrollment details, and a clear description of the issue for faster resolution."
-  },
-  {
-    "category": "contact",
-    "question": "What is the WhatsApp number for WeIntern support?",
-    "answer": "The official WhatsApp support number is shared in the official welcome email and onboarding communication after enrollment. Please check your registered email for the contact details, or reach out via email if you need it before that."
+    "question": "What is the WhatsApp number for WeIntern?",
+    "answer": "The official WeIntern WhatsApp number is +91 74149 74582. You can message us there for enrollment queries, payment issues, orientation details, or any other support."
   },
   {
     "category": "contact",
     "question": "What is the WeIntern support email?",
-    "answer": "The official WeIntern support email is shared in your registration confirmation and onboarding materials. If you did not receive it, please check your spam folder or contact the team through the official WhatsApp channel."
+    "answer": "The official WeIntern support email is contact.weintern@gmail.com. Use this for formal queries, payment receipts, certificate requests, or detailed issue resolution."
+  },
+  {
+    "category": "contact",
+    "question": "What is the WeIntern email address?",
+    "answer": "Our email address is contact.weintern@gmail.com. For faster replies, WhatsApp us at +91 74149 74582."
+  },
+  {
+    "category": "contact",
+    "question": "How do I reach WeIntern?",
+    "answer": "You can reach WeIntern through: WhatsApp: +91 74149 74582 | Email: contact.weintern@gmail.com | Website: we-intern.in. Our team is available on weekdays during business hours."
+  },
+  {
+    "category": "contact",
+    "question": "What is the escalation process?",
+    "answer": "For unresolved issues, contact the support team at +91 74149 74582 (WhatsApp) or contact.weintern@gmail.com. Provide your name, enrollment details, and a clear description of the issue for faster resolution."
   },
   {
     "category": "contact",
     "question": "What are the support office hours?",
-    "answer": "WeIntern support is generally available on weekdays during business hours. Specific availability timings may vary, so it is best to check the official communication shared after registration for the latest schedule."
+    "answer": "WeIntern support is available Monday to Saturday during business hours. For quick responses, WhatsApp us at +91 74149 74582. Emails to contact.weintern@gmail.com are typically answered within 24 hours."
   },
   {
     "category": "contact",
     "question": "How do I join the WeIntern WhatsApp group?",
-    "answer": "The WeIntern WhatsApp group invite link is shared after your enrollment is confirmed. Check your registered email or onboarding message for the invite link."
+    "answer": "After completing your registration and fee payment, you will receive the official WhatsApp group invite link on your registered email or via direct WhatsApp message from +91 74149 74582."
   },
   {
     "category": "contact",
     "question": "How do I contact support for a payment issue?",
-    "answer": "For payment-related concerns, reach out to the support team via the official WeIntern WhatsApp group or email with your payment details, transaction ID, and a description of the issue."
-  },
-  {
-    "category": "contact",
-    "question": "How do I report a technical problem?",
-    "answer": "Technical problems can be reported via the official WeIntern support channel. Share your registered email, the device and browser you are using, and a screenshot or description of the issue for faster resolution."
+    "answer": "For payment-related concerns, WhatsApp us at +91 74149 74582 or email contact.weintern@gmail.com with your transaction ID, payment screenshot, and registered email address."
   },
   {
     "category": "contact",
     "question": "I have not received any communication after registration. Who do I contact?",
-    "answer": "If you have not received any email or WhatsApp message after registration, please contact the WeIntern support team immediately via the official WhatsApp or email provided during enrollment."
+    "answer": "If you have not received a confirmation email or WhatsApp message after registration, contact us immediately at +91 74149 74582 (WhatsApp) or contact.weintern@gmail.com."
+  },
+  {
+    "category": "contact",
+    "question": "What is the WeIntern website?",
+    "answer": "The official WeIntern website is we-intern.in. You can explore all courses, fees, and enrollment options there."
   },
   {
     "category": "contact",
     "question": "Support team se kaise contact karein?",
-    "answer": "WeIntern support team se official WhatsApp group ya email ke through contact kar sakte hain. Registration ke baad official contact details onboarding message me share ki jaati hain."
+    "answer": "WeIntern support team se aap WhatsApp par +91 74149 74582 par ya email contact.weintern@gmail.com par contact kar sakte hain. Official website: we-intern.in"
   },
   {
     "category": "contact",
-    "question": "WhatsApp support number kya hai?",
-    "answer": "Official WhatsApp support number registration confirmation aur welcome email me share kiya jata hai. Agar nahi mila to email ke through support se request karein."
+    "question": "WhatsApp number kya hai?",
+    "answer": "WeIntern ka official WhatsApp number +91 74149 74582 hai. Enrollment, payment, ya orientation ke baare mein wahan message karein."
   },
   {
     "category": "contact",
     "question": "Support email kya hai?",
-    "answer": "Official support email registration aur onboarding materials me share ki jaati hai. Agar nahi mili to spam folder check karein ya WhatsApp channel ke through contact karein."
+    "answer": "Official support email contact.weintern@gmail.com hai. Payment receipts, certificate requests, ya detailed issues ke liye email karein."
   }
 ]

@@ -2,11 +2,41 @@
   {
     "category": "certificates",
     "question": "What kind of certificates are provided?",
-    "answer": "WeIntern provides certificates based on completion criteria, project participation, and learning outcomes. The exact certificate type depends on the program and completion requirements."
+    "answer": "WeIntern provides a verified completion certificate upon successfully finishing the program and required live client projects. The certificate is issued under the WeIntern brand and can be added to your LinkedIn profile."
+  },
+  {
+    "category": "certificates",
+    "question": "Will I get a certificate after completing the internship?",
+    "answer": "Yes. All WeIntern programs include a WeIntern verified certificate upon completion. You need to complete the course requirements and real client projects to be eligible."
   },
   {
     "category": "certificates",
     "question": "How can I verify my certificate?",
-    "answer": "Certificate verification generally depends on the official documentation and program completion process. Students should use the official verification method shared by WeIntern support or the certificate delivery process."
+    "answer": "Certificate verification is done through the official WeIntern process. Contact support at +91 74149 74582 (WhatsApp) or contact.weintern@gmail.com for the certificate verification link or process after completion."
+  },
+  {
+    "category": "certificates",
+    "question": "Can I add the certificate to LinkedIn?",
+    "answer": "Yes. You can add the WeIntern verified certificate to your LinkedIn profile to showcase your internship and project experience to recruiters."
+  },
+  {
+    "category": "certificates",
+    "question": "What are the criteria to get the certificate?",
+    "answer": "To receive your WeIntern certificate you must: 1) Complete all required course modules. 2) Submit and complete the real client projects. 3) Meet the program's attendance and participation requirements."
+  },
+  {
+    "category": "certificates",
+    "question": "How long does it take to receive the certificate?",
+    "answer": "Certificate issuance timelines depend on the program completion and verification process. Contact support at contact.weintern@gmail.com or +91 74149 74582 for the current certificate delivery timeline."
+  },
+  {
+    "category": "certificates",
+    "question": "Certificate kab milta hai?",
+    "answer": "Certificate program successfully complete karne aur real client projects submit karne ke baad milta hai. Delivery timeline ke liye contact.weintern@gmail.com par email karein ya +91 74149 74582 par WhatsApp karein."
+  },
+  {
+    "category": "certificates",
+    "question": "Kya certificate LinkedIn par add kar sakte hain?",
+    "answer": "Haan. WeIntern verified certificate LinkedIn profile par add kiya ja sakta hai recruiters ko apna internship experience dikhane ke liye."
   }
 ]
