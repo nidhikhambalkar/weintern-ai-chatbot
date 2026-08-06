@@ -30,20 +30,7 @@ try {
     return res.status(400).json(buildErrorPayload(400, "message is required in request body"));
   }
 
-  const greetingRegex = /^(hi|hello|hey|hii|hiii|hy|good morning|good afternoon|good evening)$/i;
 
-  if (greetingRegex.test(message.trim())) {
-    return res.json({
-      success: true,
-      reply:
-        "Hello! 👋 Welcome to WeIntern.\nHow can I help you today regarding internships, courses or placement assistance?",
-      mode: "greeting",
-      escalation: false,
-      recommendedAction: "Continue with the guided conversation.",
-      knowledgeMatches: [],
-      responseTimeMs: Date.now() - startTime,
-    });
-  }
 
   const knowledgeContext = searchKnowledgeBase(message);
   const escalation = detectEscalation(message);
