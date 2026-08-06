@@ -83,11 +83,15 @@ if (intent.type !== "weintern") {
       })),
       responseTimeMs: Date.now() - startTime,
     });
-  } catch (error) {
-    console.error("Chat controller error:", error);
-    return res.status(500).json({
-      ...buildErrorPayload(500, "Unable to process your request right now."),
-      responseTimeMs: Date.now() - startTime,
-    });
-  }
+} catch (error) {
+  console.error("========== CHAT CONTROLLER ERROR ==========");
+  console.error(error);
+  console.error(error.stack);
+  console.error("===========================================");
+
+  return res.status(500).json({
+    ...buildErrorPayload(500, "Unable to process your request right now."),
+    responseTimeMs: Date.now() - startTime,
+  });
+}
 };

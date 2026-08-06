@@ -1,118 +1,174 @@
-const { searchKnowledgeBase } = require("../services/knowledgeBaseService");
-const { generateChatResponse } = require("../services/ollamaService");
-const { detectIntent } = require("../services/intentService");
+function detectIntent(message = "") {
+  const text = String(message).toLowerCase().trim();
 
-const {
-  sanitizeMessage,
-  shouldUseKbFastPath,
-  buildKbFastPayload,
-  buildErrorPayload,
-} = require("../utils/chatUtils");
+  // Greeting
+  const greetings = [
+    "hi",
+    "hello",
+    "hey",
+    "hii",
+    "hlo",
+    "good morning",
+    "good afternoon",
+    "good evening",
+    "namaste",
+    "namaskar",
+  ];
 
+  if (greetings.some((greeting) => text === greeting || text.startsWith(greeting + " "))) {
+    return {
+      type: "greeting",
+      response:
+        "Hello! 👋 Welcome to WeIntern. How can I help you today? You can ask me about internships, courses, fees, placements, certificates, eligibility, or any WeIntern program.",
+    };
+  }
 
-function detectEscalation(message = "") {
-  const lower = String(message).toLowerCase();
+  // WeIntern-related keywords
+  const weinternKeywords = [
+    "weintern",
+    "internship",
+    "course",
+    "courses",
+    "program",
+    "training",
+    "mentor",
+    "certificate",
+    "certification",
+    "placement",
+    "resume",
+    "interview",
+    "fees",
+    "fee",
+    "emi",
+    "payment",
+    "refund",
+    "domain",
+    "full stack",
+    "fullstack",
+    "python",
+    "java",
+    "ai",
+    "ml",
+    "data science",
+    "ui ux",
+    "ui/ux",
+    "digital marketing",
+    "cyber security",
+    "cloud",
+    "orientation",
+    "google meet",
+    "support",
+    "contact",
+    "eligibility",
+    "register",
+    "registration",
+    "apply",
+    "join",
+    "live project",
+    "project",
+    "intern",
+    "interns",
+    "interning",
 
-  const triggers = {
-    refund: /refund|money back|charge|fee issue/i.test(lower),
-    complaint: /complaint|issue|problem|not working|bad experience|disappointed/i.test(lower),
-    escalation: /escalat|human|agent|support team|talk to person|representative/i.test(lower),
+  // Internship
+  "internship",
+  "intern",
+  "program",
+  "training",
+  "live project",
+  "project",
+  "projects",
+  "task",
+  "assignment",
+
+  // Courses
+  "course",
+  "courses",
+  "domain",
+  "domains",
+  "full stack",
+  "fullstack",
+  "web development",
+  "python",
+  "java",
+  "ai",
+  "machine learning",
+  "ml",
+  "data science",
+  "ui ux",
+  "ui/ux",
+  "digital marketing",
+  "cyber security",
+  "cloud computing",
+
+  // Fees
+  "fee",
+  "fees",
+  "payment",
+  "pay",
+  "emi",
+  "discount",
+  "refund",
+  "scholarship",
+
+  // Placement
+  "placement",
+  "resume",
+  "interview",
+  "mock interview",
+  "linkedin",
+  "certificate",
+  "certification",
+
+  // Support
+  "mentor",
+  "support",
+  "contact",
+  "email",
+  "whatsapp",
+  "orientation",
+  "google meet",
+
+  // Registration
+  "register",
+  "registration",
+  "enroll",
+  "apply",
+  "joining",
+
+  // Eligibility
+  "eligible",
+  "eligibility",
+  "fresher",
+  "beginner",
+  "student",
+
+  // Duration
+  "duration",
+  "month",
+  "months",
+  "3 month",
+  "6 month",
+];
+
+  const isWeIntern = weinternKeywords.some((keyword) =>
+    text.includes(keyword)
+  );
+
+  if (isWeIntern) {
+    return {
+      type: "weintern",
+    };
+  }
+
+  // Out of domain
+  return {
+    type: "out-of-domain",
+    response:
+      "I'm the WeIntern Assistant. I can answer questions only about WeIntern internships, courses, fees, certifications, placements, mentor support, and related topics.",
   };
-
-  return Object.entries(triggers)
-    .filter(([, value]) => value)
-    .map(([key]) => key);
 }
 
-
-exports.chat = async (req, res) => {
-  const startTime = Date.now();
-
-  try {
-    const message = sanitizeMessage(req.body?.message);
-
-    if (!message) {
-      return res.status(400).json(
-        buildErrorPayload(400, "message is required in request body")
-      );
-    }
-
-
-    // Intent Check (Greeting + Out of Domain)
-    const intent = detectIntent(message);
-
-    if (intent.type === "greeting" || intent.type === "out-of-domain") {
-      return res.json({
-        success: true,
-        reply: intent.response,
-        mode: intent.type,
-        escalation: false,
-        recommendedAction:
-          intent.type === "greeting"
-            ? "Continue with the guided conversation."
-            : "Please ask a WeIntern-related question.",
-        knowledgeMatches: [],
-        responseTimeMs: Date.now() - startTime,
-      });
-    }
-
-
-    const knowledgeContext = searchKnowledgeBase(message);
-
-    const escalation = detectEscalation(message);
-
-
-    if (shouldUseKbFastPath(knowledgeContext)) {
-      const kbFastReply = buildKbFastPayload(
-        message,
-        knowledgeContext
-      );
-
-      return res.json({
-        ...kbFastReply,
-        escalation: escalation.length > 0 ? escalation : false,
-        recommendedAction:
-          escalation.length > 0
-            ? "Please contact support or raise a human escalation request."
-            : "Continue with the guided answer.",
-        responseTimeMs: Date.now() - startTime,
-      });
-    }
-
-
-    const modelResult = await generateChatResponse({
-      message,
-      context: knowledgeContext,
-    });
-
-
-    return res.json({
-      success: true,
-      reply: modelResult.response,
-      mode: modelResult.mode,
-      escalation: escalation.length > 0 ? escalation : false,
-      recommendedAction:
-        escalation.length > 0
-          ? "Please contact support or raise a human escalation request."
-          : "Continue with the guided answer.",
-      knowledgeMatches: knowledgeContext.matches.map((match) => ({
-        category: match.category,
-        question: match.question,
-        answer: match.answer,
-      })),
-      responseTimeMs: Date.now() - startTime,
-    });
-
-
-  } catch (error) {
-    console.error("Chat controller error:", error);
-
-    return res.status(500).json({
-      ...buildErrorPayload(
-        500,
-        "Unable to process your request right now."
-      ),
-      responseTimeMs: Date.now() - startTime,
-    });
-  }
+module.exports = {
+  detectIntent,
 };
