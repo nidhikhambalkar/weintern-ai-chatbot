@@ -23,25 +23,44 @@ function detectEscalation(message = "") {
 exports.chat = async (req, res) => {
   const startTime = Date.now();
 
-  try {
-    const message = sanitizeMessage(req.body?.message);
+try {
+  const message = sanitizeMessage(req.body?.message);
 
-    if (!message) {
-      return res.status(400).json(buildErrorPayload(400, "message is required in request body"));
-    }
+  if (!message) {
+    return res.status(400).json(buildErrorPayload(400, "message is required in request body"));
+  }
 
-    const knowledgeContext = searchKnowledgeBase(message);
-    const escalation = detectEscalation(message);
+  const greetingRegex = /^(hi|hello|hey|hii|hiii|hy|good morning|good afternoon|good evening)$/i;
 
-    if (shouldUseKbFastPath(knowledgeContext)) {
-      const kbFastReply = buildKbFastPayload(message, knowledgeContext);
-      return res.json({
-        ...kbFastReply,
-        escalation: escalation.length > 0 ? escalation : false,
-        recommendedAction: escalation.length > 0 ? "Please contact support or raise a human escalation request." : "Continue with the guided answer.",
-        responseTimeMs: Date.now() - startTime,
-      });
-    }
+  if (greetingRegex.test(message.trim())) {
+    return res.json({
+      success: true,
+      reply:
+        "Hello! 👋 Welcome to WeIntern.\nHow can I help you today regarding internships, courses or placement assistance?",
+      mode: "greeting",
+      escalation: false,
+      recommendedAction: "Continue with the guided conversation.",
+      knowledgeMatches: [],
+      responseTimeMs: Date.now() - startTime,
+    });
+  }
+
+  const knowledgeContext = searchKnowledgeBase(message);
+  const escalation = detectEscalation(message);
+
+  if (shouldUseKbFastPath(knowledgeContext)) {
+    const kbFastReply = buildKbFastPayload(message, knowledgeContext);
+    return res.json({
+      ...kbFastReply,
+      escalation: escalation.length > 0 ? escalation : false,
+      recommendedAction:
+        escalation.length > 0
+          ? "Please contact support or raise a human escalation request."
+          : "Continue with the guided answer.",
+      responseTimeMs: Date.now() - startTime,
+    });
+  }
+
 
     const modelResult = await generateChatResponse({
       message,
@@ -68,4 +87,4 @@ exports.chat = async (req, res) => {
       responseTimeMs: Date.now() - startTime,
     });
   }
-};
+};
