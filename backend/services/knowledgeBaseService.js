@@ -173,8 +173,14 @@ const CATEGORY_HINTS = {
 };
 
 const CATEGORY_KEYWORD_MAP = {
-  company: ["weintern", "company", "about weintern", "tell me about weintern"],
-  courses: ["course", "courses", "program", "training", "skill", "learn"],
+  company: ["weintern", "company", "about weintern", "tell me about weintern","info about weintern",
+  "information about weintern",
+  "what is weintern",
+  "who is weintern",
+  "know about weintern",
+  "weintern ke baare",
+  "weintern kya hai"],
+  courses: ["course", "courses", "program", "training", "skill", "learn", "about course", "about courses", "course details", "course information", "program details", "program information", "training details", "training information", "skill development", "learn skills", "learn programming", "learn coding", "learn data science", "learn ai ml", "learn python", "learn java", "learn ui ux", "learn digital marketing", "learn cyber security", "learn cloud computing"],
   benefits: ["benefit", "benefits", "mentor", "doubt", "class", "recorded", "network", "soft skill", "softskills"],
   internship: ["internship", "intern", "onboarding", "attendance", "team", "selection", "daily task", "live project", "project", "register", "enroll", "apply", "payment", "upi", "eligible", "fresher", "beginner"],
   certification: ["certificate", "certification", "linkedin", "verify", "validity"],
@@ -348,6 +354,34 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory) {
 
   let score = 0;
 
+  // General company/about query boosting
+const aboutKeywords = [
+  "weintern",
+  "about",
+  "info",
+  "information",
+  "company",
+  "platform",
+  "what",
+  "tell"
+];
+
+const hasAboutIntent = queryTokens.some((token) =>
+  aboutKeywords.includes(token)
+);
+
+if (hasAboutIntent && entry.category === "company") {
+  score += 25;
+}
+
+if (
+  hasAboutIntent &&
+  entry.question &&
+  normalize(entry.question).includes("what is weintern")
+) {
+  score += 30;
+}
+
   queryTokens.forEach((token) => {
     if (!token) return;
     if (entryText.includes(token)) {
@@ -483,6 +517,13 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory) {
     score += 5;
   }
 
+  if (
+  queryTokens.includes("weintern") &&
+  (entry.category === "company" || entry.category === "faq")
+) {
+  score += 25;
+}
+
   if (entry.category && normalize(entry.category).includes(queryTokens.join(" "))) {
     score += 2;
   }
@@ -500,7 +541,7 @@ function searchKnowledgeBase(message = "") {
   Object.entries(knowledgeIndex).forEach(([category, entries]) => {
     entries.forEach((entry) => {
       const score = scoreMatch(entry, queryTokens, categoryHints, strongCategory);
-      if (score > 0) {
+      if (score >= 12) {
         matches.push({
           category,
           question: entry.question || entry.title || "General FAQ",
