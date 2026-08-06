@@ -1,6 +1,7 @@
 const { searchKnowledgeBase } = require("../services/knowledgeBaseService");
 const { generateChatResponse } = require("../services/ollamaService");
-const {
+const { detectIntent } = require("../services/intentService");
+ const {
   sanitizeMessage,
   shouldUseKbFastPath,
   buildKbFastPayload,
@@ -30,7 +31,22 @@ try {
     return res.status(400).json(buildErrorPayload(400, "message is required in request body"));
   }
 
+const intent = detectIntent(message);
 
+if (intent.type !== "weintern") {
+  return res.json({
+    success: true,
+    reply: intent.response,
+    mode: intent.type,
+    escalation: false,
+    recommendedAction:
+      intent.type === "greeting"
+        ? "Continue with the guided conversation."
+        : "Please ask a WeIntern-related question.",
+    knowledgeMatches: [],
+    responseTimeMs: Date.now() - startTime,
+  });
+}
 
   const knowledgeContext = searchKnowledgeBase(message);
   const escalation = detectEscalation(message);

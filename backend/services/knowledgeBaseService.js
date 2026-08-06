@@ -354,6 +354,34 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory) {
 
   let score = 0;
 
+  // General company/about query boosting
+const aboutKeywords = [
+  "weintern",
+  "about",
+  "info",
+  "information",
+  "company",
+  "platform",
+  "what",
+  "tell"
+];
+
+const hasAboutIntent = queryTokens.some((token) =>
+  aboutKeywords.includes(token)
+);
+
+if (hasAboutIntent && entry.category === "company") {
+  score += 25;
+}
+
+if (
+  hasAboutIntent &&
+  entry.question &&
+  normalize(entry.question).includes("what is weintern")
+) {
+  score += 30;
+}
+
   queryTokens.forEach((token) => {
     if (!token) return;
     if (entryText.includes(token)) {
