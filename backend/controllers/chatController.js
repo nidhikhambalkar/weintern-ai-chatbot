@@ -26,6 +26,7 @@ exports.chat = async (req, res) => {
 
 try {
   const message = sanitizeMessage(req.body?.message);
+  console.log("User Question:", message);
 
   if (!message) {
     return res.status(400).json(buildErrorPayload(400, "message is required in request body"));

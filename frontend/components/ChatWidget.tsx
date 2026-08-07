@@ -227,12 +227,19 @@ if (showLeadForm) {
 
     const lower = userMessage.toLowerCase();
 
-    if (
-  lower.includes("apply") ||
-  lower.includes("register") ||
-  lower.includes("join") ||
-  lower.includes("internship")
-) {
+   const registrationKeywords = [
+  "apply",
+  "register",
+  "registration",
+  "enroll",
+  "enrol",
+  "join now",
+  "i want to join",
+  "i want to register",
+  "admission"
+];
+
+if (registrationKeywords.some(keyword => lower.includes(keyword))) { {
   setShowLeadForm(true);
   setLeadStep(1);
 
@@ -259,20 +266,6 @@ if (showLeadForm) {
   setMessage("");
   return;
 }
-
-    if (lower.includes("domain")) {
-      botReply =
-        "We offer Full Stack Development, Data Science, AI/ML, UI/UX Design and Digital Marketing.";
-    } else if (lower.includes("certificate")) {
-      botReply =
-        "Certificates are provided after successful completion of the internship.";
-    } else if (lower.includes("fee")) {
-      botReply =
-        "Please visit the official WeIntern website for the latest internship fee details.";
-    } else if (lower.includes("contact")) {
-      botReply =
-        "You can contact the WeIntern support team through the Contact Us page on the official website.";
-    }
 
     setMessages((prev) => [
       ...prev,
@@ -302,7 +295,7 @@ if (showLeadForm) {
         },
       ]);
 
-      setIsTyping(false);
+     setIsTyping(false);
     }, 1000);
   };
 
