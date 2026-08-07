@@ -555,6 +555,7 @@ function searchKnowledgeBase(message = "") {
   matches.sort((a, b) => b.score - a.score);
 
   const bestMatches = matches.slice(0, 4);
+  console.log("BEST MATCHES:", bestMatches);
   const contextText = bestMatches
     .map((match) => `Category: ${match.category}. Question: ${match.question}. Answer: ${match.answer}`)
     .join("\n");

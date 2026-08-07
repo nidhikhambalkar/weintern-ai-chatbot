@@ -2,7 +2,7 @@
   {
     "category": "faq",
     "question": "What is WeIntern?",
-    "answer": "WeIntern is an EdTech platform (we-intern.in) where students don't wait for opportunity — they build it. WeIntern provides industry-focused internship programs with live projects, mentor support, verified certificates, and stipend opportunities across 7 domains."
+    "answer": "WeIntern is an EdTech platform where students don't wait for opportunities — they build them. WeIntern provides industry-focused internship programs with live projects, mentor support, verified certificates, and stipend opportunities across multiple domains."
   },
   {
     "category": "faq",
@@ -12,41 +12,376 @@
   {
     "category": "faq",
     "question": "How do I apply for an internship?",
-    "answer": "To apply: 1) Visit we-intern.in and choose your domain. 2) Complete the registration form. 3) Pay the program fee via Razorpay (UPI, cards, net banking). 4) Receive enrollment confirmation, WhatsApp group invite, and orientation details on your registered email and WhatsApp."
+    "answer": "To apply for a WeIntern internship: 1) Visit the official website we-intern.in. 2) Choose your preferred domain. 3) Complete the registration form. 4) Complete payment through available payment methods. 5) Receive enrollment confirmation, WhatsApp group invitation, and orientation details on your registered email and WhatsApp."
   },
   {
     "category": "faq",
     "question": "Is WeIntern genuine?",
-    "answer": "Yes. WeIntern is a legitimate EdTech platform operating at we-intern.in. You can contact the team at +91 74149 74582 (WhatsApp) or contact.weintern@gmail.com to verify any program details before enrolling."
+    "answer": "Yes. WeIntern is a legitimate EdTech platform. Students can verify program details through the official website we-intern.in or contact the support team through the official communication channels."
   },
   {
     "category": "faq",
-    "question": "What is the WeIntern website?",
-    "answer": "The official WeIntern website is we-intern.in. You can explore all 7 program domains, fees, curriculum details, and enroll directly from there."
+    "question": "What is the official website of WeIntern?",
+    "answer": "The official website of WeIntern is we-intern.in. Students can explore programs, curriculum details, and registration information there."
   },
   {
     "category": "faq",
     "question": "Can freshers join WeIntern?",
-    "answer": "Yes. WeIntern is designed for students and freshers. Programs like Full Stack Web Development, UI/UX Design, and Digital Marketing are explicitly beginner-level. No prior experience required."
+    "answer": "Yes. WeIntern programs are designed for students, beginners, and freshers. Most programs are beginner-friendly and do not require prior industry experience."
   },
   {
     "category": "faq",
-    "question": "Will I get a real certificate?",
-    "answer": "Yes. Upon successful completion of the program and required projects, you receive a WeIntern verified certificate that you can add to your LinkedIn profile."
+    "question": "Will I get a certificate from WeIntern?",
+    "answer": "Yes. Students receive a verified WeIntern certificate after successfully completing the internship program and required project work."
   },
   {
     "category": "faq",
-    "question": "Is there a stipend?",
-    "answer": "Yes. Stipend opportunities are available across all WeIntern programs. The stipend is performance-based and awarded after completing real client projects."
+    "question": "Is there a stipend opportunity?",
+    "answer": "Yes. Stipend opportunities are available based on performance and successful completion of assigned projects."
   },
   {
     "category": "faq",
     "question": "WeIntern kya hai?",
-    "answer": "WeIntern ek EdTech platform hai (we-intern.in) jahan students internship programs ke zariye real-world projects, mentor support, aur verified certificates ke saath practical skills build karte hain. Contact: +91 74149 74582 | contact.weintern@gmail.com"
+    "answer": "WeIntern ek EdTech platform hai jahan students internship programs ke through real-world projects, mentor support aur practical skills develop karte hain."
   },
   {
     "category": "faq",
     "question": "WeIntern genuine hai kya?",
-    "answer": "Haan, WeIntern ek legitimate EdTech platform hai. Official website we-intern.in hai. Koi bhi query ke liye +91 74149 74582 par WhatsApp karein ya contact.weintern@gmail.com par email karein."
+    "answer": "Haan, WeIntern ek legitimate EdTech platform hai. Students official website aur support channels ke through program details verify kar sakte hain."
+  },
+  {
+    "category": "faq",
+    "question": "WeIntern ke internship programs kaise join karein?",
+    "answer": "Join karne ke liye official website we-intern.in par visit karein, apna domain choose karein, registration complete karein aur enrollment process follow karein."
+  },
+  {
+    "category": "faq",
+    "question": "WeIntern programs beginners ke liye hain kya?",
+    "answer": "Haan. WeIntern ke programs beginners, students aur freshers ko dhyan me rakhkar design kiye gaye hain."
+  },
+  {
+    "category": "faq",
+    "question": "WeIntern programs me kya included hai?",
+    "answer": "Programs me live projects, mentor guidance, practical assignments, learning resources, certificate opportunities aur career support included hai."
+  },
+  {
+    "category": "faq",
+    "question": "WeIntern internship duration kitni hoti hai?",
+    "answer": "Program duration domain ke according vary karti hai. Different programs ki duration approximately 6 weeks se 12 weeks tak ho sakti hai."
+  },
+  {
+    "category": "faq",
+    "question": "Kya WeIntern mentorship provide karta hai?",
+    "answer": "Yes. WeIntern mentors ke through guidance, doubt-solving sessions, code reviews aur project support provide karta hai."
+  },
+  {
+    "category": "faq",
+    "question": "Kya WeIntern me real projects milte hain?",
+    "answer": "Yes. Students ko practical assignments aur real-world project experience diya jata hai jisse unke technical skills improve hote hain."
+  },
+  {
+    "category": "faq",
+    "question": "Kya WeIntern placement assistance provide karta hai?",
+    "answer": "Yes. WeIntern resume building, interview preparation aur career guidance ke through placement assistance provide karta hai."
+  },
+  {
+    "category": "faq",
+    "question": "WeIntern programs ki fees kitni hai?",
+    "answer": "Program fees selected domain aur duration ke according vary karti hai. Latest fee details official website par available hoti hain."
+  },
+  {
+    "category": "faq",
+    "question": "WeIntern support kaise milega?",
+    "answer": "Students ko WhatsApp groups, mentor sessions aur support channels ke through assistance milti hai."
+  },
+  {
+    "category": "faq",
+    "question": "Certificate kaise milega?",
+    "answer": "Internship successfully complete karne aur required projects submit karne ke baad certificate issue kiya jata hai."
+  },
+  {
+    "category": "faq",
+    "question": "Do WeIntern programs provide hands-on experience?",
+    "answer": "Yes. WeIntern programs include practical assignments, projects, and real-world tasks to help students gain hands-on experience."
+  },
+  {
+    "category": "faq",
+    "question": "Are WeIntern programs suitable for beginners?",
+    "answer": "Yes. WeIntern programs are suitable for beginners and freshers. Basic knowledge may be helpful for some technical domains."
+  },
+  {
+    "category": "faq",
+    "question": "Will I get access to learning resources?",
+    "answer": "Yes. Students receive access to learning materials, resources, project guidelines, and mentor support."
+  },
+  {
+    "category": "faq",
+    "question": "Can I work on live client projects?",
+    "answer": "Based on performance and progress, students may get opportunities to contribute to live client projects under mentor supervision."
+  },
+    {
+    "category": "faq",
+    "question": "Do I need prior coding experience for Full Stack Web Development?",
+    "answer": "No. This internship is beginner-friendly and starts with web development fundamentals before moving to advanced concepts."
+  },
+  {
+    "category": "faq",
+    "question": "What technologies will I learn in Full Stack Web Development?",
+    "answer": "You will learn HTML, CSS, JavaScript, React.js, Node.js, Express.js, databases, Git, GitHub, APIs, and deployment concepts."
+  },
+  {
+    "category": "faq",
+    "question": "Will I build projects in Full Stack Development?",
+    "answer": "Yes. You will build real-world projects to gain practical experience and create a strong portfolio."
+  },
+  {
+    "category": "faq",
+    "question": "What is the duration of the Full Stack Web Development program?",
+    "answer": "The Full Stack Web Development program duration is approximately 12 weeks with assignments, practical sessions, and project work."
+  },
+  {
+    "category": "faq",
+    "question": "Is Full Stack Development suitable for beginners?",
+    "answer": "Yes. The program is designed for students, freshers, and beginners who want to start a career in web development."
+  },
+  {
+    "category": "faq",
+    "question": "Will I receive mentor support during Full Stack internship?",
+    "answer": "Yes. Mentors provide guidance, doubt-solving sessions, code reviews, and project assistance throughout the internship."
+  },
+  {
+    "category": "faq",
+    "question": "Do I need prior Java experience?",
+    "answer": "No. The Java Development program starts from Java fundamentals and gradually covers advanced concepts."
+  },
+  {
+    "category": "faq",
+    "question": "What will I learn in Java Development?",
+    "answer": "You will learn Core Java, Object-Oriented Programming, Collections, Exception Handling, JDBC, Multithreading, and basics of Spring Boot."
+  },
+  {
+    "category": "faq",
+    "question": "Will I build Java projects?",
+    "answer": "Yes. You will work on projects such as Student Management System, Library Management System, REST APIs, and industry-style applications."
+  },
+  {
+    "category": "faq",
+    "question": "Who can join Java Development internship?",
+    "answer": "The program is suitable for college students, fresh graduates, and beginners who want to learn Java development."
+  },
+  {
+    "category": "faq",
+    "question": "Do I need prior Python experience?",
+    "answer": "No. The Python Development program starts with Python basics and gradually moves to advanced topics."
+  },
+  {
+    "category": "faq",
+    "question": "What will I learn in Python Development?",
+    "answer": "You will learn Python fundamentals, Object-Oriented Programming, File Handling, APIs, Automation, Web Development basics, and project development."
+  },
+  {
+    "category": "faq",
+    "question": "Will I create Python projects?",
+    "answer": "Yes. You will build automation scripts, Python applications, APIs, and practical projects to improve your development skills."
+  },
+  {
+    "category": "faq",
+    "question": "Is Python internship suitable for beginners?",
+    "answer": "Yes. The Python program is designed for students, freshers, and anyone who wants to start Python development from basics."
+  },
+  {
+    "category": "faq",
+    "question": "Will I learn C and C++ in the internship?",
+    "answer": "Yes. The program starts with C programming fundamentals and covers advanced C++ concepts including Object-Oriented Programming."
+  },
+  {
+    "category": "faq",
+    "question": "Does the C/C++ program cover Data Structures and Algorithms?",
+    "answer": "Yes. You will learn arrays, linked lists, stacks, queues, trees, sorting, searching, and algorithm fundamentals using C/C++."
+  },
+  {
+    "category": "faq",
+    "question": "Which tools are used for C/C++ development?",
+    "answer": "Students will learn using tools like Visual Studio Code, Code::Blocks, and GCC/MinGW compiler setup."
+  },
+  {
+    "category": "faq",
+    "question": "What projects will I build in C/C++?",
+    "answer": "You will build projects like Student Management System, Library Management System, Banking System, and mini games."
+  },
+  {
+    "category": "faq",
+    "question": "Do I need Data Science experience?",
+    "answer": "No. The Data Science program starts from basics and covers data analysis, visualization, SQL, and machine learning concepts."
+  },
+  {
+    "category": "faq",
+    "question": "What tools will I learn in Data Science?",
+    "answer": "You will work with Python, Pandas, NumPy, Matplotlib, SQL, Power BI, Excel, Jupyter Notebook, and introductory machine learning libraries."
+  },
+  {
+    "category": "faq",
+    "question": "Will I work with real datasets?",
+    "answer": "Yes. You will analyze real datasets, solve business problems, and build data-driven projects."
+  },
+  {
+    "category": "faq",
+    "question": "Will Data Science projects be added to my portfolio?",
+    "answer": "Yes. Industry-oriented projects can be showcased on your resume, GitHub, and LinkedIn profile."
+  },
+  {
+    "category": "faq",
+    "question": "Do I need AI or Machine Learning knowledge?",
+    "answer": "No. The AI & Machine Learning program starts with Python and AI basics before moving to advanced concepts."
+  },
+  {
+    "category": "faq",
+    "question": "What AI technologies will I learn?",
+    "answer": "You will learn Python, AI concepts, APIs, prompt engineering, automation workflows, LLM applications, and modern AI development tools."
+  },
+  {
+    "category": "faq",
+    "question": "Will I build AI projects?",
+    "answer": "Yes. You will create AI chatbots, automation workflows, document Q&A systems, AI assistants, and practical AI applications."
+  },
+  {
+    "category": "faq",
+    "question": "Is AI & Automation internship suitable for beginners?",
+    "answer": "Yes. The program is designed for students, freshers, and beginners who want to start learning AI and automation from scratch."
+  },
+    {
+    "category": "faq",
+    "question": "Do I need prior Cloud Computing experience?",
+    "answer": "No. The Cloud Computing program starts with cloud fundamentals and gradually covers advanced cloud concepts, making it suitable for beginners."
+  },
+  {
+    "category": "faq",
+    "question": "Which cloud platforms will I learn?",
+    "answer": "You will gain hands-on experience with AWS and learn cloud services such as EC2, S3, IAM, VPC, and cloud deployment concepts."
+  },
+  {
+    "category": "faq",
+    "question": "Will I work on cloud projects?",
+    "answer": "Yes. You will deploy applications, configure cloud resources, manage storage, and work on real-world cloud infrastructure projects."
+  },
+  {
+    "category": "faq",
+    "question": "Is Cloud Computing internship suitable for students?",
+    "answer": "Yes. The program is designed for students, freshers, and beginners who want to start a career in cloud technologies."
+  },
+  {
+    "category": "faq",
+    "question": "Will I learn cloud security?",
+    "answer": "Yes. You will learn IAM, security practices, backup strategies, and cloud resource management."
+  },
+  {
+    "category": "faq",
+    "question": "Do I need prior DevOps experience?",
+    "answer": "No. The DevOps program starts with fundamentals and gradually covers Linux, networking, automation, cloud, and deployment concepts."
+  },
+  {
+    "category": "faq",
+    "question": "Which DevOps tools will I learn?",
+    "answer": "You will learn Git, GitHub, Docker, Kubernetes, Jenkins, Terraform, Ansible, AWS basics, and CI/CD pipelines."
+  },
+  {
+    "category": "faq",
+    "question": "Will I work on DevOps projects?",
+    "answer": "Yes. You will build deployment workflows, automate CI/CD pipelines, containerize applications, and work on practical DevOps tasks."
+  },
+  {
+    "category": "faq",
+    "question": "Is DevOps internship beginner friendly?",
+    "answer": "Yes. The program is suitable for students, fresh graduates, and developers who want to build DevOps skills step-by-step."
+  },
+  {
+    "category": "faq",
+    "question": "Will I learn Docker and Kubernetes?",
+    "answer": "Yes. You will learn containerization using Docker and application orchestration using Kubernetes."
+  },
+  {
+    "category": "faq",
+    "question": "Do I need prior Mobile App Development experience?",
+    "answer": "No. The Mobile App Development program starts with fundamentals and covers app development concepts from basics."
+  },
+  {
+    "category": "faq",
+    "question": "Which technologies will I learn in Mobile App Development?",
+    "answer": "You will learn Flutter, Dart, Firebase, APIs, mobile app development concepts, testing, and deployment."
+  },
+  {
+    "category": "faq",
+    "question": "Will I build mobile applications?",
+    "answer": "Yes. You will create real-world Android and iOS applications that can be added to your portfolio."
+  },
+  {
+    "category": "faq",
+    "question": "Do I need a Mac for Mobile App Development?",
+    "answer": "No. Most of the internship can be completed using Windows or Linux. Mac is only required for direct iOS publishing."
+  },
+  {
+    "category": "faq",
+    "question": "Will I learn app deployment?",
+    "answer": "Yes. You will learn application testing, building, and publishing processes."
+  },
+  {
+    "category": "faq",
+    "question": "Do I need prior UI/UX Design experience?",
+    "answer": "No. The UI/UX Design program is beginner-friendly and starts with design fundamentals."
+  },
+  {
+    "category": "faq",
+    "question": "What tools will I learn in UI/UX Design?",
+    "answer": "You will learn design principles, wireframing, prototyping, user research, and tools like Figma."
+  },
+  {
+    "category": "faq",
+    "question": "Will I create a UI/UX portfolio?",
+    "answer": "Yes. You will create design projects and case studies that can be added to your portfolio."
+  },
+  {
+    "category": "faq",
+    "question": "Do I need coding knowledge for UI/UX Design?",
+    "answer": "No. Coding knowledge is not mandatory. The program focuses on user experience and interface design."
+  },
+  {
+    "category": "faq",
+    "question": "What will I learn in Digital Marketing?",
+    "answer": "You will learn SEO, social media marketing, content marketing, online advertising, analytics, and digital marketing strategies."
+  },
+  {
+    "category": "faq",
+    "question": "Is Digital Marketing internship suitable for beginners?",
+    "answer": "Yes. The program is designed for students, freshers, and beginners who want to start a career in digital marketing."
+  },
+  {
+    "category": "faq",
+    "question": "Will I work on real marketing projects?",
+    "answer": "Yes. You will work on practical campaigns, marketing strategies, and industry-based assignments."
+  },
+  {
+    "category": "faq",
+    "question": "What career opportunities are available after Digital Marketing?",
+    "answer": "You can explore roles such as Digital Marketing Executive, SEO Specialist, Social Media Manager, and Content Marketing Associate."
+  },
+  {
+    "category": "faq",
+    "question": "How long are WeIntern programs?",
+    "answer": "Program duration depends on the selected domain. Programs generally range from 6 weeks to 12 weeks."
+  },
+  {
+    "category": "faq",
+    "question": "What happens after completing the internship?",
+    "answer": "After successful completion, students receive certificates and career support including resume guidance and interview preparation."
+  },
+  {
+    "category": "faq",
+    "question": "Why should I choose WeIntern?",
+    "answer": "WeIntern focuses on practical learning through industry-oriented curriculum, live projects, mentor support, and career-focused skill development."
+  },
+  {
+    "category": "faq",
+    "question": "How can I contact WeIntern support?",
+    "answer": "Students can contact WeIntern through official communication channels available on the website we-intern.in."
   }
 ]
