@@ -1,0 +1,97 @@
+[
+  {
+    "category": "domains",
+    "question": "What internship domains does WeIntern offer?",
+    "answer": "WeIntern offers the following internship programs: Full Stack Web Development (12 weeks, ₹4,999), Mobile App Development with Flutter (10 weeks, ₹5,999), AI & Automation (8 weeks, ₹6,499), Cloud Solutions & DevOps (10 weeks, ₹5,499), UI/UX Design (8 weeks, ₹3,999), Digital Marketing (6 weeks, ₹2,999), and Data Science & Analytics (12 weeks, ₹6,999)."
+  },
+  {
+    "category": "domains",
+    "question": "Which domain is best for me?",
+    "answer": "Choose based on your interests: Full Stack Web Development or Data Science for coding + tech roles, Mobile App Development for app building, AI & Automation for AI tools and workflow automation, UI/UX Design for design careers, Digital Marketing for growth and marketing, Cloud & DevOps for infrastructure roles. All programs are in English + Hindi."
+  },
+  {
+    "category": "domains",
+    "question": "What is the duration of the internship?",
+    "answer": "Program durations vary by domain: Full Stack Web Development — 12 weeks, Mobile App Development — 10 weeks, AI & Automation — 8 weeks, Cloud Solutions & DevOps — 10 weeks, UI/UX Design — 8 weeks, Digital Marketing — 6 weeks, Data Science & Analytics — 12 weeks."
+  },
+  {
+    "category": "domains",
+    "question": "How long is the internship program?",
+    "answer": "WeIntern internship durations range from 6 weeks to 12 weeks depending on the chosen domain. Digital Marketing is 6 weeks, UI/UX and AI & Automation are 8 weeks, Mobile App and Cloud DevOps are 10 weeks, and Full Stack + Data Science are 12 weeks."
+  },
+  {
+    "category": "domains",
+    "question": "What is the Full Stack Web Development course?",
+    "answer": "Full Stack Web Development is a 12-week program priced at ₹4,999. It covers HTML, CSS, JavaScript, React.js, Node.js, Express.js, MongoDB, Git, and deployment. You build 4 real client projects. Certificate and stipend are included. Suitable for beginners."
+  },
+  {
+    "category": "domains",
+    "question": "What is the price of Full Stack Web Development?",
+    "answer": "The Full Stack Web Development program is priced at ₹4,999 (discounted). The program is 12 weeks long and includes a WeIntern certificate, live projects, and stipend opportunities."
+  },
+  {
+    "category": "domains",
+    "question": "What is the Mobile App Development course?",
+    "answer": "Mobile App Development with Flutter is a 10-week program priced at ₹5,999. It covers Flutter, Dart, Firebase, REST APIs, Android/iOS publishing. You build 3 real client apps. Intermediate level. Certificate and stipend included."
+  },
+  {
+    "category": "domains",
+    "question": "What is the AI and Automation course?",
+    "answer": "AI & Automation is an 8-week program priced at ₹6,499. It covers Python, OpenAI API, LangChain, n8n, Make.com, Pinecone, and FastAPI. You build 3 AI projects including an AI chatbot and business automation pipeline. Certificate and stipend included."
+  },
+  {
+    "category": "domains",
+    "question": "What is the Cloud Computing and DevOps course?",
+    "answer": "Cloud Solutions & DevOps is a 10-week program priced at ₹5,499. It covers AWS, Docker, Kubernetes, GitHub Actions, Jenkins, Linux, Terraform, and Nginx. Real client infrastructure projects included. Certificate and stipend available."
+  },
+  {
+    "category": "domains",
+    "question": "What is the UI UX Design course?",
+    "answer": "UI/UX Design is an 8-week beginner-friendly program priced at ₹3,999. It covers Figma, Adobe XD, FigJam, design thinking, wireframing, prototyping, and design systems. You complete 3 real client design projects. Certificate and stipend included."
+  },
+  {
+    "category": "domains",
+    "question": "What is the Digital Marketing course?",
+    "answer": "Digital Marketing is a 6-week beginner-friendly program priced at ₹2,999. It covers Google Ads, Meta Ads, SEO, content marketing, Canva, Mailchimp, and Google Analytics. You run real client campaigns. Certificate and stipend included."
+  },
+  {
+    "category": "domains",
+    "question": "What is the Data Science course?",
+    "answer": "Data Science & Analytics is a 12-week intermediate program priced at ₹6,999. It covers Python, Pandas, NumPy, Scikit-learn, Matplotlib, Seaborn, Tableau, and SQL. You complete 3 real data projects. Certificate and stipend included."
+  },
+  {
+    "category": "domains",
+    "question": "Which is the cheapest course at WeIntern?",
+    "answer": "The most affordable WeIntern program is Digital Marketing at ₹2,999 (6 weeks), followed by UI/UX Design at ₹3,999 (8 weeks)."
+  },
+  {
+    "category": "domains",
+    "question": "Can a beginner join any domain?",
+    "answer": "Yes. Full Stack Web Development, UI/UX Design, and Digital Marketing are explicitly beginner-level programs and require no prior experience. Mobile App Development, AI & Automation, Cloud DevOps, and Data Science are intermediate-level — basic programming knowledge is helpful."
+  },
+  {
+    "category": "domains",
+    "question": "Do all courses provide certificates?",
+    "answer": "Yes. All WeIntern programs include a WeIntern verified certificate upon successful completion. Certificates can be added to your LinkedIn profile."
+  },
+  {
+    "category": "domains",
+    "question": "Is stipend available in all courses?",
+    "answer": "Yes. All WeIntern programs offer stipend opportunities. The stipend is performance-based and is given upon completing real client projects successfully."
+  },
+  {
+    "category": "domains",
+    "question": "Internship kitne weeks ki hoti hai?",
+    "answer": "Duration domain ke hisaab se vary karta hai: Full Stack aur Data Science — 12 weeks, Mobile App aur Cloud DevOps — 10 weeks, AI & Automation aur UI/UX — 8 weeks, Digital Marketing — 6 weeks."
+  },
+  {
+    "category": "domains",
+    "question": "WeIntern me kaunse domains available hain?",
+    "answer": "WeIntern ke available domains: Full Stack Web Development (₹4,999), Mobile App Development (₹5,999), AI & Automation (₹6,499), Cloud Solutions & DevOps (₹5,499), UI/UX Design (₹3,999), Digital Marketing (₹2,999), Data Science & Analytics (₹6,999)."
+  },
+  {
+    "category": "domains",
+    "question": "Mujhe kaunsa domain choose karna chahiye?",
+    "answer": "Apni interest ke hisaab se choose karein: website banana chahte hain to Full Stack, app banana chahte hain to Mobile App, AI tools seekhna chahte hain to AI & Automation, design mein interest hai to UI/UX, marketing mein hai to Digital Marketing, aur data mein interest hai to Data Science."
+  }
+]
