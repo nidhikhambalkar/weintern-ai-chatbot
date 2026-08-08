@@ -3,8 +3,7 @@ import ChatWidget from "@/components/ChatWidget";
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex flex-col justify-center items-center bg-gray-100">
-
+    <main className="min-h-screen flex flex-col items-center justify-center">
       <h1 className="text-5xl font-bold text-blue-700">
         WeIntern AI Chatbot
       </h1>
@@ -21,7 +20,6 @@ export default function Home() {
 
       {/* Chat Widget */}
       <ChatWidget />
-
     </main>
   );
 }

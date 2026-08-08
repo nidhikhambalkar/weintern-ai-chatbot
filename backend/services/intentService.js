@@ -149,6 +149,54 @@ function detectIntent(message = "") {
   "months",
   "3 month",
   "6 month",
+
+  // C/C++
+"c",
+"c++",
+"c/c++",
+"programming",
+"coding",
+"compiler",
+"gcc",
+"mingw",
+"codeblocks",
+"code::blocks",
+"visual studio code",
+"vscode",
+"ide",
+"data structures",
+"algorithms",
+"dsa",
+
+// Java
+"core java",
+"spring",
+"spring boot",
+"jdbc",
+"multithreading",
+
+// Python
+"automation",
+"api",
+"oop",
+"file handling",
+
+// AI
+"prompt engineering",
+"llm",
+"langchain",
+"rag",
+"chatbot",
+
+// Cloud
+"aws",
+"ec2",
+"s3",
+"docker",
+"kubernetes",
+"jenkins",
+"terraform",
+"ansible"
 ];
 
   const isWeIntern = weinternKeywords.some((keyword) =>

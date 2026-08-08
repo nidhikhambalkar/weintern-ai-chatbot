@@ -61,16 +61,15 @@ const TOKEN_MAP = {
   hain: "",
   nahi: "not",
   refund: "fees",
-  payment: "internship",
-  pay: "internship",
+  payment: "fees",
+  pay: "fees",
+  upi: "fees",
   emi: "fees",
   scholarship: "fees",
   scholarships: "fees",
-  resume: "placement",
-  interview: "placement",
+ 
   interviews: "placement",
-  mock: "placement",
-  job: "placement",
+  
   jobs: "placement",
   rules: "policy",
   terms: "policy",
@@ -134,10 +133,7 @@ const TOKEN_MAP = {
   cybersecurity: "domains",
   cloud: "domains",
   // Stipend / EMI / Guarantee / LinkedIn
-  stipend: "internship",
-  salary: "internship",
-  earnings: "internship",
-  earn: "internship",
+
   emi: "fees",
   installment: "fees",
   installments: "fees",
@@ -147,12 +143,31 @@ const TOKEN_MAP = {
   "100%": "placement",
   linkedin: "placement",
   profile: "placement",
-  "6month": "internship",
-  "3month": "internship",
-  "6-month": "internship",
-  "3-month": "internship",
-  "6months": "internship",
-  "3months": "internship",
+
+  // C/C++ synonyms
+c: "c",
+cpp: "c++",
+cplusplus: "c++",
+"c++": "c++",
+
+tool: "ide",
+tools: "ide",
+ide: "ide",
+editor: "ide",
+compiler: "compiler",
+compilers: "compiler",
+
+develop: "development",
+development: "development",
+coding: "programming",
+code: "programming",
+
+vscode: "visual studio code",
+visual: "visual",
+studio: "studio",
+gcc: "gcc",
+mingw: "mingw",
+codeblocks: "code blocks",
 };
 
 const CATEGORY_HINTS = {
@@ -198,7 +213,7 @@ const CATEGORY_KEYWORD_MAP = {
 function normalize(text = "") {
   const cleaned = String(text)
     .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/[^a-z0-9+\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 
@@ -415,8 +430,21 @@ if (
   }
 
   if (queryTokens.includes("project") && entryText.includes("project")) {
-    score += 7;
-  }
+    // IDE / Compiler
+if (
+  (queryTokens.includes("ide") ||
+   queryTokens.includes("compiler")) &&
+  (entryText.includes("ide") ||
+   entryText.includes("compiler") ||
+   entryText.includes("visual studio code") ||
+   entryText.includes("gcc") ||
+   entryText.includes("mingw") ||
+   entryText.includes("code blocks"))
+) {
+  score += 15;
+}
+    
+}
 
   if (queryTokens.includes("mentor") && entryText.includes("mentor")) {
     score += 7;
@@ -541,7 +569,7 @@ function searchKnowledgeBase(message = "") {
   Object.entries(knowledgeIndex).forEach(([category, entries]) => {
     entries.forEach((entry) => {
       const score = scoreMatch(entry, queryTokens, categoryHints, strongCategory);
-      if (score >= 12) {
+     if (score >= 6) {
         matches.push({
           category,
           question: entry.question || entry.title || "General FAQ",
@@ -555,6 +583,7 @@ function searchKnowledgeBase(message = "") {
   matches.sort((a, b) => b.score - a.score);
 
   const bestMatches = matches.slice(0, 4);
+  console.log("BEST MATCHES:", bestMatches);
   const contextText = bestMatches
     .map((match) => `Category: ${match.category}. Question: ${match.question}. Answer: ${match.answer}`)
     .join("\n");

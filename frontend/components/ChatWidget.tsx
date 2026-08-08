@@ -52,29 +52,11 @@ const [leadData, setLeadData] = useState({
     });
   }, [messages, isTyping]);
 
-  const quickReply = (question: string, answer: string) => {
-    setMessages((prev) => [
-      ...prev,
-      {
-        sender: "user",
-        text: question,
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-      {
-        sender: "bot",
-        text: answer,
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-    ]);
-  };
+const quickReply = (question: string) => {
+  setMessage(question);
+};
 
-  const sendMessage = () => {
+  const sendMessage =  async () => {
     if (!message.trim()) return;
 
     const userMessage = message.trim();
@@ -224,86 +206,66 @@ if (showLeadForm) {
 
 }
 
+setMessages((prev) => [
+  ...prev,
+  {
+    sender: "user",
+    text: userMessage,
+    time: new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+  },
+]);
 
-    const lower = userMessage.toLowerCase();
+setMessage("");
+setIsTyping(true);
 
-    if (
-  lower.includes("apply") ||
-  lower.includes("register") ||
-  lower.includes("join") ||
-  lower.includes("internship")
-) {
-  setShowLeadForm(true);
-  setLeadStep(1);
+try {
+  const response = await fetch("http://localhost:5000/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      message: userMessage,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok || !data.success) {
+    throw new Error(data.message || "Failed to get response");
+  }
 
   setMessages((prev) => [
     ...prev,
     {
-      sender: "user",
-      text: userMessage,
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    },
-    {
       sender: "bot",
-      text: "Great! Let's get you registered.\n\nPlease enter your Full Name.",
+      text: data.reply,
       time: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       }),
     },
   ]);
+} catch (error) {
+  console.error("Chat API Error:", error);
 
-  setMessage("");
-  return;
+  setMessages((prev) => [
+    ...prev,
+    {
+      sender: "bot",
+      text: "Sorry, I'm unable to connect to the WeIntern AI right now. Please try again.",
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    },
+  ]);
+} finally {
+  setIsTyping(false);
 }
-
-    if (lower.includes("domain")) {
-      botReply =
-        "We offer Full Stack Development, Data Science, AI/ML, UI/UX Design and Digital Marketing.";
-    } else if (lower.includes("certificate")) {
-      botReply =
-        "Certificates are provided after successful completion of the internship.";
-    } else if (lower.includes("fee")) {
-      botReply =
-        "Please visit the official WeIntern website for the latest internship fee details.";
-    } else if (lower.includes("contact")) {
-      botReply =
-        "You can contact the WeIntern support team through the Contact Us page on the official website.";
-    }
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        sender: "user",
-        text: userMessage,
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-    ]);
-
-    setMessage("");
-    setIsTyping(true);
-
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: "bot",
-          text: botReply,
-          time: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        },
-      ]);
-
-      setIsTyping(false);
-    }, 1000);
   };
 
   return (
@@ -389,10 +351,7 @@ if (showLeadForm) {
 
             <button
               onClick={() =>
-                quickReply(
-                  "Internship Fees",
-                  "Our internship fee depends on the selected program. Please visit the official WeIntern website for the latest details."
-                )
+                quickReply("Internship Fees")
               }
               className="border border-blue-600 text-blue-700 rounded-full px-3 py-1 text-sm hover:bg-blue-600 hover:text-white transition"
             >
@@ -401,10 +360,7 @@ if (showLeadForm) {
 
             <button
               onClick={() =>
-                quickReply(
-                  "Domains",
-                  "We offer Full Stack Development, Data Science, AI/ML, UI/UX Design and Digital Marketing."
-                )
+                quickReply("Domains")
               }
               className="border border-blue-600 text-blue-700 rounded-full px-3 py-1 text-sm hover:bg-blue-600 hover:text-white transition"
             >
@@ -413,10 +369,7 @@ if (showLeadForm) {
 
             <button
               onClick={() =>
-                quickReply(
-                  "Certificates",
-                  "Certificates are awarded after successfully completing the internship."
-                )
+                quickReply("Certificates")
               }
               className="border border-blue-600 text-blue-700 rounded-full px-3 py-1 text-sm hover:bg-blue-600 hover:text-white transition"
             >
@@ -425,10 +378,7 @@ if (showLeadForm) {
 
             <button
               onClick={() =>
-                quickReply(
-                  "Contact",
-                  "You can contact the WeIntern support team through the Contact Us page on the official website."
-                )
+                quickReply("Contact")
               }
               className="border border-blue-600 text-blue-700 rounded-full px-3 py-1 text-sm hover:bg-blue-600 hover:text-white transition"
             >
