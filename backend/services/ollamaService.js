@@ -122,7 +122,17 @@ async function generateChatResponse({ message, context }) {
   }
 }
 
+async function pingOllama() {
+  try {
+    const res = await axios.get(`${OLLAMA_HOST}/api/models/${OLLAMA_MODEL}`, { timeout: 5000 });
+    return { ok: true, model: res.data };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
 module.exports = {
   generateChatResponse,
   buildFallbackResponse,
+  pingOllama,
 };

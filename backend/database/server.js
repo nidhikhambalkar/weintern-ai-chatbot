@@ -25,8 +25,8 @@ dotenv.config();
 // Line 6: Create an instance of Express application
 const app = express();
 
-// Line 7: Define server port (reads PORT from .env or defaults to 5000)
-const PORT = process.env.PORT || 5000;
+// Line 7: Define server port (reads PORT from .env or defaults to 5001 to avoid clash)
+const PORT = process.env.PORT || 5001;
 
 // Line 8: Enable CORS middleware so browser allows cross-origin API requests
 app.use(cors());
@@ -47,6 +47,11 @@ app.get('/health', (req, res) => {
     db_status: getIsPgConnected() ? 'PostgreSQL' : 'In-Memory Fallback', // Active DB mode
     timestamp: new Date().toISOString() // Current server timestamp
   });
+});
+
+// Root route: friendly message to avoid "Cannot GET /" in browser
+app.get('/', (req, res) => {
+  res.status(200).send('WeIntern Database Backend is running. Use /health for status.');
 });
 
 
@@ -114,8 +119,8 @@ app.post('/api/leads', async (req, res) => {
 });
 
 
-// ENDPOINT 2: GET /api/admin/leads -> Retrieve all captured leads for Admin
-app.get('/api/admin/leads', async (req, res) => {
+// ENDPOINT 2: GET /api/leads & GET /api/admin/leads -> Retrieve all captured leads
+app.get(['/api/leads', '/api/admin/leads'], async (req, res) => {
   try {
     // If PostgreSQL is connected
     if (getIsPgConnected()) {
@@ -245,8 +250,8 @@ app.post('/api/history', async (req, res) => {
 // WHY: Collects escalation requests when chatbot cannot answer student queries.
 // ==============================================================================
 
-// ENDPOINT 5: POST /api/escalate -> Create support ticket
-app.post('/api/escalate', async (req, res) => {
+// ENDPOINT 5: POST /api/escalate & POST /api/escalations -> Create support escalation ticket
+app.post(['/api/escalate', '/api/escalations'], async (req, res) => {
   try {
     // Read session_id and issue description from request body
     const { session_id, issue } = req.body;
@@ -293,8 +298,8 @@ app.post('/api/escalate', async (req, res) => {
 });
 
 
-// ENDPOINT 6: GET /api/admin/escalations -> View support escalation tickets for Admin
-app.get('/api/admin/escalations', async (req, res) => {
+// ENDPOINT 6: GET /api/escalations & GET /api/admin/escalations -> View support escalation tickets
+app.get(['/api/escalations', '/api/admin/escalations'], async (req, res) => {
   try {
     if (getIsPgConnected()) {
       const result = await query(`SELECT * FROM escalations ORDER BY created_at DESC;`);
@@ -317,8 +322,8 @@ app.get('/api/admin/escalations', async (req, res) => {
 });
 
 
-// ENDPOINT 7: PATCH /api/admin/escalations/:id -> Update escalation ticket status
-app.patch('/api/admin/escalations/:id', async (req, res) => {
+// ENDPOINT 7: PATCH /api/escalations/:id & PATCH /api/admin/escalations/:id -> Update escalation status
+app.patch(['/api/escalations/:id', '/api/admin/escalations/:id'], async (req, res) => {
   try {
     const { id } = req.params;     // Ticket ID from URL parameter
     const { status } = req.body;  // New status string ('pending', 'in_progress', 'resolved', 'closed')
@@ -355,8 +360,8 @@ app.patch('/api/admin/escalations/:id', async (req, res) => {
 });
 
 
-// ENDPOINT 8: GET /api/admin/summary -> Overview statistics for Admin Dashboard
-app.get('/api/admin/summary', async (req, res) => {
+// ENDPOINT 8: GET /api/summary & GET /api/admin/summary -> Overview statistics
+app.get(['/api/summary', '/api/admin/summary'], async (req, res) => {
   try {
     let leadsCount = 0;
     let escalationsCount = 0;
