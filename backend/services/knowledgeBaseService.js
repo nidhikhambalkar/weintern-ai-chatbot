@@ -61,16 +61,15 @@ const TOKEN_MAP = {
   hain: "",
   nahi: "not",
   refund: "fees",
-  payment: "internship",
-  pay: "internship",
+  payment: "fees",
+  pay: "fees",
+  upi: "fees",
   emi: "fees",
   scholarship: "fees",
   scholarships: "fees",
-  resume: "placement",
-  interview: "placement",
+ 
   interviews: "placement",
-  mock: "placement",
-  job: "placement",
+  
   jobs: "placement",
   rules: "policy",
   terms: "policy",
@@ -134,10 +133,7 @@ const TOKEN_MAP = {
   cybersecurity: "domains",
   cloud: "domains",
   // Stipend / EMI / Guarantee / LinkedIn
-  stipend: "internship",
-  salary: "internship",
-  earnings: "internship",
-  earn: "internship",
+
   emi: "fees",
   installment: "fees",
   installments: "fees",
@@ -147,12 +143,7 @@ const TOKEN_MAP = {
   "100%": "placement",
   linkedin: "placement",
   profile: "placement",
-  "6month": "internship",
-  "3month": "internship",
-  "6-month": "internship",
-  "3-month": "internship",
-  "6months": "internship",
-  "3months": "internship",
+
   // C/C++ synonyms
 c: "c",
 cpp: "c++",
