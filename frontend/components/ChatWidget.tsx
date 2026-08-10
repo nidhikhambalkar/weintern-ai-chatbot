@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { BsChatDotsFill, BsX } from "react-icons/bs";
 import { IoSend } from "react-icons/io5";
+import { sendChat, saveLead } from "@/services/chatApi";
 
 type ChatMessage = {
   sender: "user" | "bot";
@@ -52,26 +53,225 @@ const [leadData, setLeadData] = useState({
     });
   }, [messages, isTyping]);
 
-const quickReply = (question: string) => {
-  setMessage(question);
-};
+  const startLeadForm = () => {
+    setShowLeadForm(true);
+    setLeadStep(1);
+    setMessages((prev) => [
+      ...prev,
+      {
+        sender: "bot",
+        text: "📝 Great! Let's get you registered for the WeIntern Internship.\n\nPlease enter your Full Name:",
+        time: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      },
+    ]);
+  };
+
+  const quickReply = (question: string) => {
+    if (question.includes("Apply") || question.includes("Register")) {
+      startLeadForm();
+      return;
+    }
+    setMessage(question);
+  };
 
   const sendMessage =  async () => {
     if (!message.trim()) return;
 
     const userMessage = message.trim();
-    let botReply = "Sorry, I don't have information about that yet.";
-// Lead Form Logic
-if (showLeadForm) {
 
-  // STEP 1 - Name
-  if (leadStep === 1) {
-    setLeadData((prev) => ({
-      ...prev,
-      name: userMessage,
-    }));
+    // Lead Form Logic
+    if (showLeadForm) {
 
-    setLeadStep(2);
+      // STEP 1 - Name
+      if (leadStep === 1) {
+        setLeadData((prev) => ({
+          ...prev,
+          name: userMessage,
+        }));
+
+        setLeadStep(2);
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "user",
+            text: userMessage,
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          },
+          {
+            sender: "bot",
+            text: "Please enter your Email Address.",
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          },
+        ]);
+
+        setMessage("");
+        return;
+      }
+
+      // STEP 2 - Email
+      if (leadStep === 2) {
+        setLeadData((prev) => ({
+          ...prev,
+          email: userMessage,
+        }));
+
+        setLeadStep(3);
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "user",
+            text: userMessage,
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          },
+          {
+            sender: "bot",
+            text: "Please enter your Phone Number.",
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          },
+        ]);
+
+        setMessage("");
+        return;
+      }
+
+      // STEP 3 - Phone Number
+      if (leadStep === 3) {
+        setLeadData((prev) => ({
+          ...prev,
+          phone: userMessage,
+        }));
+
+        setLeadStep(4);
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "user",
+            text: userMessage,
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          },
+          {
+            sender: "bot",
+            text: "Please enter your Interested Domain.\n\nExample: Full Stack Development, Data Science, AI/ML, UI/UX Design, Digital Marketing",
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          },
+        ]);
+
+        setMessage("");
+        return;
+      }
+
+      // STEP 4 - Domain & Save to Database
+      if (leadStep === 4) {
+        const payload = {
+          name: leadData.name,
+          email: leadData.email,
+          phone: leadData.phone,
+          preferred_domain: userMessage,
+        };
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "user",
+            text: userMessage,
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          },
+        ]);
+
+        setMessage("");
+        setIsTyping(true);
+
+        try {
+          const res = await saveLead(payload);
+          if (!res.success) {
+            throw new Error(res.error || res.message || "Failed to save lead.");
+          }
+
+          setMessages((prev) => [
+            ...prev,
+            {
+              sender: "bot",
+              text: `🎉 Thank you for registering, ${payload.name}!\n\nYour details have been submitted and saved successfully in our database.\nOur team will contact you soon.`,
+              time: new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            },
+          ]);
+        } catch (err: unknown) {
+          console.error("Error saving lead:", err);
+          const errorMessage = err instanceof Error ? err.message : String(err);
+          setMessages((prev) => [
+            ...prev,
+            {
+              sender: "bot",
+              text: `⚠️ Could not submit your registration (${errorMessage}). Please try again later.`,
+              time: new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            },
+          ]);
+        } finally {
+          setIsTyping(false);
+          setShowLeadForm(false);
+          setLeadStep(0);
+          setLeadData({
+            name: "",
+            email: "",
+            phone: "",
+            domain: "",
+          });
+        }
+        return;
+      }
+
+    }
+
+    // Check if user is asking to apply/register
+    if (/apply|register|enroll|registration|fill form|lead/i.test(userMessage)) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: "user",
+          text: userMessage,
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        },
+      ]);
+      setMessage("");
+      startLeadForm();
+      return;
+    }
 
     setMessages((prev) => [
       ...prev,
@@ -83,189 +283,47 @@ if (showLeadForm) {
           minute: "2-digit",
         }),
       },
-      {
-        sender: "bot",
-        text: "Please enter your Email Address.",
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
     ]);
 
     setMessage("");
-    return;
-  }
+    setIsTyping(true);
 
-  // STEP 2 - Email
-  if (leadStep === 2) {
-    setLeadData((prev) => ({
-      ...prev,
-      email: userMessage,
-    }));
+    try {
+      const data = await sendChat(userMessage);
 
-    setLeadStep(3);
+      if (!data.success) {
+        throw new Error(data.message || "Failed to get response");
+      }
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        sender: "user",
-        text: userMessage,
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-      {
-        sender: "bot",
-        text: "Please enter your Phone Number.",
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-    ]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: "bot",
+          text: data.reply,
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        },
+      ]);
+    } catch (error) {
+      console.error("Chat API Error:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
 
-    setMessage("");
-    return;
-  }
-
-  // STEP 3 - Phone Number
-  if (leadStep === 3) {
-    setLeadData((prev) => ({
-      ...prev,
-      phone: userMessage,
-    }));
-
-    setLeadStep(4);
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        sender: "user",
-        text: userMessage,
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-      {
-        sender: "bot",
-        text: "Please enter your Interested Domain.\n\nExample: Full Stack Development, Data Science, AI/ML, UI/UX Design, Digital Marketing",
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-    ]);
-
-    setMessage("");
-    return;
-  }
-
-  // STEP 4 - Domain
-  if (leadStep === 4) {
-    setLeadData((prev) => ({
-      ...prev,
-      domain: userMessage,
-    }));
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        sender: "user",
-        text: userMessage,
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-      {
-        sender: "bot",
-        text: "🎉 Thank you for registering!\n\nYour details have been submitted successfully.\nOur team will contact you soon.",
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-    ]);
-
-    setShowLeadForm(false);
-    setLeadStep(0);
-
-    setLeadData({
-      name: "",
-      email: "",
-      phone: "",
-      domain: "",
-    });
-
-    setMessage("");
-    return;
-  }
-
-}
-
-setMessages((prev) => [
-  ...prev,
-  {
-    sender: "user",
-    text: userMessage,
-    time: new Date().toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
-  },
-]);
-
-setMessage("");
-setIsTyping(true);
-
-try {
-  const response = await fetch("http://localhost:5000/api/chat", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      message: userMessage,
-    }),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok || !data.success) {
-    throw new Error(data.message || "Failed to get response");
-  }
-
-  setMessages((prev) => [
-    ...prev,
-    {
-      sender: "bot",
-      text: data.reply,
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    },
-  ]);
-} catch (error) {
-  console.error("Chat API Error:", error);
-
-  setMessages((prev) => [
-    ...prev,
-    {
-      sender: "bot",
-      text: "Sorry, I'm unable to connect to the WeIntern AI right now. Please try again.",
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    },
-  ]);
-} finally {
-  setIsTyping(false);
-}
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: "bot",
+          text: `Sorry, I'm unable to connect to the WeIntern AI right now. (${errorMessage}) Please try again.`,
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        },
+      ]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   return (
@@ -317,7 +375,7 @@ try {
                       : "bg-blue-100 text-gray-900"
                   }`}
                 >
-                  <div>{msg.text}</div>
+                  <div className="whitespace-pre-line">{msg.text}</div>
 
                   <p
                     className={`text-[10px] mt-1 ${
@@ -348,6 +406,15 @@ try {
 
           {/* Quick Replies */}
           <div className="border-t p-3 flex flex-wrap gap-2 bg-white">
+
+            <button
+              onClick={() =>
+                quickReply("Apply / Register")
+              }
+              className="border border-blue-600 bg-blue-50 text-blue-700 font-medium rounded-full px-3 py-1 text-sm hover:bg-blue-600 hover:text-white transition"
+            >
+              ✨ Apply / Register
+            </button>
 
             <button
               onClick={() =>
