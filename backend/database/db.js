@@ -7,14 +7,12 @@
 // 3. Includes an in-memory fallback mode so the project runs even without local PostgreSQL!
 // ==============================================================================
 
-// Import 'Pool' from 'pg' module to manage PostgreSQL database connections
-const { Pool } = require('pg');
-
-// Import 'dotenv' module to read settings from the .env file
-const dotenv = require('dotenv');
-
-// Load environment variables from .env file into process.env
-dotenv.config();
+let Pool;
+try {
+  Pool = require('pg').Pool;
+} catch (err) {
+  Pool = null;
+}
 
 // Create connection parameters object using .env variables or safe default values
 const poolConfig = process.env.DATABASE_URL
@@ -27,11 +25,12 @@ const poolConfig = process.env.DATABASE_URL
       database: process.env.DB_NAME || 'weintern_chatbot', // Database name
     };
 
-// Initialize PostgreSQL Connection Pool instance
-const pool = new Pool({
+// Initialize PostgreSQL Connection Pool instance if module is available
+const pool = Pool ? new Pool({
   ...poolConfig,               // Spread connection configuration object
   connectionTimeoutMillis: 3000 // Timeout after 3 seconds if DB is unreachable
-});
+}) : null;
+
 
 // Variable to track whether PostgreSQL connection is active (true/false)
 let isPgConnected = false;
@@ -87,6 +86,11 @@ const initDatabase = async () => {
   `;
 
   try {
+    if (!pool) {
+      isPgConnected = false;
+      console.warn('ℹ️ [Fallback] Running in-memory mode for easy testing without PostgreSQL setup.');
+      return;
+    }
     // Attempt to acquire a connection client from pool
     const client = await pool.connect();
     // Run the table creation SQL script
