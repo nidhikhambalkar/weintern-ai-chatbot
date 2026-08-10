@@ -151,7 +151,8 @@ if (showLeadForm) {
       },
       {
         sender: "bot",
-        text: "Please enter your Interested Domain.\n\nExample: Full Stack Development, Data Science, AI/ML, UI/UX Design, Digital Marketing",
+        text:
+          "Please enter your Interested Domain.\n\nExample: Full Stack Development, Data Science, AI/ML, UI/UX Design, Digital Marketing",
         time: new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -182,7 +183,8 @@ if (showLeadForm) {
       },
       {
         sender: "bot",
-        text: "🎉 Thank you for registering!\n\nYour details have been submitted successfully.\nOur team will contact you soon.",
+        text:
+          "🎉 Thank you for registering!\n\nYour details have been submitted successfully.\nOur team will contact you soon.",
         time: new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -203,7 +205,57 @@ if (showLeadForm) {
     setMessage("");
     return;
   }
+}
 
+// Registration Intent
+const lower = userMessage.toLowerCase();
+const leadFormKeywords = [
+  "i want to apply",
+  "i want to register",
+  "i want to enroll",
+  "i want to join",
+  "i want to join internship",
+  "i want to join the internship",
+  "i want to apply for internship",
+  "i want to register for internship",
+  "how can i apply",
+  "how can i register",
+  "how can i enroll",
+  "start registration",
+  "start my registration",
+  "begin registration",
+];
+
+const wantsToRegister = leadFormKeywords.some((keyword) =>
+  lower.includes(keyword)
+);
+
+if (wantsToRegister) {
+  setShowLeadForm(true);
+  setLeadStep(1);
+
+  setMessages((prev) => [
+    ...prev,
+    {
+      sender: "user",
+      text: userMessage,
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    },
+    {
+      sender: "bot",
+      text: "Great! Let's get you registered.\n\nPlease enter your Full Name.",
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    },
+  ]);
+
+  setMessage("");
+  return;
 }
 
 setMessages((prev) => [
