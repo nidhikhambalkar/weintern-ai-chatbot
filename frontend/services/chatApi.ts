@@ -42,4 +42,22 @@ export async function getHistory(session_id: string) {
 	return handleJsonResponse(res);
 }
 
-export default { sendChat, saveLead, getHistory };
+export async function saveHistory(session_id: string, sender: string, message: string) {
+	const res = await fetch(`${API_BASE}/api/history`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ session_id, sender, message }),
+	});
+	return handleJsonResponse(res);
+}
+
+export async function createEscalation(session_id: string, issue: string) {
+	const res = await fetch(`${API_BASE}/api/escalate`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ session_id, issue }),
+	});
+	return handleJsonResponse(res);
+}
+
+export default { sendChat, saveLead, getHistory, saveHistory, createEscalation };
