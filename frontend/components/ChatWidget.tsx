@@ -609,7 +609,7 @@ export default function ChatWidget() {
 
       {/* Chat Window */}
       {open && (
-        <div className="fixed bottom-24 right-6 w-[380px] h-[550px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-150 z-50">
+        <div className="fixed bottom-0 right-0 w-full h-[100dvh] sm:bottom-24 sm:right-6 sm:w-[380px] sm:h-[550px] bg-white sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-150 z-50">
 
           {/* Header */}
           <div className="bg-blue-600 text-white p-4 flex justify-between items-center shadow-md">
@@ -691,34 +691,34 @@ export default function ChatWidget() {
                   <div className="whitespace-pre-line text-sm leading-relaxed">{msg.text}</div>
 
                   {msg.sender === "bot" && (
-                    <div className="flex gap-2.5 mt-2 pt-1 border-t border-gray-100 justify-start items-center text-gray-400">
+                    <div className="flex gap-4 sm:gap-2.5 mt-2 pt-1.5 border-t border-gray-100 justify-start items-center text-gray-400">
                       {((playingMessageIndex === index) || (playingMessageIndex === -1 && index === messages.length - 1)) ? (
                         <>
                           {playbackState === "PLAYING" ? (
                             <button 
                               onClick={handlePauseMessage}
                               title="Pause response"
-                              className="hover:text-blue-600 transition duration-200 p-0.5 flex items-center justify-center cursor-pointer"
+                              className="hover:text-blue-600 transition duration-200 p-2 sm:p-0.5 flex items-center justify-center cursor-pointer touch-manipulation"
                             >
-                              <BsPauseFill size={14} />
+                              <BsPauseFill className="w-5 h-5 sm:w-3.5 sm:h-3.5" />
                             </button>
                           ) : (
                             <button 
                               onClick={() => handlePlayMessage(index, msg.text)}
                               title="Resume response"
-                              className="hover:text-blue-600 transition duration-200 p-0.5 flex items-center justify-center cursor-pointer"
+                              className="hover:text-blue-600 transition duration-200 p-2 sm:p-0.5 flex items-center justify-center cursor-pointer touch-manipulation"
                             >
-                              <BsPlayFill size={14} />
+                              <BsPlayFill className="w-5 h-5 sm:w-3.5 sm:h-3.5" />
                             </button>
                           )}
                           <button 
                             onClick={handleStopMessage}
                             title="Stop response"
-                            className="hover:text-red-500 transition duration-200 p-0.5 flex items-center justify-center cursor-pointer"
+                            className="hover:text-red-500 transition duration-200 p-2 sm:p-0.5 flex items-center justify-center cursor-pointer touch-manipulation"
                           >
-                            <BsStopFill size={14} />
+                            <BsStopFill className="w-5 h-5 sm:w-3.5 sm:h-3.5" />
                           </button>
-                          <span className="text-[8px] text-blue-500 font-medium animate-pulse ml-1">
+                          <span className="text-[10px] sm:text-[8px] text-blue-500 font-medium animate-pulse ml-1">
                             {playbackState === "PLAYING" ? "speaking..." : "paused"}
                           </span>
                         </>
@@ -726,9 +726,9 @@ export default function ChatWidget() {
                         <button 
                           onClick={() => handlePlayMessage(index, msg.text)}
                           title="Speak response"
-                          className="hover:text-blue-600 transition duration-200 p-0.5 flex items-center justify-center cursor-pointer"
+                          className="hover:text-blue-600 transition duration-200 p-2 sm:p-0.5 flex items-center justify-center cursor-pointer touch-manipulation"
                         >
-                          <BsPlayFill size={14} />
+                          <BsPlayFill className="w-5 h-5 sm:w-3.5 sm:h-3.5" />
                         </button>
                       )}
                     </div>
@@ -830,39 +830,39 @@ export default function ChatWidget() {
           )}
 
           {/* Quick Replies */}
-          <div className="border-t p-3 flex flex-wrap gap-1.5 bg-white border-b border-gray-100">
+          <div className="border-t p-3 flex overflow-x-auto gap-2 bg-white border-b border-gray-100 no-scrollbar scroll-smooth">
 
             <button
               onClick={() => quickReply("Apply / Register")}
-              className="border border-blue-600 bg-blue-50 text-blue-700 font-medium rounded-full px-3 py-1 text-xs hover:bg-blue-600 hover:text-white transition duration-200"
+              className="flex-shrink-0 border border-blue-600 bg-blue-50 text-blue-700 font-medium rounded-full px-3 py-1 text-xs hover:bg-blue-600 hover:text-white transition duration-200 touch-manipulation"
             >
               ✨ Apply / Register
             </button>
 
             <button
               onClick={() => quickReply("Internship Fees")}
-              className="border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200"
+              className="flex-shrink-0 border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200 touch-manipulation"
             >
               Fees & EMI
             </button>
 
             <button
               onClick={() => quickReply("Domains")}
-              className="border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200"
+              className="flex-shrink-0 border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200 touch-manipulation"
             >
               Domains
             </button>
 
             <button
               onClick={() => quickReply("Certificates")}
-              className="border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200"
+              className="flex-shrink-0 border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200 touch-manipulation"
             >
               Certificates
             </button>
 
             <button
               onClick={() => quickReply("Contact")}
-              className="border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200"
+              className="flex-shrink-0 border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200 touch-manipulation"
             >
               Contact
             </button>
@@ -883,7 +883,7 @@ export default function ChatWidget() {
                   sendMessage();
                 }
               }}
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-black text-sm placeholder-gray-400 outline-none focus:border-blue-600 disabled:bg-gray-100 disabled:text-gray-500"
+              className="flex-1 border border-gray-300 rounded-lg px-3.5 py-2.5 text-black text-base md:text-sm placeholder-gray-400 outline-none focus:border-blue-600 disabled:bg-gray-100 disabled:text-gray-500"
             />
 
             {/* Voice Input Mic Button */}
@@ -891,7 +891,7 @@ export default function ChatWidget() {
               <button
                 onClick={handleMicClick}
                 title={voiceState === "LISTENING" ? "Stop recording" : "Record voice message"}
-                className={`p-2.5 rounded-lg text-white transition duration-200 ${
+                className={`p-3 rounded-lg text-white transition duration-200 touch-manipulation ${
                   voiceState === "LISTENING"
                     ? "bg-red-500 hover:bg-red-600 voice-listening-btn"
                     : voiceState === "SPEAKING"
@@ -906,7 +906,7 @@ export default function ChatWidget() {
             <button
               onClick={sendMessage}
               disabled={voiceState === "LISTENING" || !message.trim()}
-              className="bg-blue-600 text-white p-2.5 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-50 flex items-center justify-center"
+              className="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-50 flex items-center justify-center touch-manipulation"
             >
               <IoSend size={18} />
             </button>

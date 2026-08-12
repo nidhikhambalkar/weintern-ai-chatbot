@@ -72,3 +72,11 @@ body {
 .voice-wave-bar:nth-child(4) { animation-delay: 0.15s; }
 .voice-wave-bar:nth-child(5) { animation-delay: 0.3s; }
 
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
