@@ -345,6 +345,41 @@ function inferCategoryHints(queryTokens) {
 }
 
 function detectStrongCategory(queryTokens) {
+  // Direct priority mapping for exact categories
+  const directCategories = [
+    "placement",
+    "fees",
+    "domains",
+    "certificates",
+    "certification",
+    "orientation",
+    "contact",
+    "benefits",
+    "courses",
+    "company",
+    "internship"
+  ];
+  
+  // Virtual category routing to physical KB categories
+  if (queryTokens.includes("duration") || queryTokens.includes("weeks") || queryTokens.includes("months") || queryTokens.includes("long")) {
+    return "internship";
+  }
+  if (queryTokens.includes("eligibility") || queryTokens.includes("eligible") || queryTokens.includes("fresher") || queryTokens.includes("beginner") || queryTokens.includes("qualification")) {
+    return "internship";
+  }
+  if (queryTokens.includes("registration") || queryTokens.includes("register") || queryTokens.includes("apply") || queryTokens.includes("enroll")) {
+    return "internship";
+  }
+  if (queryTokens.includes("payment") || queryTokens.includes("pay") || queryTokens.includes("upi") || queryTokens.includes("razorpay")) {
+    return "fees";
+  }
+
+  for (const cat of directCategories) {
+    if (queryTokens.includes(cat)) {
+      return cat;
+    }
+  }
+
   let strongestCategory = null;
   let strongestScore = 0;
 
