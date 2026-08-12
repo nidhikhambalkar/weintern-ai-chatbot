@@ -45,6 +45,12 @@ CREATE TABLE IF NOT EXISTS messages (
     -- message: The actual message text content
     message TEXT NOT NULL,
 
+    -- source: The source of the message (text or voice)
+    source VARCHAR(50) DEFAULT 'text',
+
+    -- voice_metadata: Metadata for voice messages (e.g. duration, confidence)
+    voice_metadata JSONB DEFAULT NULL,
+
     -- timestamp: Exact time the message was recorded
     timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

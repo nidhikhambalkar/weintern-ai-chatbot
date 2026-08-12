@@ -175,6 +175,7 @@ const CATEGORY_HINTS = {
   courses: ["course", "courses", "program", "learn", "training", "skill"],
   benefits: ["benefit", "benefits", "mentor", "mentor support", "doubt", "class", "recorded", "network", "soft skill", "softskills"],
   internship: ["internship", "intern", "onboarding", "attendance", "team", "selection", "daily task", "live project", "project", "register", "enroll", "apply", "payment", "pay", "upi", "eligible", "fresher", "beginner", "how long", "how many months"],
+  certificates: ["certificate", "certification", "linkedin", "verify", "validity"],
   certification: ["certificate", "certification", "linkedin", "verify", "validity"],
   placement: ["placement", "resume", "interview", "mock", "job", "career", "hire"],
   fees: ["fees", "fee", "discount", "scholarship", "emi", "refund", "price"],
@@ -198,6 +199,7 @@ const CATEGORY_KEYWORD_MAP = {
   courses: ["course", "courses", "program", "training", "skill", "learn", "about course", "about courses", "course details", "course information", "program details", "program information", "training details", "training information", "skill development", "learn skills", "learn programming", "learn coding", "learn data science", "learn ai ml", "learn python", "learn java", "learn ui ux", "learn digital marketing", "learn cyber security", "learn cloud computing"],
   benefits: ["benefit", "benefits", "mentor", "doubt", "class", "recorded", "network", "soft skill", "softskills"],
   internship: ["internship", "intern", "onboarding", "attendance", "team", "selection", "daily task", "live project", "project", "register", "enroll", "apply", "payment", "upi", "eligible", "fresher", "beginner"],
+  certificates: ["certificate", "certification", "linkedin", "verify", "validity"],
   certification: ["certificate", "certification", "linkedin", "verify", "validity"],
   placement: ["placement", "resume", "interview", "mock", "job", "career", "hire"],
   fees: ["fees", "fee", "discount", "scholarship", "emi", "refund", "price"],
@@ -369,33 +371,34 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory) {
 
   let score = 0;
 
+  const isCertificateQuery = queryTokens.includes("certificate") || queryTokens.includes("certificates") || queryTokens.includes("certification") || queryTokens.includes("cert");
+
   // General company/about query boosting
-const aboutKeywords = [
-  "weintern",
-  "about",
-  "info",
-  "information",
-  "company",
-  "platform",
-  "what",
-  "tell"
-];
+  const aboutKeywords = [
+    "weintern",
+    "about",
+    "info",
+    "information",
+    "company",
+    "platform",
+    "tell"
+  ];
 
-const hasAboutIntent = queryTokens.some((token) =>
-  aboutKeywords.includes(token)
-);
+  const hasAboutIntent = queryTokens.some((token) =>
+    aboutKeywords.includes(token)
+  );
 
-if (hasAboutIntent && entry.category === "company") {
-  score += 25;
-}
+  if (hasAboutIntent && entry.category === "company" && !isCertificateQuery) {
+    score += 25;
+  }
 
-if (
-  hasAboutIntent &&
-  entry.question &&
-  normalize(entry.question).includes("what is weintern")
-) {
-  score += 30;
-}
+  if (
+    hasAboutIntent &&
+    entry.question &&
+    normalize(entry.question).includes("what is weintern")
+  ) {
+    score += 30;
+  }
 
   queryTokens.forEach((token) => {
     if (!token) return;
@@ -466,8 +469,12 @@ if (
     score += 8;
   }
 
-  if (queryTokens.includes("certificate") && entryText.includes("certificate")) {
-    score += 6;
+  if (isCertificateQuery) {
+    if (entry.category === "certificates" || entry.category === "certification") {
+      score += 65;
+    } else if (entryText.includes("certificate") || entryText.includes("certification")) {
+      score += 20;
+    }
   }
 
   if (queryTokens.includes("internship") && entryText.includes("internship")) {
@@ -547,7 +554,8 @@ if (
 
   if (
   queryTokens.includes("weintern") &&
-  (entry.category === "company" || entry.category === "faq")
+  (entry.category === "company" || entry.category === "faq") &&
+  !isCertificateQuery
 ) {
   score += 25;
 }

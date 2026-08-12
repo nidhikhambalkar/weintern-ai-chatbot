@@ -23,6 +23,23 @@ router.post('/leads', async (req, res) => {
     const trimmedEmail = email.trim();
     const trimmedPhone = phone.trim();
 
+    // Secure format validations
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide a valid email address.'
+      });
+    }
+
+    const phoneDigits = trimmedPhone.replace(/\D/g, '');
+    if (phoneDigits.length < 10) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide a valid phone number (minimum 10 digits).'
+      });
+    }
+
     if (getIsPgConnected()) {
       const sql = `
         INSERT INTO leads (name, email, phone, preferred_domain)

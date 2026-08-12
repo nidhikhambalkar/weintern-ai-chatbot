@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { BsChatDotsFill, BsX } from "react-icons/bs";
+import { BsChatDotsFill, BsX, BsMicFill, BsMicMuteFill, BsVolumeUpFill, BsVolumeMuteFill, BsPlayFill, BsPauseFill, BsStopFill } from "react-icons/bs";
 import { IoSend } from "react-icons/io5";
-import { sendChat, saveLead } from "@/services/chatApi";
+import { sendChat, saveLead, getHistory } from "@/services/chatApi";
 
 type ChatMessage = {
   sender: "user" | "bot";
@@ -16,17 +16,26 @@ export default function ChatWidget() {
   const [message, setMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [showLeadForm, setShowLeadForm] = useState(false);
+  const [leadStep, setLeadStep] = useState(0);
+  const [leadData, setLeadData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    domain: "",
+  });
 
-const [leadStep, setLeadStep] = useState(0);
-
-const [leadData, setLeadData] = useState({
-  name: "",
-  email: "",
-  phone: "",
-  domain: "",
-});
+  const [sessionId, setSessionId] = useState<string>("");
+  const [voiceMode, setVoiceMode] = useState<boolean>(false);
+  const [voiceState, setVoiceState] = useState<"IDLE" | "LISTENING" | "PROCESSING" | "SPEAKING" | "ERROR">("IDLE");
+  const [interimTranscript, setInterimTranscript] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [isSpeakerMuted, setIsSpeakerMuted] = useState<boolean>(false);
+  const [playingMessageIndex, setPlayingMessageIndex] = useState<number | null>(null);
+  const [playbackState, setPlaybackState] = useState<"IDLE" | "PLAYING" | "PAUSED">("IDLE");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
+  const synthesisRef = useRef<any>(null);
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -47,26 +56,78 @@ const [leadData, setLeadData] = useState({
     },
   ]);
 
+  // Generate or load session ID & Initialize Web Speech API
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      let id = localStorage.getItem("weintern_session_id");
+      if (!id) {
+        id = "session_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
+        localStorage.setItem("weintern_session_id", id);
+      }
+      setSessionId(id);
+
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const rec = new SpeechRecognition();
+        rec.continuous = false;
+        rec.interimResults = true;
+        rec.lang = "en-IN";
+        recognitionRef.current = rec;
+      }
+      synthesisRef.current = window.speechSynthesis;
+    }
+  }, []);
+
+  // Fetch chat history from PostgreSQL / In-Memory fallback on startup
+  useEffect(() => {
+    if (!sessionId) return;
+    const fetchHistory = async () => {
+      try {
+        const res = await getHistory(sessionId);
+        if (res.success && res.data && res.data.length > 0) {
+          setMessages(
+            res.data.map((msg: any) => ({
+              sender: msg.sender === "bot" ? "bot" : "user",
+              text: msg.message,
+              time: new Date(msg.timestamp).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Failed to load chat history:", err);
+      }
+    };
+    fetchHistory();
+  }, [sessionId]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
     });
-  }, [messages, isTyping]);
+  }, [messages, isTyping, interimTranscript]);
 
   const startLeadForm = () => {
     setShowLeadForm(true);
     setLeadStep(1);
+    const text = "📝 Great! Let's get you registered for the WeIntern Internship.\n\nPlease enter your Full Name:";
     setMessages((prev) => [
       ...prev,
       {
         sender: "bot",
-        text: "📝 Great! Let's get you registered for the WeIntern Internship.\n\nPlease enter your Full Name:",
+        text,
         time: new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
         }),
       },
     ]);
+
+    if (voiceMode && !isSpeakerMuted) {
+      speakResponse(text);
+    }
   };
 
   const quickReply = (question: string) => {
@@ -77,209 +138,463 @@ const [leadData, setLeadData] = useState({
     setMessage(question);
   };
 
-  const sendMessage =  async () => {
-    if (!message.trim()) return;
+  // Speaks response using Web Speech Synthesis (TTS)
+  const speakResponse = (text: string) => {
+    handlePlayMessage(-1, text);
+  };
 
-    const userMessage = message.trim();
+  const handlePlayMessage = (index: number, text: string) => {
+    if (!synthesisRef.current) return;
 
-    // Lead Form Logic
+    const isCurrentPlaying = playingMessageIndex === index || (playingMessageIndex === -1 && index === messages.length - 1);
+
+    if (isCurrentPlaying && playbackState === "PAUSED") {
+      synthesisRef.current.resume();
+      setPlaybackState("PLAYING");
+      setVoiceState("SPEAKING");
+      return;
+    }
+
+    synthesisRef.current.cancel();
+
+    const cleanText = text
+      .replace(/👋|🤖|📝|🎉|✨|🟢|🚀|#\d+/g, "")
+      .replace(/\*\*|__/g, "")
+      .replace(/\*|_/g, "")
+      .replace(/`([^`]+)`/g, "$1")
+      .trim();
+
+    if (!cleanText) {
+      setVoiceState("IDLE");
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = "en-IN"; // English (India) works best for WeIntern
+
+    utterance.onstart = () => {
+      setPlayingMessageIndex(index);
+      setPlaybackState("PLAYING");
+      setVoiceState("SPEAKING");
+    };
+
+    utterance.onend = () => {
+      setPlayingMessageIndex(null);
+      setPlaybackState("IDLE");
+      setVoiceState("IDLE");
+    };
+
+    utterance.onerror = (e) => {
+      console.error("TTS Error:", e);
+      setPlayingMessageIndex(null);
+      setPlaybackState("IDLE");
+      setVoiceState("IDLE");
+    };
+
+    synthesisRef.current.speak(utterance);
+  };
+
+  const handlePauseMessage = () => {
+    if (synthesisRef.current && playbackState === "PLAYING") {
+      synthesisRef.current.pause();
+      setPlaybackState("PAUSED");
+    }
+  };
+
+  const handleStopMessage = () => {
+    if (synthesisRef.current) {
+      synthesisRef.current.cancel();
+      setPlayingMessageIndex(null);
+      setPlaybackState("IDLE");
+      setVoiceState("IDLE");
+    }
+  };
+
+  // Start Speech-to-Text (STT) Recognition
+  const startSpeechRecognition = () => {
+    const rec = recognitionRef.current;
+    if (!rec) {
+      setVoiceState("ERROR");
+      setErrorMessage("Speech recognition not supported in this browser.");
+      return;
+    }
+
+    if (synthesisRef.current) {
+      synthesisRef.current.cancel();
+    }
+
+    setVoiceState("LISTENING");
+    setInterimTranscript("");
+    setErrorMessage("");
+
+    rec.onstart = () => {
+      setVoiceState("LISTENING");
+    };
+
+    rec.onresult = (event: any) => {
+      let interim = "";
+      let final = "";
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          final += event.results[i][0].transcript;
+        } else {
+          interim += event.results[i][0].transcript;
+        }
+      }
+      if (interim) {
+        setInterimTranscript(interim);
+      }
+      if (final) {
+        setInterimTranscript("");
+        rec.stop();
+        processMessage(final, "voice");
+      }
+    };
+
+    rec.onerror = (event: any) => {
+      console.error("STT Error:", event.error);
+      setVoiceState("ERROR");
+      if (event.error === "no-speech") {
+        setErrorMessage("No speech detected. Please speak clearly.");
+      } else if (event.error === "not-allowed") {
+        setErrorMessage("Mic permission denied. Please allow mic access.");
+      } else {
+        setErrorMessage(`Microphone error: ${event.error}`);
+      }
+      setTimeout(() => {
+        setVoiceState("IDLE");
+      }, 4000);
+    };
+
+    rec.onend = () => {
+      setVoiceState((prev) => (prev === "LISTENING" ? "IDLE" : prev));
+    };
+
+    try {
+      rec.start();
+    } catch (e) {
+      console.error("SpeechRecognition start exception:", e);
+      setVoiceState("ERROR");
+      setErrorMessage("Microphone is already listening.");
+    }
+  };
+
+  const stopSpeechRecognition = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    setVoiceState("IDLE");
+  };
+
+  const handleMicClick = () => {
+    if (voiceState === "LISTENING") {
+      stopSpeechRecognition();
+    } else if (voiceState === "SPEAKING") {
+      if (synthesisRef.current) {
+        synthesisRef.current.cancel();
+      }
+      setVoiceState("IDLE");
+    } else {
+      startSpeechRecognition();
+    }
+  };
+
+  // Main message processing function (shared by Text and Voice)
+  const processMessage = async (userMessage: string, source: "text" | "voice" = "text") => {
     if (showLeadForm) {
-
       // STEP 1 - Name
       if (leadStep === 1) {
         setLeadData((prev) => ({
           ...prev,
           name: userMessage,
         }));
-
         setLeadStep(2);
+        const botReply = "Please enter your Email Address.";
 
         setMessages((prev) => [
           ...prev,
           {
             sender: "user",
             text: userMessage,
-            time: new Date().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
+            time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           },
           {
             sender: "bot",
-            text: "Please enter your Email Address.",
-            time: new Date().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
+            text: botReply,
+            time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           },
         ]);
 
-        setMessage("");
+        if (source === "voice" && !isSpeakerMuted) {
+          speakResponse(botReply);
+        }
         return;
       }
 
       // STEP 2 - Email
       if (leadStep === 2) {
+        // Basic email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(userMessage.trim())) {
+          const errorReply = "That doesn't look like a valid email. Please enter a valid email address.";
+          setMessages((prev) => [
+            ...prev,
+            {
+              sender: "user",
+              text: userMessage,
+              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            },
+            {
+              sender: "bot",
+              text: errorReply,
+              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            },
+          ]);
+          if (source === "voice" && !isSpeakerMuted) {
+            speakResponse(errorReply);
+          }
+          return;
+        }
+
         setLeadData((prev) => ({
           ...prev,
-          email: userMessage,
+          email: userMessage.trim(),
         }));
-
         setLeadStep(3);
+        const botReply = "Please enter your Phone Number.";
 
         setMessages((prev) => [
           ...prev,
           {
             sender: "user",
             text: userMessage,
-            time: new Date().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
+            time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           },
           {
             sender: "bot",
-            text: "Please enter your Phone Number.",
-            time: new Date().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
+            text: botReply,
+            time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           },
         ]);
 
-        setMessage("");
+        if (source === "voice" && !isSpeakerMuted) {
+          speakResponse(botReply);
+        }
         return;
       }
 
       // STEP 3 - Phone Number
       if (leadStep === 3) {
+        // Basic phone validation (digits and optional plus, min 10 digits)
+        const phoneDigits = userMessage.replace(/\D/g, "");
+        if (phoneDigits.length < 10) {
+          const errorReply = "That doesn't look like a valid phone number. Please enter at least 10 digits.";
+          setMessages((prev) => [
+            ...prev,
+            {
+              sender: "user",
+              text: userMessage,
+              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            },
+            {
+              sender: "bot",
+              text: errorReply,
+              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            },
+          ]);
+          if (source === "voice" && !isSpeakerMuted) {
+            speakResponse(errorReply);
+          }
+          return;
+        }
+
         setLeadData((prev) => ({
           ...prev,
           phone: userMessage,
         }));
-
         setLeadStep(4);
+        const botReply = "Please enter your Interested Domain.\n\nExample: Full Stack Development, Data Science, AI/ML, UI/UX Design, Digital Marketing";
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        sender: "user",
-        text: userMessage,
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-      {
-        sender: "bot",
-        text: "Please enter your Interested Domain.\n\nExample: Full Stack Development, Data Science, AI/ML, UI/UX Design, Digital Marketing",
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-    ]);
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "user",
+            text: userMessage,
+            time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          },
+          {
+            sender: "bot",
+            text: botReply,
+            time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          },
+        ]);
 
-        setMessage("");
+        if (source === "voice" && !isSpeakerMuted) {
+          speakResponse(botReply);
+        }
         return;
       }
 
       // STEP 4 - Domain & Save to Database
       if (leadStep === 4) {
-        const payload = {
-          name: leadData.name,
-          email: leadData.email,
-          phone: leadData.phone,
-          preferred_domain: userMessage,
-        };
+        setVoiceState("PROCESSING");
+        try {
+          const payload = {
+            name: leadData.name,
+            email: leadData.email,
+            phone: leadData.phone,
+            preferred_domain: userMessage,
+          };
 
+          const res = await saveLead(payload);
+          if (!res.success) {
+            throw new Error(res.error || "Failed to save lead");
+          }
+
+          const botReply = `Thank you for registering, ${leadData.name}! Your details have been submitted successfully. Our team will contact you soon.`;
+          setMessages((prev) => [
+            ...prev,
+            {
+              sender: "user",
+              text: userMessage,
+              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            },
+            {
+              sender: "bot",
+              text: botReply,
+              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            },
+          ]);
+
+          setShowLeadForm(false);
+          setLeadStep(0);
+          setLeadData({ name: "", email: "", phone: "", domain: "" });
+
+          if (source === "voice" && !isSpeakerMuted) {
+            speakResponse(botReply);
+          } else {
+            setVoiceState("IDLE");
+          }
+        } catch (error) {
+          console.error("Lead saving error:", error);
+          const errorReply = "Sorry, there was an issue saving your application. Please try submitting again.";
+          setMessages((prev) => [
+            ...prev,
+            {
+              sender: "bot",
+              text: errorReply,
+              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            },
+          ]);
+          if (source === "voice" && !isSpeakerMuted) {
+            speakResponse(errorReply);
+          } else {
+            setVoiceState("IDLE");
+          }
+        }
+        return;
+      }
+    }
+
+    // Normal chat message flow
     setMessages((prev) => [
       ...prev,
       {
         sender: "user",
         text: userMessage,
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-      {
-        sender: "bot",
-        text: "🎉 Thank you for registering!\n\nYour details have been submitted successfully.\nOur team will contact you soon.",
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       },
     ]);
 
-    setShowLeadForm(false);
-    setLeadStep(0);
-
-    setLeadData({
-      name: "",
-      email: "",
-      phone: "",
-      domain: "",
-    });
-
-    setMessage("");
-    return;
-  }
-
-}
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        sender: "user",
-        text: userMessage,
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-    ]);
-
-    setMessage("");
     setIsTyping(true);
+    setVoiceState("PROCESSING");
 
     try {
-      const data = await sendChat(userMessage);
+      const voiceMetadata = source === "voice" ? { duration: parseFloat((userMessage.length / 5).toFixed(1)), confidence: 0.95 } : null;
+      const data = await sendChat(userMessage, source, sessionId, voiceMetadata);
 
       if (!data.success) {
         throw new Error(data.message || "Failed to get response");
       }
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: "bot",
-          text: data.reply,
-          time: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        },
-      ]);
+      const botReply = data.reply;
+
+      // Handle escalation triggers if returned from backend
+      if (data.escalation) {
+        const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000';
+        const escalateRes = await fetch(`${apiBase}/api/escalate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sessionId, issue: `User requested human support. Trigger phrase: "${userMessage}"` })
+        });
+        const escalateData = await escalateRes.json();
+        
+        let escalationMessage = botReply;
+        if (escalateData.success) {
+          escalationMessage += `\n\n[Escalation Support Ticket Created: #${escalateData.data.id || escalateData.data.session_id}]`;
+        }
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "bot",
+            text: escalationMessage,
+            time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          },
+        ]);
+
+        if (source === "voice" && !isSpeakerMuted) {
+          speakResponse(botReply); // speak original text, exclude system ticket tags
+        } else {
+          setVoiceState("IDLE");
+        }
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "bot",
+            text: botReply,
+            time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          },
+        ]);
+
+        if (source === "voice" && !isSpeakerMuted) {
+          speakResponse(botReply);
+        } else {
+          setVoiceState("IDLE");
+        }
+      }
     } catch (error) {
       console.error("Chat API Error:", error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessageText = error instanceof Error ? error.message : String(error);
+      const errorReply = `Sorry, I'm unable to connect to the WeIntern AI right now. (${errorMessageText}) Please try again.`;
 
       setMessages((prev) => [
         ...prev,
         {
           sender: "bot",
-          text: `Sorry, I'm unable to connect to the WeIntern AI right now. (${errorMessage}) Please try again.`,
-          time: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
+          text: errorReply,
+          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         },
       ]);
+
+      if (source === "voice" && !isSpeakerMuted) {
+        speakResponse("I had trouble connecting to the server. Please try again.");
+      } else {
+        setVoiceState("ERROR");
+        setErrorMessage("Network issue. Reverted to text chat fallback.");
+        setTimeout(() => setVoiceState("IDLE"), 4000);
+      }
     } finally {
       setIsTyping(false);
     }
+  };
+
+  const sendMessage = async () => {
+    if (!message.trim()) return;
+    const userMessage = message.trim();
+    setMessage("");
+    await processMessage(userMessage, "text");
   };
 
   return (
@@ -287,57 +602,141 @@ const [leadData, setLeadData] = useState({
       {/* Floating Button */}
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-xl hover:bg-blue-700 transition"
+        className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-xl hover:bg-blue-700 transition duration-300 z-50 flex items-center justify-center hover:scale-105 active:scale-95"
       >
         <BsChatDotsFill size={24} />
       </button>
 
       {/* Chat Window */}
       {open && (
-        <div className="fixed bottom-24 right-6 w-[380px] h-[550px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+        <div className="fixed bottom-24 right-6 w-[380px] h-[550px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-150 z-50">
 
           {/* Header */}
-          <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
+          <div className="bg-blue-600 text-white p-4 flex justify-between items-center shadow-md">
             <div>
-              <h2 className="font-bold">🤖 WeIntern AI Assistant</h2>
-              <p className="text-xs">🟢 Online</p>
+              <h2 className="font-bold flex items-center gap-1.5 text-sm md:text-base">
+                🤖 WeIntern AI Assistant
+              </h2>
+              <p className="text-[10px] opacity-90 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-green-400 rounded-full inline-block animate-pulse"></span>
+                Online {voiceMode && "• Voice Mode Active"}
+              </p>
             </div>
 
-            <button onClick={() => setOpen(false)}>
-              <BsX size={28} />
-            </button>
+            <div className="flex gap-2.5 items-center">
+              {/* Speaker Output Toggle */}
+              <button 
+                onClick={() => {
+                  const val = !isSpeakerMuted;
+                  setIsSpeakerMuted(val);
+                  if (val && synthesisRef.current) {
+                    synthesisRef.current.cancel();
+                    if (voiceState === "SPEAKING") {
+                      setVoiceState("IDLE");
+                    }
+                  }
+                }}
+                title={isSpeakerMuted ? "Unmute bot output" : "Mute bot output"}
+                className="hover:text-blue-200 transition-colors p-1"
+              >
+                {isSpeakerMuted ? <BsVolumeMuteFill size={20} /> : <BsVolumeUpFill size={20} />}
+              </button>
+
+              {/* Voice Mode (STT) Toggle */}
+              <button 
+                onClick={() => {
+                  const mode = !voiceMode;
+                  setVoiceMode(mode);
+                  if (!mode) {
+                    stopSpeechRecognition();
+                    if (synthesisRef.current) {
+                      synthesisRef.current.cancel();
+                    }
+                    setVoiceState("IDLE");
+                  }
+                }}
+                title={voiceMode ? "Disable Voice Mode" : "Enable Voice Mode"}
+                className={`hover:text-blue-200 transition-colors p-1 ${voiceMode ? "text-yellow-300 font-bold" : "text-white"}`}
+              >
+                {voiceMode ? <BsMicFill size={20} /> : <BsMicMuteFill size={20} />}
+              </button>
+
+              <button onClick={() => setOpen(false)} className="hover:text-blue-200 transition-colors p-1">
+                <BsX size={28} />
+              </button>
+            </div>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-white">
+          <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50 flex flex-col">
 
             {messages.map((msg, index) => (
               <div
                 key={index}
                 className={`flex ${
-                  msg.sender === "user"
-                    ? "justify-end"
-                    : "justify-start"
+                  msg.sender === "user" ? "justify-end" : "justify-start"
                 }`}
               >
                 {msg.sender === "bot" && (
-                  <div className="mr-2 text-2xl">🤖</div>
+                  <div className="mr-2 text-2xl self-end mb-1">🤖</div>
                 )}
 
                 <div
                   className={`p-3 rounded-xl shadow max-w-[75%] ${
                     msg.sender === "user"
-                      ? "bg-blue-600 text-white"
-                      : "bg-blue-100 text-gray-900"
+                      ? "bg-blue-600 text-white rounded-br-none"
+                      : "bg-white text-gray-900 border border-gray-100 rounded-bl-none"
                   }`}
                 >
-                  <div className="whitespace-pre-line">{msg.text}</div>
+                  <div className="whitespace-pre-line text-sm leading-relaxed">{msg.text}</div>
+
+                  {msg.sender === "bot" && (
+                    <div className="flex gap-2.5 mt-2 pt-1 border-t border-gray-100 justify-start items-center text-gray-400">
+                      {((playingMessageIndex === index) || (playingMessageIndex === -1 && index === messages.length - 1)) ? (
+                        <>
+                          {playbackState === "PLAYING" ? (
+                            <button 
+                              onClick={handlePauseMessage}
+                              title="Pause response"
+                              className="hover:text-blue-600 transition duration-200 p-0.5 flex items-center justify-center cursor-pointer"
+                            >
+                              <BsPauseFill size={14} />
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => handlePlayMessage(index, msg.text)}
+                              title="Resume response"
+                              className="hover:text-blue-600 transition duration-200 p-0.5 flex items-center justify-center cursor-pointer"
+                            >
+                              <BsPlayFill size={14} />
+                            </button>
+                          )}
+                          <button 
+                            onClick={handleStopMessage}
+                            title="Stop response"
+                            className="hover:text-red-500 transition duration-200 p-0.5 flex items-center justify-center cursor-pointer"
+                          >
+                            <BsStopFill size={14} />
+                          </button>
+                          <span className="text-[8px] text-blue-500 font-medium animate-pulse ml-1">
+                            {playbackState === "PLAYING" ? "speaking..." : "paused"}
+                          </span>
+                        </>
+                      ) : (
+                        <button 
+                          onClick={() => handlePlayMessage(index, msg.text)}
+                          title="Speak response"
+                          className="hover:text-blue-600 transition duration-200 p-0.5 flex items-center justify-center cursor-pointer"
+                        >
+                          <BsPlayFill size={14} />
+                        </button>
+                      )}
+                    </div>
+                  )}
 
                   <p
-                    className={`text-[10px] mt-1 ${
-                      msg.sender === "user"
-                        ? "text-blue-100"
-                        : "text-gray-500"
+                    className={`text-[9px] mt-1 text-right ${
+                      msg.sender === "user" ? "text-blue-100" : "text-gray-400"
                     }`}
                   >
                     {msg.time}
@@ -346,12 +745,22 @@ const [leadData, setLeadData] = useState({
               </div>
             ))}
 
+            {/* Interim Transcript display for user speech */}
+            {voiceState === "LISTENING" && interimTranscript && (
+              <div className="flex justify-end">
+                <div className="bg-gray-200 text-gray-700 p-3 rounded-xl shadow max-w-[75%] italic text-sm rounded-br-none">
+                  🎤 {interimTranscript}...
+                </div>
+              </div>
+            )}
+
             {isTyping && (
               <div className="flex justify-start">
-                <div className="mr-2 text-2xl">🤖</div>
-
-                <div className="bg-blue-100 text-gray-900 p-3 rounded-xl shadow">
-                  Typing...
+                <div className="mr-2 text-2xl self-end mb-1">🤖</div>
+                <div className="bg-white text-gray-400 p-3 rounded-xl shadow border border-gray-100 rounded-bl-none text-sm italic flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></span>
+                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:0.4s]"></span>
                 </div>
               </div>
             )}
@@ -360,77 +769,146 @@ const [leadData, setLeadData] = useState({
 
           </div>
 
+          {/* Voice State Information Panel */}
+          {voiceMode && (
+            <div className="bg-white border-t px-4 py-2 flex flex-col gap-1.5">
+              {/* Listening panel */}
+              {voiceState === "LISTENING" && (
+                <div className="flex justify-between items-center text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-100">
+                  <span className="flex items-center gap-1.5 font-medium animate-pulse">
+                    <span className="w-2 h-2 bg-red-500 rounded-full inline-block"></span>
+                    Listening... speak now
+                  </span>
+                  <button 
+                    onClick={stopSpeechRecognition}
+                    className="text-[10px] text-gray-500 hover:text-gray-700 font-semibold underline"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+
+              {/* Speaking panel */}
+              {voiceState === "SPEAKING" && (
+                <div className="flex justify-between items-center text-xs text-blue-600 bg-blue-50 p-2 rounded-lg border border-blue-100">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">Bot is speaking</span>
+                    <div className="voice-wave-container">
+                      <div className="voice-wave-bar"></div>
+                      <div className="voice-wave-bar"></div>
+                      <div className="voice-wave-bar"></div>
+                      <div className="voice-wave-bar"></div>
+                      <div className="voice-wave-bar"></div>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      if (synthesisRef.current) synthesisRef.current.cancel();
+                      setVoiceState("IDLE");
+                    }}
+                    className="text-[10px] text-red-500 hover:text-red-700 font-semibold underline"
+                  >
+                    Stop
+                  </button>
+                </div>
+              )}
+
+              {/* Processing panel */}
+              {voiceState === "PROCESSING" && (
+                <div className="flex items-center text-xs text-blue-600 bg-blue-50 p-2 rounded-lg border border-blue-100">
+                  <span className="font-medium animate-pulse">Processing voice data...</span>
+                </div>
+              )}
+
+              {/* Error panel */}
+              {voiceState === "ERROR" && errorMessage && (
+                <div className="text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-200 text-center font-semibold">
+                  ⚠️ {errorMessage}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Quick Replies */}
-          <div className="border-t p-3 flex flex-wrap gap-2 bg-white">
+          <div className="border-t p-3 flex flex-wrap gap-1.5 bg-white border-b border-gray-100">
 
             <button
-              onClick={() =>
-                quickReply("Apply / Register")
-              }
-              className="border border-blue-600 bg-blue-50 text-blue-700 font-medium rounded-full px-3 py-1 text-sm hover:bg-blue-600 hover:text-white transition"
+              onClick={() => quickReply("Apply / Register")}
+              className="border border-blue-600 bg-blue-50 text-blue-700 font-medium rounded-full px-3 py-1 text-xs hover:bg-blue-600 hover:text-white transition duration-200"
             >
               ✨ Apply / Register
             </button>
 
             <button
-              onClick={() =>
-                quickReply("Internship Fees")
-              }
-              className="border border-blue-600 text-blue-700 rounded-full px-3 py-1 text-sm hover:bg-blue-600 hover:text-white transition"
+              onClick={() => quickReply("Internship Fees")}
+              className="border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200"
             >
-              Internship Fees
+              Fees & EMI
             </button>
 
             <button
-              onClick={() =>
-                quickReply("Domains")
-              }
-              className="border border-blue-600 text-blue-700 rounded-full px-3 py-1 text-sm hover:bg-blue-600 hover:text-white transition"
+              onClick={() => quickReply("Domains")}
+              className="border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200"
             >
               Domains
             </button>
 
             <button
-              onClick={() =>
-                quickReply("Certificates")
-              }
-              className="border border-blue-600 text-blue-700 rounded-full px-3 py-1 text-sm hover:bg-blue-600 hover:text-white transition"
+              onClick={() => quickReply("Certificates")}
+              className="border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200"
             >
               Certificates
             </button>
 
             <button
-              onClick={() =>
-                quickReply("Contact")
-              }
-              className="border border-blue-600 text-blue-700 rounded-full px-3 py-1 text-sm hover:bg-blue-600 hover:text-white transition"
+              onClick={() => quickReply("Contact")}
+              className="border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200"
             >
               Contact
             </button>
 
           </div>
 
-          {/* Input */}
-          <div className="border-t p-3 flex gap-2">
+          {/* Input Panel */}
+          <div className="border-t p-3 flex gap-2 bg-white items-center">
 
             <input
               type="text"
-              placeholder="Type your message..."
+              placeholder={voiceState === "LISTENING" ? "Listening to your voice..." : "Type your message..."}
               value={message}
+              disabled={voiceState === "LISTENING"}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   sendMessage();
                 }
               }}
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-black placeholder-gray-500 outline-none focus:border-blue-600"
+              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-black text-sm placeholder-gray-400 outline-none focus:border-blue-600 disabled:bg-gray-100 disabled:text-gray-500"
             />
+
+            {/* Voice Input Mic Button */}
+            {voiceMode && recognitionRef.current && (
+              <button
+                onClick={handleMicClick}
+                title={voiceState === "LISTENING" ? "Stop recording" : "Record voice message"}
+                className={`p-2.5 rounded-lg text-white transition duration-200 ${
+                  voiceState === "LISTENING"
+                    ? "bg-red-500 hover:bg-red-600 voice-listening-btn"
+                    : voiceState === "SPEAKING"
+                    ? "bg-orange-500 hover:bg-orange-600 animate-pulse"
+                    : "bg-blue-500 hover:bg-blue-600"
+                }`}
+              >
+                {voiceState === "LISTENING" ? <BsMicMuteFill size={18} /> : <BsMicFill size={18} />}
+              </button>
+            )}
 
             <button
               onClick={sendMessage}
-              className="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition"
+              disabled={voiceState === "LISTENING" || !message.trim()}
+              className="bg-blue-600 text-white p-2.5 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-50 flex items-center justify-center"
             >
-              <IoSend />
+              <IoSend size={18} />
             </button>
 
           </div>
