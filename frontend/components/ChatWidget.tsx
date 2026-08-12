@@ -241,6 +241,90 @@ export default function ChatWidget() {
     setMessage(question);
   };
 
+  // Helper to fetch the last response spoken by WeIntern AI
+  const getLastBotResponse = () => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].sender === "bot") {
+        return { index: i, text: messages[i].text };
+      }
+    }
+    return null;
+  };
+
+  // Handles natural voice command detection and execution (supports Hindi/Hinglish variations)
+  const detectAndExecuteVoiceCommand = (text: string): boolean => {
+    const rawLower = text.toLowerCase().trim();
+
+    // 1. STOP
+    // English: stop, stop speaking, shut up, stop it, stop please
+    // Hindi/Hinglish: ruko, band karo, chup, chup ho jao, ruk
+    if (/^(stop|stop speaking|shut up|stop it|ruko|band karo|chup|chup ho jao|ruk)$/i.test(rawLower) || 
+        /\b(stop speaking|band karo|chup ho jao)\b/i.test(rawLower)) {
+      handleStopMessage();
+      return true;
+    }
+
+    // 2. PAUSE
+    // English: pause, pause speech, wait, hold on
+    // Hindi/Hinglish: pause, ruko thoda, thoda ruko, rokna, roko, hold karo
+    if (/^(pause|pause speech|wait|hold on|ruko thoda|thoda ruko|rokna|roko|hold karo)$/i.test(rawLower) ||
+        /\b(pause speech|thoda ruko|hold karo)\b/i.test(rawLower)) {
+      handlePauseMessage();
+      return true;
+    }
+
+    // 3. RESUME
+    // English: resume, continue, play, go on
+    // Hindi/Hinglish: chalu karo, phir se chalu karo, continue karo, resume karo
+    if (/^(resume|continue|go on|chalu karo|phir se chalu karo|continue karo|resume karo)$/i.test(rawLower) ||
+        /\b(continue karo|phir se chalu karo|resume karo)\b/i.test(rawLower)) {
+      const lastBot = getLastBotResponse();
+      if (lastBot) {
+        if (playbackState === "PAUSED" && synthesisRef.current) {
+          synthesisRef.current.resume();
+          setPlaybackState("PLAYING");
+          setVoiceState("SPEAKING");
+        } else {
+          handlePlayMessage(lastBot.index, lastBot.text);
+        }
+      }
+      return true;
+    }
+
+    // 4. START / REPLAY / SPEAK AGAIN / REPEAT
+    // English: start, begin, repeat, speak again, replay, read again, say again, tell me again
+    // Hindi/Hinglish: shuru karo, shuru se, play karo, shuru, pehle se, phir se bolo, phir se, dobara bolo, wapas bolo
+    if (/^(start|begin|repeat|speak again|replay|read again|say again|tell me again|shuru karo|shuru se|play karo|shuru|pehle se|phir se bolo|phir se|dobara bolo|wapas bolo)$/i.test(rawLower) ||
+        /\b(speak again|read again|say again|tell me again|shuru karo|pehle se|phir se bolo|dobara bolo|wapas bolo)\b/i.test(rawLower)) {
+      const lastBot = getLastBotResponse();
+      if (lastBot) {
+        handlePlayMessage(lastBot.index, lastBot.text);
+      }
+      return true;
+    }
+
+    // 5. MUTE
+    // English: mute, mute volume, turn off voice, silent
+    // Hindi/Hinglish: awaaz band, mute karo, silent karo, aawaz band
+    if (/^(mute|mute volume|turn off voice|silent|awaaz band|mute karo|silent karo|aawaz band)$/i.test(rawLower) ||
+        /\b(mute volume|turn off voice|awaaz band|mute karo|silent karo|aawaz band)\b/i.test(rawLower)) {
+      setIsSpeakerMuted(true);
+      handleStopMessage();
+      return true;
+    }
+
+    // 6. UNMUTE
+    // English: unmute, unmute volume, turn on voice, speak up, voice on
+    // Hindi/Hinglish: unmute, awaaz chalu, unmute karo, speak karo, aawaz chalu
+    if (/^(unmute|unmute volume|turn on voice|speak up|voice on|awaaz chalu|unmute karo|speak karo|aawaz chalu)$/i.test(rawLower) ||
+        /\b(unmute volume|turn on voice|awaaz chalu|unmute karo|speak karo|aawaz chalu)\b/i.test(rawLower)) {
+      setIsSpeakerMuted(false);
+      return true;
+    }
+
+    return false;
+  };
+
   // Speaks response using Web Speech Synthesis (TTS)
   const speakResponse = (text: string) => {
     handlePlayMessage(-1, text);
@@ -415,6 +499,14 @@ export default function ChatWidget() {
 
         // Select the best alternative (in case of homophone spelling errors) and normalize
         const normalizedMsg = selectAndNormalizeTranscript(alternatives.length > 0 ? alternatives : [final]);
+        
+        // Voice-command controls intercept
+        const isVoiceControlCommand = detectAndExecuteVoiceCommand(normalizedMsg);
+        if (isVoiceControlCommand) {
+          setVoiceState("IDLE");
+          return;
+        }
+
         processMessage(normalizedMsg, "voice");
       }
     };
