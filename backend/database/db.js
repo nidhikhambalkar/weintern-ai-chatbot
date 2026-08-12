@@ -14,9 +14,13 @@ try {
   Pool = null;
 }
 
-// Create connection parameters object using .env variables or safe default values
 const poolConfig = process.env.DATABASE_URL
-  ? { connectionString: process.env.DATABASE_URL } // Use DATABASE_URL string if provided
+  ? { 
+      connectionString: process.env.DATABASE_URL,
+      ssl: (process.env.DATABASE_URL.includes("localhost") || process.env.DATABASE_URL.includes("127.0.0.1"))
+        ? false 
+        : { rejectUnauthorized: false } // Required for remote databases on Railway/Render
+    }
   : {
       user: process.env.DB_USER || 'postgres',         // DB username (default: postgres)
       password: process.env.DB_PASSWORD || 'postgres', // DB password (default: postgres)
@@ -64,6 +68,8 @@ const initDatabase = async () => {
       session_id VARCHAR(255) NOT NULL,
       sender VARCHAR(50) NOT NULL,
       message TEXT NOT NULL,
+      source VARCHAR(50) DEFAULT 'text',
+      voice_metadata JSONB DEFAULT NULL,
       timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -95,6 +101,11 @@ const initDatabase = async () => {
     const client = await pool.connect();
     // Run the table creation SQL script
     await client.query(schemaSql);
+    // Programmatic migrations to alter existing tables
+    await client.query(`
+      ALTER TABLE messages ADD COLUMN IF NOT EXISTS source VARCHAR(50) DEFAULT 'text';
+      ALTER TABLE messages ADD COLUMN IF NOT EXISTS voice_metadata JSONB DEFAULT NULL;
+    `);
     // Release the client back to pool
     client.release();
     // Mark PostgreSQL connection as active

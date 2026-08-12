@@ -1,0 +1,28 @@
+# Render Deployment Blueprint for WeIntern Chatbot
+services:
+  # Express Backend Web Service
+  - type: web
+    name: weintern-backend
+    runtime: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: weintern-db
+          property: connectionString
+      - key: OLLAMA_HOST
+        value: http://localhost:11434 # Configured for Ollama running on the backend host
+      - key: OLLAMA_MODEL
+        value: llama3.2
+      - key: ALLOWED_ORIGINS
+        value: https://frontend-six-eosin-97.vercel.app
+
+databases:
+  - name: weintern-db
+    databaseName: weintern_chatbot
+    plan: free

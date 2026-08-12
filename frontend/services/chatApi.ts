@@ -17,11 +17,11 @@ async function handleJsonResponse(res: Response) {
 	return data;
 }
 
-export async function sendChat(message: string) {
+export async function sendChat(message: string, source: string = 'text', session_id?: string, voiceMetadata?: any) {
 	const res = await fetch(`${API_BASE}/api/chat`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ message }),
+		body: JSON.stringify({ message, source, session_id, voice_metadata: voiceMetadata }),
 	});
 	return handleJsonResponse(res);
 }
