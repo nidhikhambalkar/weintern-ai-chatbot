@@ -79,7 +79,11 @@ const TOKEN_MAP = {
   whatsapp: "contact",
   email: "contact",
   contact: "contact",
-  cert: "certification",
+  cert: "certificate",
+  lor: "certificate",              // Letter of Recommendation → certificates
+  recommendation: "certificate",  // "letter of recommendation" → certificates
+  letter: "certificate",          // "letter" alone → certificates context
+  "training certificate": "certificate",
   // Orientation & Meet
   orientation: "orientation",
   orient: "orientation",
@@ -175,9 +179,9 @@ const CATEGORY_HINTS = {
   courses: ["course", "courses", "program", "learn", "training", "skill"],
   benefits: ["benefit", "benefits", "mentor", "mentor support", "doubt", "class", "recorded", "network", "soft skill", "softskills"],
   internship: ["internship", "intern", "onboarding", "attendance", "team", "selection", "daily task", "live project", "project", "register", "enroll", "apply", "payment", "pay", "upi", "eligible", "fresher", "beginner", "how long", "how many months"],
-  certificates: ["certificate", "certification", "linkedin", "verify", "validity"],
-  certification: ["certificate", "certification", "linkedin", "verify", "validity"],
-  placement: ["placement", "resume", "interview", "mock", "job", "career", "hire"],
+  certificates: ["certificate", "certification", "verify", "validity", "lor", "letter", "recommendation", "training certificate", "linkedin"],
+  certification: ["certificate", "certification", "verify", "validity", "lor", "letter", "recommendation", "training certificate", "linkedin"],
+  placement: ["placement", "resume", "interview", "mock", "job", "career", "hire", "linkedin", "profile"],
   fees: ["fees", "fee", "discount", "scholarship", "emi", "refund", "price"],
   contact: ["contact", "support", "helpdesk", "whatsapp", "email", "complaint", "escalation", "reach", "office hours", "phone", "number"],
   policies: ["policy", "terms", "conditions", "privacy", "conduct", "attendance", "rules"],
@@ -199,9 +203,9 @@ const CATEGORY_KEYWORD_MAP = {
   courses: ["course", "courses", "program", "training", "skill", "learn", "about course", "about courses", "course details", "course information", "program details", "program information", "training details", "training information", "skill development", "learn skills", "learn programming", "learn coding", "learn data science", "learn ai ml", "learn python", "learn java", "learn ui ux", "learn digital marketing", "learn cyber security", "learn cloud computing"],
   benefits: ["benefit", "benefits", "mentor", "doubt", "class", "recorded", "network", "soft skill", "softskills"],
   internship: ["internship", "intern", "onboarding", "attendance", "team", "selection", "daily task", "live project", "project", "register", "enroll", "apply", "payment", "upi", "eligible", "fresher", "beginner"],
-  certificates: ["certificate", "certification", "linkedin", "verify", "validity"],
-  certification: ["certificate", "certification", "linkedin", "verify", "validity"],
-  placement: ["placement", "resume", "interview", "mock", "job", "career", "hire"],
+  certificates: ["certificate", "certification", "verify", "validity", "lor", "letter", "recommendation", "training certificate", "linkedin"],
+  certification: ["certificate", "certification", "verify", "validity", "lor", "letter", "recommendation", "training certificate", "linkedin"],
+  placement: ["placement", "resume", "interview", "mock", "job", "career", "hire", "linkedin", "profile"],
   fees: ["fees", "fee", "discount", "scholarship", "emi", "refund", "price"],
   contact: ["contact", "support", "helpdesk", "whatsapp", "email", "complaint", "escalation", "reach", "office hours"],
   policies: ["policy", "terms", "conditions", "privacy", "conduct", "attendance", "rules"],
@@ -374,6 +378,16 @@ function detectStrongCategory(queryTokens) {
     return "fees";
   }
 
+  // LOR / Letter of Recommendation → always certificates
+  if (
+    queryTokens.includes("lor") ||
+    queryTokens.includes("recommendation") ||
+    queryTokens.includes("letter") ||
+    (queryTokens.includes("certificate") && queryTokens.includes("get"))
+  ) {
+    return "certificates";
+  }
+
   for (const cat of directCategories) {
     if (queryTokens.includes(cat)) {
       return cat;
@@ -512,6 +526,16 @@ if (
     }
   }
 
+  // LOR / Letter of Recommendation boost
+  const isLorQuery = queryTokens.includes("lor") || queryTokens.includes("recommendation") || queryTokens.includes("letter");
+  if (isLorQuery) {
+    if (entry.category === "certificates" || entry.category === "certification") {
+      score += 65;
+    } else if (entryText.includes("lor") || entryText.includes("letter") || entryText.includes("recommendation")) {
+      score += 20;
+    }
+  }
+
   if (queryTokens.includes("internship") && entryText.includes("internship")) {
     score += 8;
   }
@@ -606,12 +630,27 @@ function searchKnowledgeBase(message = "") {
   const query = normalize(message);
   const queryTokens = query.split(" ").filter(Boolean);
   const categoryHints = inferCategoryHints(queryTokens);
-  const strongCategory = detectStrongCategory(queryTokens);
+
+  // Pre-detect plan-price certificate questions before token-based detection
+  // e.g. "What is included in 7999 plan?" or "999 wale plan mein kya milega?"
+  const rawLower = message.toLowerCase();
+  const hasPlanPrice = /7[,\s]?999/.test(rawLower) || (/\b999\b/.test(rawLower) && !/fees|fee|price|cost|how much/.test(rawLower));
+  const hasCertContext = /plan|include|included|milega|milta|certificate|get|cert|lor/.test(rawLower);
+  let strongCategory = detectStrongCategory(queryTokens);
+  // Override fees→certificates when asking what a plan *includes* (cert context)
+  if (hasPlanPrice && hasCertContext && (strongCategory === null || strongCategory === "fees")) {
+    strongCategory = "certificates";
+  }
+  const isPlanCertQuery = hasPlanPrice && hasCertContext;
   const matches = [];
 
   Object.entries(knowledgeIndex).forEach(([category, entries]) => {
     entries.forEach((entry) => {
-      const score = scoreMatch(entry, queryTokens, categoryHints, strongCategory);
+      let score = scoreMatch(entry, queryTokens, categoryHints, strongCategory);
+      // Extra boost: "what's in 7999/999 plan" → heavily favour certificate entries
+      if (isPlanCertQuery && (category === "certificates" || category === "certification")) {
+        score += 50;
+      }
      if (score >= 6) {
         matches.push({
           category,
