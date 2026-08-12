@@ -32,6 +32,7 @@ export default function ChatWidget() {
   const [isSpeakerMuted, setIsSpeakerMuted] = useState<boolean>(false);
   const [playingMessageIndex, setPlayingMessageIndex] = useState<number | null>(null);
   const [playbackState, setPlaybackState] = useState<"IDLE" | "PLAYING" | "PAUSED">("IDLE");
+  const [detectedLang, setDetectedLang] = useState<string>("en-IN"); // tracks last detected speech language
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -71,6 +72,8 @@ export default function ChatWidget() {
         const rec = new SpeechRecognition();
         rec.continuous = false;
         rec.interimResults = true;
+        // Multi-language: accepts English, Hindi and Marathi; browser picks the best match
+        // Chrome supports comma-separated langs via grammars; fallback is en-IN for Hinglish
         rec.lang = "en-IN";
         recognitionRef.current = rec;
       }
@@ -169,8 +172,46 @@ export default function ChatWidget() {
       return;
     }
 
+    // ── Language-aware, human-like TTS ──────────────────────────────────────
+    // Detect language of the TEXT to speak (not just the last detected input lang)
+    const hasDevanagari = /[\u0900-\u097F]/.test(cleanText);
+    const hasMahratti  = /[\u0900-\u097F]/.test(cleanText) && /[\u0967-\u096F\u0964\u0965]/.test(cleanText);
+    const speakLang = hasMahratti ? "mr-IN" : hasDevanagari ? "hi-IN" : detectedLang === "hi-IN" ? "hi-IN" : "en-IN";
+
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = "en-IN"; // English (India) works best for WeIntern
+    utterance.lang = speakLang;
+
+    // Pick best human-like voice: prefer Google voices, then any matching locale
+    const allVoices = synthesisRef.current.getVoices();
+    const preferredVoice = (() => {
+      // Priority order of voice name patterns (human-sounding Google/Microsoft voices)
+      const patterns = [
+        // Google Indian English (most natural)
+        (v: SpeechSynthesisVoice) => v.lang === speakLang && /google/i.test(v.name) && /female|woman/i.test(v.name),
+        (v: SpeechSynthesisVoice) => v.lang === speakLang && /google/i.test(v.name),
+        // Microsoft Indian voices
+        (v: SpeechSynthesisVoice) => v.lang === speakLang && /neerja|heera|ravi|kalpana|hemant/i.test(v.name),
+        // Any same-locale voice
+        (v: SpeechSynthesisVoice) => v.lang === speakLang,
+        // Fallback: Google en-IN
+        (v: SpeechSynthesisVoice) => v.lang === "en-IN" && /google/i.test(v.name),
+        // Last resort: any en-IN
+        (v: SpeechSynthesisVoice) => v.lang === "en-IN",
+      ];
+      for (const pattern of patterns) {
+        const match = allVoices.find(pattern);
+        if (match) return match;
+      }
+      return null;
+    })();
+
+    if (preferredVoice) utterance.voice = preferredVoice;
+
+    // Human-like prosody — natural, not robotic
+    utterance.rate  = speakLang === "en-IN" ? 1.0 : 0.92;  // Hindi/Marathi slightly slower
+    utterance.pitch = 1.05;  // Slightly above monotone for warmth
+    utterance.volume = 1.0;
+    // ────────────────────────────────────────────────────────────────────────
 
     utterance.onstart = () => {
       setPlayingMessageIndex(index);
@@ -247,6 +288,21 @@ export default function ChatWidget() {
       if (final) {
         setInterimTranscript("");
         rec.stop();
+
+        // ── Language detection heuristic ─────────────────────────────────────
+        // Devanagari Unicode block covers Hindi + Marathi script
+        const devanagariRatio = (final.match(/[\u0900-\u097F]/g) || []).length / Math.max(final.length, 1);
+        // Marathi-specific matras / vowel signs that are rare in pure Hindi
+        const marathiMarkers  = /[\u0963\u094D\u0902\u0919\u091C\u091E]/.test(final);
+        let lang = "en-IN"; // default: English or Hinglish (Latin script)
+        if (devanagariRatio > 0.3) {
+          lang = marathiMarkers ? "mr-IN" : "hi-IN";
+        }
+        setDetectedLang(lang);
+        // Update recognition lang for next utterance so the browser adapts
+        recognitionRef.current.lang = lang === "mr-IN" ? "mr-IN" : lang === "hi-IN" ? "hi-IN" : "en-IN";
+        // ────────────────────────────────────────────────────────────────────
+
         processMessage(final, "voice");
       }
     };
