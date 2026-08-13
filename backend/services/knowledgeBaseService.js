@@ -684,7 +684,7 @@ if (
   }
 
   // 6-month / 3-month program scoring
-  if ((queryTokens.includes("6") || queryTokens.includes("six") || queryTokens.includes("6-month")) && (entryText.includes("6-month") || entryText.includes("6 month") || entryText.includes("₹7,999"))) {
+  if ((queryTokens.includes("6") || queryTokens.includes("six") || queryTokens.includes("6-month")) && (entryText.includes("6-month") || entryText.includes("6 month") || entryText.includes("₹6,599"))) {
     score += 10;
   }
 
@@ -717,7 +717,7 @@ function searchKnowledgeBase(message = "") {
   const categoryHints = inferCategoryHints(queryTokens);
 
   // Pre-detect plan-price certificate questions before token-based detection
-  // e.g. "What is included in 7999 plan?" or "999 wale plan mein kya milega?"
+  // e.g. "What is included in 6599 plan?" or "999 wale plan mein kya milega?"
   const rawLower = message.toLowerCase();
   const hasPlanPrice = /7[,\s]?999/.test(rawLower) || (/\b999\b/.test(rawLower) && !/fees|fee|price|cost|how much/.test(rawLower));
   const hasCertContext = /plan|include|included|milega|milta|certificate|get|cert|lor/.test(rawLower);
@@ -732,7 +732,7 @@ function searchKnowledgeBase(message = "") {
   Object.entries(knowledgeIndex).forEach(([category, entries]) => {
     entries.forEach((entry) => {
       let score = scoreMatch(entry, queryTokens, categoryHints, strongCategory);
-      // Extra boost: "what's in 7999/999 plan" → heavily favour certificate entries
+      // Extra boost: "what's in 6599/999 plan" → heavily favour certificate entries
       if (isPlanCertQuery && (category === "certificates" || category === "certification")) {
         score += 50;
       }

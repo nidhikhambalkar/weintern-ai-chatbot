@@ -26,7 +26,7 @@ function transliterateDevanagari(text: string): string {
     'अ': 'a', 'आ': 'a', 'इ': 'i', 'ई': 'ee', 'उ': 'u', 'ऊ': 'oo', 'ए': 'e', 'ऐ': 'ai', 'ओ': 'o', 'औ': 'au',
     'ऑ': 'o', 'ऋ': 'ri'
   };
-  
+
   let result = "";
   for (const char of cleanText) {
     result += mapping[char] || char;
@@ -91,7 +91,7 @@ function normalizeSpeechInput(text: string): string {
 // ── Alternatives Picker Helper ──────────────────────────────────────────
 function selectAndNormalizeTranscript(alternatives: string[]): string {
   if (!alternatives || alternatives.length === 0) return "";
-  
+
   // Heuristic: Check each alternative. If one contains a strong WeIntern keyword, prefer it.
   const patterns = [
     /\b(weintern|we\s+intern|v\s*intern|be\s*intern|wintern)\b/i,
@@ -240,7 +240,7 @@ export default function ChatWidget() {
       startLeadForm();
       return;
     }
-    
+
     setMessage("");
     const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
@@ -251,9 +251,9 @@ export default function ChatWidget() {
       userLabel = "Fees & EMI";
       botReplyText = `Here are the complete fee and EMI details for WeIntern programs and courses:
 
-📌 **6-Month Internship Program — ₹7,999**
+📌 **6-Month Internship Program — ₹6,599**
 • Duration: 6 months (includes 2 months industry training + live project)
-• Price: ₹7,999
+• Price: ₹6,599
 • EMI Option: Split in 30:40:30 ratio across 3 installments (30% enrollment, 40% midpoint, 30% end)
 • One-Time Discount: 10% off on full upfront payment
 • Features: Internship Certificate, Training Certificate, LOR, Mock Interview Prep, LinkedIn Profile Building, 100% Placement Guarantee, and performance stipend up to ₹10,000.
@@ -292,13 +292,13 @@ export default function ChatWidget() {
 10. Digital Marketing — 8 weeks (₹2,499)
 
 💼 **Internship Program Track Durations**:
-• 6-Month Internship Program: 6 Months (₹7,999) — includes 2 months training + live project + 100% placement guarantee.
+• 6-Month Internship Program: 6 Months (₹6,599) — includes 2 months training + live project + 100% placement guarantee.
 • 3-Month Internship Program: 3 Months (₹999) — includes industry training + live project + placement support.`;
     } else if (question === "Certificates" || question.includes("Certificates")) {
       userLabel = "Certificates";
       botReplyText = `WeIntern provides verified certificates based on your enrolled program:
 
-📜 **6-Month Internship Program (₹7,999)**:
+📜 **6-Month Internship Program (₹6,599)**:
 1. Internship Completion Certificate
 2. Training Certificate
 3. Letter of Recommendation (LOR)
@@ -345,7 +345,7 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
     return null;
   };
 
-    const handleResumeOrContinueMessage = () => {
+  const handleResumeOrContinueMessage = () => {
     if (!synthesisRef.current) return;
 
     if (synthesisRef.current.paused) {
@@ -374,21 +374,21 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
 
     // 1. STOP & PAUSE
     if (/^(stop|pause|stop speaking|pause speech|wait|hold on|quiet|ruko|band karo|chup|chup ho jao|ruk|roko|hold karo|ruko thoda|thoda ruko)$/i.test(rawLower) ||
-        /\b(stop speaking|pause speech|band karo|chup ho jao|thoda ruko|hold karo)\b/i.test(rawLower)) {
+      /\b(stop speaking|pause speech|band karo|chup ho jao|thoda ruko|hold karo)\b/i.test(rawLower)) {
       handlePauseMessage();
       return true;
     }
 
     // 2. CONTINUE & RESUME
     if (/^(continue|resume|go on|keep speaking|carry on|continue speaking|chalu karo|phir se chalu karo|continue karo|resume karo|aage bolo)$/i.test(rawLower) ||
-        /\b(continue karo|phir se chalu karo|resume karo|continue speaking|keep speaking|carry on)\b/i.test(rawLower)) {
+      /\b(continue karo|phir se chalu karo|resume karo|continue speaking|keep speaking|carry on)\b/i.test(rawLower)) {
       handleResumeOrContinueMessage();
       return true;
     }
 
     // 3. START / REPLAY / SPEAK AGAIN / REPEAT
     if (/^(start|begin|repeat|speak again|replay|read again|say again|tell me again|shuru karo|shuru se|play karo|shuru|pehle se|phir se bolo|phir se|dobara bolo|wapas bolo)$/i.test(rawLower) ||
-        /\b(speak again|read again|say again|tell me again|shuru karo|pehle se|phir se bolo|dobara bolo|wapas bolo)\b/i.test(rawLower)) {
+      /\b(speak again|read again|say again|tell me again|shuru karo|pehle se|phir se bolo|dobara bolo|wapas bolo)\b/i.test(rawLower)) {
       const lastBot = getLastBotResponse();
       if (lastBot) {
         handlePlayMessage(lastBot.index, lastBot.text, 0);
@@ -398,7 +398,7 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
 
     // 4. MUTE
     if (/^(mute|mute volume|turn off voice|silent|awaaz band|mute karo|silent karo|aawaz band)$/i.test(rawLower) ||
-        /\b(mute volume|turn off voice|awaaz band|mute karo|silent karo|aawaz band)\b/i.test(rawLower)) {
+      /\b(mute volume|turn off voice|awaaz band|mute karo|silent karo|aawaz band)\b/i.test(rawLower)) {
       setIsSpeakerMuted(true);
       handleStopMessage();
       return true;
@@ -406,7 +406,7 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
 
     // 5. UNMUTE
     if (/^(unmute|unmute volume|turn on voice|speak up|voice on|awaaz chalu|unmute karo|speak karo|aawaz chalu)$/i.test(rawLower) ||
-        /\b(unmute volume|turn on voice|awaaz chalu|unmute karo|speak karo|aawaz chalu)\b/i.test(rawLower)) {
+      /\b(unmute volume|turn on voice|awaaz chalu|unmute karo|speak karo|aawaz chalu)\b/i.test(rawLower)) {
       setIsSpeakerMuted(false);
       return true;
     }
@@ -453,7 +453,7 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
     }
 
     const hasDevanagari = /[\u0900-\u097F]/.test(cleanText);
-    const hasMahratti  = /[\u0900-\u097F]/.test(cleanText) && /[\u0967-\u096F\u0964\u0965]/.test(cleanText);
+    const hasMahratti = /[\u0900-\u097F]/.test(cleanText) && /[\u0967-\u096F\u0964\u0965]/.test(cleanText);
     const hindiWords = /\b(kya|hai|hain|mein|ko|se|karne|karta|karte|milta|milega|milegi|hoga|hogi|kiya|gaya|rha|raha|rahe|he|tha|thi|the|hu|hoon|aur|ya|par)\b/i;
     const isHinglish = hindiWords.test(cleanText);
     const speakLang = hasMahratti ? "mr-IN" : (hasDevanagari || isHinglish || detectedLang === "hi-IN" ? "hi-IN" : "en-IN");
@@ -480,7 +480,7 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
 
     if (preferredVoice) utterance.voice = preferredVoice;
 
-    utterance.rate  = speakLang === "en-IN" ? 1.0 : 0.92;
+    utterance.rate = speakLang === "en-IN" ? 1.0 : 0.92;
     utterance.pitch = 1.05;
     utterance.volume = 1.0;
 
@@ -587,7 +587,7 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
 
         // ── Language detection heuristic from raw final text ─────────────────
         const devanagariRatio = (final.match(/[\u0900-\u097F]/g) || []).length / Math.max(final.length, 1);
-        const marathiMarkers  = /[\u0963\u094D\u0902\u0919\u091C\u091E]/.test(final);
+        const marathiMarkers = /[\u0963\u094D\u0902\u0919\u091C\u091E]/.test(final);
         let lang = "en-IN";
         if (devanagariRatio > 0.3) {
           lang = marathiMarkers ? "mr-IN" : "hi-IN";
@@ -598,7 +598,7 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
 
         // Select the best alternative (in case of homophone spelling errors) and normalize
         const normalizedMsg = selectAndNormalizeTranscript(alternatives.length > 0 ? alternatives : [final]);
-        
+
         // Voice-command controls intercept
         const isVoiceControlCommand = detectAndExecuteVoiceCommand(normalizedMsg);
         if (isVoiceControlCommand) {
@@ -887,7 +887,7 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
           body: JSON.stringify({ session_id: sessionId, issue: `User requested human support. Trigger phrase: "${userMessage}"` })
         });
         const escalateData = await escalateRes.json();
-        
+
         let escalationMessage = botReply;
         if (escalateData.success) {
           escalationMessage += `\n\n[Escalation Support Ticket Created: #${escalateData.data.id || escalateData.data.session_id}]`;
@@ -984,7 +984,7 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
 
             <div className="flex gap-2.5 items-center">
               {/* Speaker Output Toggle */}
-              <button 
+              <button
                 onClick={() => {
                   const val = !isSpeakerMuted;
                   setIsSpeakerMuted(val);
@@ -1002,7 +1002,7 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
               </button>
 
               {/* Voice Mode (STT) Toggle */}
-              <button 
+              <button
                 onClick={() => {
                   const mode = !voiceMode;
                   setVoiceMode(mode);
@@ -1032,20 +1032,18 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`flex ${
-                  msg.sender === "user" ? "justify-end" : "justify-start"
-                }`}
+                className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"
+                  }`}
               >
                 {msg.sender === "bot" && (
                   <div className="mr-2 text-2xl self-end mb-1">🤖</div>
                 )}
 
                 <div
-                  className={`p-3 rounded-xl shadow max-w-[75%] ${
-                    msg.sender === "user"
+                  className={`p-3 rounded-xl shadow max-w-[75%] ${msg.sender === "user"
                       ? "bg-blue-600 text-white rounded-br-none"
                       : "bg-white text-gray-900 border border-gray-100 rounded-bl-none"
-                  }`}
+                    }`}
                 >
                   <div className="whitespace-pre-line text-sm leading-relaxed">{msg.text}</div>
 
@@ -1054,7 +1052,7 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
                       {((playingMessageIndex === index) || (playingMessageIndex === -1 && index === messages.length - 1)) ? (
                         <>
                           {playbackState === "PLAYING" ? (
-                            <button 
+                            <button
                               onClick={handlePauseMessage}
                               title="Pause response"
                               className="hover:text-blue-600 transition duration-200 p-2 sm:p-0.5 flex items-center justify-center cursor-pointer touch-manipulation"
@@ -1062,7 +1060,7 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
                               <BsPauseFill className="w-5 h-5 sm:w-3.5 sm:h-3.5" />
                             </button>
                           ) : (
-                            <button 
+                            <button
                               onClick={() => handlePlayMessage(index, msg.text)}
                               title="Resume response"
                               className="hover:text-blue-600 transition duration-200 p-2 sm:p-0.5 flex items-center justify-center cursor-pointer touch-manipulation"
@@ -1070,7 +1068,7 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
                               <BsPlayFill className="w-5 h-5 sm:w-3.5 sm:h-3.5" />
                             </button>
                           )}
-                          <button 
+                          <button
                             onClick={handleStopMessage}
                             title="Stop response"
                             className="hover:text-red-500 transition duration-200 p-2 sm:p-0.5 flex items-center justify-center cursor-pointer touch-manipulation"
@@ -1082,7 +1080,7 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
                           </span>
                         </>
                       ) : (
-                        <button 
+                        <button
                           onClick={() => handlePlayMessage(index, msg.text)}
                           title="Speak response"
                           className="hover:text-blue-600 transition duration-200 p-2 sm:p-0.5 flex items-center justify-center cursor-pointer touch-manipulation"
@@ -1094,9 +1092,8 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
                   )}
 
                   <p
-                    className={`text-[9px] mt-1 text-right ${
-                      msg.sender === "user" ? "text-blue-100" : "text-gray-400"
-                    }`}
+                    className={`text-[9px] mt-1 text-right ${msg.sender === "user" ? "text-blue-100" : "text-gray-400"
+                      }`}
                   >
                     {msg.time}
                   </p>
@@ -1138,7 +1135,7 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
                     <span className="w-2 h-2 bg-red-500 rounded-full inline-block"></span>
                     Listening... speak now
                   </span>
-                  <button 
+                  <button
                     onClick={stopSpeechRecognition}
                     className="text-[10px] text-gray-500 hover:text-gray-700 font-semibold underline"
                   >
@@ -1160,7 +1157,7 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
                       <div className="voice-wave-bar"></div>
                     </div>
                   </div>
-                  <button 
+                  <button
                     onClick={() => {
                       if (synthesisRef.current) synthesisRef.current.cancel();
                       setVoiceState("IDLE");
@@ -1250,13 +1247,12 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
               <button
                 onClick={handleMicClick}
                 title={voiceState === "LISTENING" ? "Stop recording" : "Record voice message"}
-                className={`p-3 rounded-lg text-white transition duration-200 touch-manipulation ${
-                  voiceState === "LISTENING"
+                className={`p-3 rounded-lg text-white transition duration-200 touch-manipulation ${voiceState === "LISTENING"
                     ? "bg-red-500 hover:bg-red-600 voice-listening-btn"
                     : voiceState === "SPEAKING"
-                    ? "bg-orange-500 hover:bg-orange-600 animate-pulse"
-                    : "bg-blue-500 hover:bg-blue-600"
-                }`}
+                      ? "bg-orange-500 hover:bg-orange-600 animate-pulse"
+                      : "bg-blue-500 hover:bg-blue-600"
+                  }`}
               >
                 {voiceState === "LISTENING" ? <BsMicMuteFill size={18} /> : <BsMicFill size={18} />}
               </button>
