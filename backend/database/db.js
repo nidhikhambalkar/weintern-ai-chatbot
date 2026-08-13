@@ -23,7 +23,7 @@ const poolConfig = process.env.DATABASE_URL
     }
   : {
       user: process.env.DB_USER || 'postgres',         // DB username (default: postgres)
-      password: process.env.DB_PASSWORD || 'postgres', // DB password (default: postgres)
+      password: process.env.DB_PASSWORD || 'Pooja123#$', // DB password (default: Pooja123#$)
       host: process.env.DB_HOST || 'localhost',         // DB host (default: localhost)
       port: parseInt(process.env.DB_PORT, 10) || 5432, // DB port (default: 5432)
       database: process.env.DB_NAME || 'weintern_chatbot', // Database name
@@ -87,6 +87,15 @@ const initDatabase = async () => {
       session_id VARCHAR(255) NOT NULL,
       issue TEXT NOT NULL,
       status VARCHAR(50) DEFAULT 'pending',
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      email VARCHAR(255) UNIQUE NOT NULL,
+      password_hash VARCHAR(255),
+      role VARCHAR(50) DEFAULT 'user',
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );
   `;

@@ -51,6 +51,15 @@ export async function saveHistory(session_id: string, sender: string, message: s
 	return handleJsonResponse(res);
 }
 
+export async function clearHistory(session_id: string) {
+	const url = new URL(`${API_BASE}/api/history`);
+	url.searchParams.append('session_id', session_id);
+	const res = await fetch(url.toString(), {
+		method: 'DELETE',
+	});
+	return handleJsonResponse(res);
+}
+
 export async function createEscalation(session_id: string, issue: string) {
 	const res = await fetch(`${API_BASE}/api/escalate`, {
 		method: 'POST',
@@ -60,4 +69,4 @@ export async function createEscalation(session_id: string, issue: string) {
 	return handleJsonResponse(res);
 }
 
-export default { sendChat, saveLead, getHistory, saveHistory, createEscalation };
+export default { sendChat, saveLead, getHistory, saveHistory, clearHistory, createEscalation };

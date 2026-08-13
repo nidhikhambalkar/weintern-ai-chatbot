@@ -184,6 +184,40 @@ router.post('/history', async (req, res) => {
   }
 });
 
+// DELETE /api/history -> Clear chat history for a session_id
+router.delete('/history', async (req, res) => {
+  try {
+    const sessionId = req.query.session_id || req.query.sessionId || req.body?.session_id;
+
+    if (!sessionId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required parameter: session_id'
+      });
+    }
+
+    if (getIsPgConnected()) {
+      const sql = `DELETE FROM messages WHERE session_id = $1;`;
+      await query(sql, [sessionId]);
+      return res.status(200).json({
+        success: true,
+        message: 'Chat history cleared successfully from database.',
+        session_id: sessionId
+      });
+    }
+
+    inMemoryDb.messages = inMemoryDb.messages.filter(m => m.session_id !== sessionId);
+    return res.status(200).json({
+      success: true,
+      message: 'Chat history cleared successfully.',
+      session_id: sessionId
+    });
+  } catch (error) {
+    console.error('Error clearing history:', error.message);
+    return res.status(500).json({ success: false, error: 'Failed to clear chat history.' });
+  }
+});
+
 // ==============================================================================
 // HUMAN ESCALATION ENDPOINTS
 // ==============================================================================

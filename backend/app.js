@@ -4,33 +4,45 @@ require("dotenv").config();
 
 // Secure environment check
 if (!process.env.OLLAMA_HOST) {
-  console.warn("⚠️ [Security] OLLAMA_HOST is not set in .env! Defaulting to http://localhost:11434");
+  console.warn(
+    "⚠️ [Security] OLLAMA_HOST is not set in .env! Defaulting to http://localhost:11434"
+  );
 }
 
 const chatRoutes = require("./routes/chatRoutes");
 const dbRoutes = require("./routes/dbRoutes");
+const faqRoutes = require("./routes/faqRoutes");
 const { initDatabase, getIsPgConnected } = require("./database/db");
 const { pingOllama } = require("./services/ollamaService");
-const faqRoutes = require("./routes/faqRoutes");
+
 const app = express();
 
 // Custom in-memory sliding window rate limiter
 const rateLimits = new Map();
+
 const rateLimiter = (req, res, next) => {
-  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress || req.ip;
+  const ip =
+    req.headers["x-forwarded-for"] ||
+    req.socket.remoteAddress ||
+    req.ip;
+
   const now = Date.now();
-  const windowMs = 60 * 1000; // 1 minute window
-  const maxRequests = 60; // Max 60 requests per minute
+  const windowMs = 60 * 1000;
+  const maxRequests = 60;
 
   if (!rateLimits.has(ip)) {
     rateLimits.set(ip, []);
   }
 
-  const timestamps = rateLimits.get(ip).filter(t => now - t < windowMs);
+  const timestamps = rateLimits
+    .get(ip)
+    .filter((t) => now - t < windowMs);
+
   if (timestamps.length >= maxRequests) {
     return res.status(429).json({
       success: false,
-      error: "Too many requests. Please slow down and try again in a minute."
+      error:
+        "Too many requests. Please slow down and try again in a minute.",
     });
   }
 
@@ -81,20 +93,26 @@ app.use(cors(corsOptions));
 app.options("/{*path}", cors(corsOptions));
 app.use(express.json());
 
-// Routes (Apply rate limiting globally)
+// Apply rate limiting globally
 app.use(rateLimiter);
+
+// Routes
 app.use("/api/chat", chatRoutes);
 app.use("/api", dbRoutes);
 app.use("/api/faq", faqRoutes);
 
+// Health check
 app.get("/health", async (req, res) => {
   let dbStatus = "UNKNOWN";
   let dbError = null;
+
   try {
-    const { pool, getIsPgConnected } = require("./database/db");
+    const { pool } = require("./database/db");
+
     if (pool && getIsPgConnected()) {
       const result = await pool.query("SELECT NOW()");
-      dbStatus = result.rows.length > 0 ? "CONNECTED" : "UNHEALTHY";
+      dbStatus =
+        result.rows.length > 0 ? "CONNECTED" : "UNHEALTHY";
     } else {
       dbStatus = "IN_MEMORY_FALLBACK";
     }
@@ -104,6 +122,7 @@ app.get("/health", async (req, res) => {
   }
 
   let ollamaStatus = "UNKNOWN";
+
   try {
     const ping = await pingOllama();
     ollamaStatus = ping.ok ? "CONNECTED" : "OFFLINE";
@@ -114,51 +133,70 @@ app.get("/health", async (req, res) => {
   res.status(200).json({
     status: "online",
     service: "WeIntern AI Chatbot Backend Server",
-    environment: process.env.NODE_ENV || "development",
-    database: {
-      status: dbStatus,
-      error: dbError
-    },
-    ollama: {
-      status: ollamaStatus
-    },
-    timestamp: new Date().toISOString()
+    db_status: dbStatus,
+    db_error: dbError,
+    ollama_status: ollamaStatus,
+    timestamp: new Date().toISOString(),
   });
 });
 
+// Root route
 app.get("/", (req, res) => {
   res.send("WeIntern AI Chatbot Backend is Running 🚀");
 });
 
-app.get('/api/ollama/test', async (req, res) => {
+// Ollama test
+app.get("/api/ollama/test", async (req, res) => {
   try {
     const result = await pingOllama();
-    if (result.ok) return res.json({ success: true, model: result.model });
-    return res.status(503).json({ success: false, error: result.error });
+
+    if (result.ok) {
+      return res.json({
+        success: true,
+        model: result.model,
+      });
+    }
+
+    return res.status(503).json({
+      success: false,
+      error: result.error,
+    });
   } catch (error) {
-    return res.status(500).json({ success: false, error: error.message });
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 });
 
-// Production Error Handling Middleware
+// Production error handling middleware
 app.use((err, req, res, next) => {
   console.error("❌ [Error] Unexpected request error:", err);
+
   const status = err.status || err.statusCode || 500;
+
   res.status(status).json({
     success: false,
-    error: process.env.NODE_ENV === "production" 
-      ? "An unexpected internal server error occurred."
-      : err.message || String(err)
+    error:
+      process.env.NODE_ENV === "production"
+        ? "An unexpected internal server error occurred."
+        : err.message || String(err),
   });
 });
 
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
-  await initDatabase();
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+  try {
+    await initDatabase();
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("❌ Failed to start server:", error);
+    process.exit(1);
+  }
 };
 
 startServer();
