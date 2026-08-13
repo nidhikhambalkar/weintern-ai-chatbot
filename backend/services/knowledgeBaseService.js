@@ -365,6 +365,28 @@ function detectStrongCategory(queryTokens) {
   ];
   
   // Virtual category routing to physical KB categories
+  const isSixMonthQuery = (
+    queryTokens.includes("6") ||
+    queryTokens.includes("six") ||
+    queryTokens.includes("6-month") ||
+    queryTokens.includes("6month")
+  ) && (
+    queryTokens.includes("month") ||
+    queryTokens.includes("months") ||
+    queryTokens.includes("program") ||
+    queryTokens.includes("internship") ||
+    queryTokens.includes("fee") ||
+    queryTokens.includes("fees") ||
+    queryTokens.includes("price") ||
+    queryTokens.includes("details") ||
+    queryTokens.includes("include") ||
+    queryTokens.includes("included")
+  );
+
+  if (isSixMonthQuery) {
+    return "fees";
+  }
+
   const isCourseQuery = queryTokens.includes("course") || queryTokens.includes("courses");
   if (isCourseQuery) {
     if (
@@ -438,10 +460,40 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory) {
 
   let score = 0;
 
+  const isSixMonthQuery = (
+    queryTokens.includes("6") ||
+    queryTokens.includes("six") ||
+    queryTokens.includes("6-month") ||
+    queryTokens.includes("6month")
+  ) && (
+    queryTokens.includes("month") ||
+    queryTokens.includes("months") ||
+    queryTokens.includes("program") ||
+    queryTokens.includes("internship") ||
+    queryTokens.includes("fee") ||
+    queryTokens.includes("fees") ||
+    queryTokens.includes("price") ||
+    queryTokens.includes("details") ||
+    queryTokens.includes("include") ||
+    queryTokens.includes("included")
+  );
+
+  if (isSixMonthQuery) {
+    if (entryText.includes("6 month internship program") || entryText.includes("6-month internship program") || entry.question.toLowerCase().includes("6-month") || entry.question.toLowerCase().includes("6 month")) {
+      score += 65;
+    }
+    if (entryText.includes("training certificate") && entryText.includes("lor") && entryText.includes("mock interview")) {
+      score += 45;
+    }
+    if (entryText.includes("full stack web development — 12 weeks") || entryText.includes("mobile app development — 10 weeks")) {
+      score -= 80;
+    }
+  }
+
   const isCourseQuery = queryTokens.includes("course") || queryTokens.includes("courses");
   const isFeeOrDurationQuery = queryTokens.includes("fee") || queryTokens.includes("fees") || queryTokens.includes("price") || queryTokens.includes("cost") || queryTokens.includes("duration") || queryTokens.includes("weeks") || queryTokens.includes("each") || queryTokens.includes("all");
 
-  if (isCourseQuery && isFeeOrDurationQuery) {
+  if (isCourseQuery && isFeeOrDurationQuery && !isSixMonthQuery) {
     if (entryText.includes("full stack web development") && entryText.includes("7 999")) {
       score += 45;
     }
