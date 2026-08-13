@@ -2,7 +2,7 @@
   {
     "category": "domains",
     "question": "What are all available internship domains and course durations?",
-    "answer": "WeIntern offers 10 specialized courses and domain training tracks with exact durations:\n\n1. Full Stack Web Development — 12 weeks (₹7,999)\n2. Mobile App Development — 10 weeks (₹12,999)\n3. AI & Automation — 8 weeks (₹7,999)\n4. Cloud Solutions & DevOps — 10 weeks (₹12,999)\n5. Data Science & Analytics — 12 weeks (₹7,999)\n6. Cloud Computing — 12 weeks (₹6,499)\n7. DevOps Engineering — 10 weeks (₹6,999)\n8. Python Programming — 10 weeks (₹3,999)\n9. Java Programming — 12 weeks (₹3,999)\n10. C/C++ Programming — 10 weeks (₹3,999)\n\n💼 **Internship Program Track Durations**:\n• 6-Month Internship Program: 6 Months (₹7,999) — includes 2 months training + live project + 100% placement guarantee.\n• 3-Month Internship Program: 3 Months (₹999) — includes industry training + live project + placement support."
+    "answer": "WeIntern offers 10 specialized courses and domain training tracks with exact durations:\n\n1. Full Stack Web Development — 12 weeks (₹6,599)\n2. Mobile App Development — 10 weeks (₹10,699)\n3. AI & Automation — 8 weeks (₹6,599)\n4. Data Science & Analytics — 12 weeks (₹6,599)\n5. Python Programming — 10 weeks (₹3,299)\n6. Java Programming — 12 weeks (₹3,299)\n7. C/C++ Programming — 10 weeks (₹3,299)\n8. UI/UX Design — 8 weeks (₹3,299)\n9. Cloud Computing — 12 weeks (₹5,399)\n10. Digital Marketing — 8 weeks (₹2,499)\n\n💼 **Internship Program Track Durations**:\n• 6-Month Internship Program: 6 Months (₹7,999) — includes 2 months training + live project + 100% placement guarantee.\n• 3-Month Internship Program: 3 Months (₹999) — includes industry training + live project + placement support."
   },
   {
     "category": "domains",
@@ -27,47 +27,47 @@
   {
     "category": "domains",
     "question": "What is the Full Stack Web Development course?",
-    "answer": "Full Stack Web Development is a 12-week program priced at ₹4,999. It covers HTML, CSS, JavaScript, React.js, Node.js, Express.js, MongoDB, Git, and deployment. You build 4 real client projects. Certificate and stipend are included. Suitable for beginners."
+    "answer": "Full Stack Web Development is a 12-week program priced at ₹6,599. It covers HTML, CSS, JavaScript, React.js, Node.js, Express.js, MongoDB, Git, and deployment. You build 4 real client projects. Certificate and stipend are included. Suitable for beginners."
   },
   {
     "category": "domains",
     "question": "What is the price of Full Stack Web Development?",
-    "answer": "The Full Stack Web Development program is priced at ₹4,999 (discounted). The program is 12 weeks long and includes a WeIntern certificate, live projects, and stipend opportunities."
+    "answer": "The Full Stack Web Development program is priced at ₹6,599 (discounted). The program is 12 weeks long and includes a WeIntern certificate, live projects, and stipend opportunities."
   },
   {
     "category": "domains",
     "question": "What is the Mobile App Development course?",
-    "answer": "Mobile App Development with Flutter is a 10-week program priced at ₹5,999. It covers Flutter, Dart, Firebase, REST APIs, Android/iOS publishing. You build 3 real client apps. Intermediate level. Certificate and stipend included."
+    "answer": "Mobile App Development with Flutter is a 10-week program priced at ₹10,699. It covers Flutter, Dart, Firebase, REST APIs, Android/iOS publishing. You build 3 real client apps. Intermediate level. Certificate and stipend included."
   },
   {
     "category": "domains",
     "question": "What is the AI and Automation course?",
-    "answer": "AI & Automation is an 8-week program priced at ₹6,499. It covers Python, OpenAI API, LangChain, n8n, Make.com, Pinecone, and FastAPI. You build 3 AI projects including an AI chatbot and business automation pipeline. Certificate and stipend included."
+    "answer": "AI & Automation is an 8-week program priced at ₹6,599. It covers Python, OpenAI API, LangChain, n8n, Make.com, Pinecone, and FastAPI. You build 3 AI projects including an AI chatbot and business automation pipeline. Certificate and stipend included."
   },
   {
     "category": "domains",
     "question": "What is the Cloud Computing and DevOps course?",
-    "answer": "Cloud Solutions & DevOps is a 10-week program priced at ₹5,499. It covers AWS, Docker, Kubernetes, GitHub Actions, Jenkins, Linux, Terraform, and Nginx. Real client infrastructure projects included. Certificate and stipend available."
+    "answer": "Cloud Solutions & DevOps is a 10-week program priced at ₹5,399. It covers AWS, Docker, Kubernetes, GitHub Actions, Jenkins, Linux, Terraform, and Nginx. Real client infrastructure projects included. Certificate and stipend available."
   },
   {
     "category": "domains",
     "question": "What is the UI UX Design course?",
-    "answer": "UI/UX Design is an 8-week beginner-friendly program priced at ₹3,999. It covers Figma, Adobe XD, FigJam, design thinking, wireframing, prototyping, and design systems. You complete 3 real client design projects. Certificate and stipend included."
+    "answer": "UI/UX Design is an 8-week beginner-friendly program priced at ₹3,299. It covers Figma, Adobe XD, FigJam, design thinking, wireframing, prototyping, and design systems. You complete 3 real client design projects. Certificate and stipend included."
   },
   {
     "category": "domains",
     "question": "What is the Digital Marketing course?",
-    "answer": "Digital Marketing is a 6-week beginner-friendly program priced at ₹2,999. It covers Google Ads, Meta Ads, SEO, content marketing, Canva, Mailchimp, and Google Analytics. You run real client campaigns. Certificate and stipend included."
+    "answer": "Digital Marketing is a 6-week beginner-friendly program priced at ₹2,499. It covers Google Ads, Meta Ads, SEO, content marketing, Canva, Mailchimp, and Google Analytics. You run real client campaigns. Certificate and stipend included."
   },
   {
     "category": "domains",
     "question": "What is the Data Science course?",
-    "answer": "Data Science & Analytics is a 12-week intermediate program priced at ₹6,999. It covers Python, Pandas, NumPy, Scikit-learn, Matplotlib, Seaborn, Tableau, and SQL. You complete 3 real data projects. Certificate and stipend included."
+    "answer": "Data Science & Analytics is a 12-week intermediate program priced at ₹6,599. It covers Python, Pandas, NumPy, Scikit-learn, Matplotlib, Seaborn, Tableau, and SQL. You complete 3 real data projects. Certificate and stipend included."
   },
   {
     "category": "domains",
     "question": "Which is the cheapest course at WeIntern?",
-    "answer": "The most affordable WeIntern program is Digital Marketing at ₹2,999 (6 weeks), followed by UI/UX Design at ₹3,999 (8 weeks)."
+    "answer": "The most affordable WeIntern program is Digital Marketing at ₹2,499 (8 weeks), followed by UI/UX Design, Python, Java, and C/C++ Programming at ₹3,299."
   },
   {
     "category": "domains",
@@ -92,7 +92,7 @@
   {
     "category": "domains",
     "question": "WeIntern me kaunse domains available hain?",
-    "answer": "WeIntern ke available domains: Full Stack Web Development (₹4,999), Mobile App Development (₹5,999), AI & Automation (₹6,499), Cloud Solutions & DevOps (₹5,499), UI/UX Design (₹3,999), Digital Marketing (₹2,999), Data Science & Analytics (₹6,999)."
+    "answer": "WeIntern ke available domains: Full Stack Web Development (₹6,599), Mobile App Development (₹10,699), AI & Automation (₹6,599), Data Science & Analytics (₹6,599), Python Programming (₹3,299), Java Programming (₹3,299), C/C++ Programming (₹3,299), UI/UX Design (₹3,299), Cloud Computing (₹5,399), Digital Marketing (₹2,499)."
   },
   {
     "category": "domains",

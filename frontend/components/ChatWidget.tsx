@@ -262,16 +262,16 @@ export default function ChatWidget() {
 • Features: Industry Training, Live Project, Internship Certificate, LOR, Placement Support, and performance stipend up to ₹10,000.
 
 📌 **All 10 Courses (Exact Durations & Fees)**
-1. Full Stack Web Development — 12 weeks — ₹7,999
-2. Mobile App Development — 10 weeks — ₹12,999
-3. AI & Automation — 8 weeks — ₹7,999
-4. Cloud Solutions & DevOps — 10 weeks — ₹12,999
-5. Data Science & Analytics — 12 weeks — ₹7,999
-6. Cloud Computing — 12 weeks — ₹6,499
-7. DevOps Engineering — 10 weeks — ₹6,999
-8. Python Programming — 10 weeks — ₹3,999
-9. Java Programming — 12 weeks — ₹3,999
-10. C/C++ Programming — 10 weeks — ₹3,999
+1. Full Stack Web Development — 12 weeks — ₹6,599
+2. Mobile App Development — 10 weeks — ₹10,699
+3. AI & Automation — 8 weeks — ₹6,599
+4. Data Science & Analytics — 12 weeks — ₹6,599
+5. Python Programming — 10 weeks — ₹3,299
+6. Java Programming — 12 weeks — ₹3,299
+7. C/C++ Programming — 10 weeks — ₹3,299
+8. UI/UX Design — 8 weeks — ₹3,299
+9. Cloud Computing — 12 weeks — ₹5,399
+10. Digital Marketing — 8 weeks — ₹2,499
 
 💳 **Payment Methods**: Razorpay (UPI, Credit/Debit Cards, Net Banking, Paytm, PhonePe, GPay).`;
     } else if (question === "Domains" || question.includes("Domains")) {

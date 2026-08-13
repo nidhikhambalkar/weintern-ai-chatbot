@@ -494,7 +494,7 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory) {
   const isFeeOrDurationQuery = queryTokens.includes("fee") || queryTokens.includes("fees") || queryTokens.includes("price") || queryTokens.includes("cost") || queryTokens.includes("duration") || queryTokens.includes("weeks") || queryTokens.includes("each") || queryTokens.includes("all");
 
   if (isCourseQuery && isFeeOrDurationQuery && !isSixMonthQuery) {
-    if (entryText.includes("full stack web development") && entryText.includes("7 999")) {
+    if (entryText.includes("full stack web development") && entryText.includes("6 599")) {
       score += 45;
     }
     if (entry.category === "faq" || entry.category === "courses" || entry.category === "domains") {
