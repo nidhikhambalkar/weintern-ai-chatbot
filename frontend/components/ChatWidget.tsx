@@ -311,7 +311,7 @@ export default function ChatWidget() {
       botReplyText = `Here are the official contact details for WeIntern:
 
 📱 **WhatsApp**: +91 74149 74582
-📧 **Email**: contact.weintern@gmail.com
+📧 **Email**: contact@we-intern.in
 🌐 **Website**: https://we-intern.in
 ⏰ **Support Hours**: Monday to Saturday, 9:00 AM – 7:00 PM IST
 
