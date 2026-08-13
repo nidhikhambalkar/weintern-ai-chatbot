@@ -238,7 +238,19 @@ export default function ChatWidget() {
       startLeadForm();
       return;
     }
-    setMessage(question);
+    
+    let query = question;
+    if (question === "Fees & EMI" || question.includes("Fees")) {
+      query = "What are the internship fees, EMI options, and course prices?";
+    } else if (question === "Domains" || question.includes("Domains")) {
+      query = "What are all available internship domains and course durations?";
+    } else if (question === "Certificates" || question.includes("Certificates")) {
+      query = "What certificates are included in 6-month and 3-month programs?";
+    } else if (question === "Contact" || question.includes("Contact")) {
+      query = "What are the official WeIntern contact details?";
+    }
+
+    processMessage(query, "text");
   };
 
   // Helper to fetch the last response spoken by WeIntern AI

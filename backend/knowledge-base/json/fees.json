@@ -1,6 +1,11 @@
 [
   {
     "category": "fees",
+    "question": "What are the internship fees, EMI options, and course prices?",
+    "answer": "Here are the complete fee details for WeIntern programs and courses:\n\n📌 **6-Month Internship Program — ₹7,999**\n• Duration: 6 months (includes 2 months industry training + live project)\n• Price: ₹7,999\n• EMI Option: Split in 30:40:30 ratio across 3 installments (30% enrollment, 40% midpoint, 30% end)\n• One-Time Discount: 10% off on full upfront payment\n• Includes: Internship Certificate, Training Certificate, LOR, Mock Interview Prep, LinkedIn Profile Building, 100% Placement Guarantee, and performance stipend up to ₹10,000.\n\n📌 **3-Month Internship Program — ₹999**\n• Duration: 3 months\n• Price: ₹999 (one-time full payment)\n• Includes: Industry Training, Live Project, Internship Certificate, LOR, Placement Support, and performance stipend up to ₹10,000.\n\n📌 **All 10 Courses (Exact Durations & Fees)**\n1. Full Stack Web Development — 12 weeks — ₹7,999\n2. Mobile App Development — 10 weeks — ₹12,999\n3. AI & Automation — 8 weeks — ₹7,999\n4. Cloud Solutions & DevOps — 10 weeks — ₹12,999\n5. Data Science & Analytics — 12 weeks — ₹7,999\n6. Cloud Computing — 12 weeks — ₹6,499\n7. DevOps Engineering — 10 weeks — ₹6,999\n8. Python Programming — 10 weeks — ₹3,999\n9. Java Programming — 12 weeks — ₹3,999\n10. C/C++ Programming — 10 weeks — ₹3,999\n\n💳 **Payment Methods**: Razorpay (UPI, Credit/Debit Cards, Net Banking, Paytm, PhonePe, GPay)."
+  },
+  {
+    "category": "fees",
     "question": "What are the WeIntern program options?",
     "answer": "WeIntern offers two main internship programs: 1) 6-Month Internship Program at ₹7,999 — includes 2 months of industry training + live project experience + 100% placement guarantee + mock interviews + LinkedIn profile building + stipend up to ₹10,000. 2) 3-Month Internship Program at ₹999 — includes industry training + internship certificate + stipend up to ₹10,000 (subject to project availability) + placement support (not 100% guaranteed)."
   },
