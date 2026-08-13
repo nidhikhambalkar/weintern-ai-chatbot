@@ -39,13 +39,46 @@ const rateLimiter = (req, res, next) => {
   next();
 };
 
+// Allowed origins: production Vercel frontend + local dev
+const ALLOWED_ORIGINS = [
+  // Production Vercel deployment(s)
+  "https://frontend-six-eosin-97.vercel.app",
+  // Additional Vercel preview/custom domains (add more here if needed)
+  "https://weintern-ai-chatbot.vercel.app",
+  // Local development
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "http://127.0.0.1:3000",
+];
+
+// Merge any extra origins from env (comma-separated) without losing the hardcoded list
+if (process.env.ALLOWED_ORIGINS) {
+  process.env.ALLOWED_ORIGINS.split(",").forEach((origin) => {
+    const trimmed = origin.trim();
+    if (trimmed && !ALLOWED_ORIGINS.includes(trimmed)) {
+      ALLOWED_ORIGINS.push(trimmed);
+    }
+  });
+}
+
 const corsOptions = {
-  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : "*",
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) {
+      return callback(null, true);
+    }
+    console.warn(`[CORS] Blocked request from: ${origin}`);
+    return callback(new Error(`CORS policy: Origin ${origin} is not allowed.`), false);
+  },
   methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: false,
 };
 
 app.use(cors(corsOptions));
+// Explicitly handle preflight OPTIONS requests for all routes
+app.options("/{*path}", cors(corsOptions));
 app.use(express.json());
 
 // Routes (Apply rate limiting globally)

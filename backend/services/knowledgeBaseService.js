@@ -79,6 +79,28 @@ const TOKEN_MAP = {
   whatsapp: "contact",
   email: "contact",
   contact: "contact",
+  ceo: "company",
+  founder: "company",
+  owner: "company",
+  founded: "company",
+  started: "company",
+  location: "company",
+  address: "company",
+  headquarter: "company",
+  headquarters: "company",
+  introduce: "company",
+  introduction: "company",
+  overview: "company",
+  info: "company",
+  platform: "company",
+  ashwin: "company",
+  gurao: "company",
+  namita: "company",
+  gope: "company",
+  kharadi: "company",
+  pune: "company",
+  cofounder: "company",
+  "co-founder": "company",
   cert: "certificate",
   lor: "certificate",              // Letter of Recommendation → certificates
   recommendation: "certificate",  // "letter of recommendation" → certificates
@@ -175,7 +197,7 @@ codeblocks: "code blocks",
 };
 
 const CATEGORY_HINTS = {
-  company: ["weintern", "company", "about weintern", "tell me about weintern"],
+  company: ["weintern", "company", "about weintern", "tell me about weintern", "what is weintern", "who is weintern", "who are weintern", "what does weintern do", "ceo", "founder", "owner", "location", "address", "introduce", "introduction", "overview", "info", "information", "platform", "edtech", "headquarter"],
   courses: ["course", "courses", "program", "learn", "training", "skill"],
   benefits: ["benefit", "benefits", "mentor", "mentor support", "doubt", "class", "recorded", "network", "soft skill", "softskills"],
   internship: ["internship", "intern", "onboarding", "attendance", "team", "selection", "daily task", "live project", "project", "register", "enroll", "apply", "payment", "pay", "upi", "eligible", "fresher", "beginner", "how long", "how many months"],
@@ -193,13 +215,17 @@ const CATEGORY_HINTS = {
 };
 
 const CATEGORY_KEYWORD_MAP = {
-  company: ["weintern", "company", "about weintern", "tell me about weintern","info about weintern",
-  "information about weintern",
-  "what is weintern",
-  "who is weintern",
-  "know about weintern",
-  "weintern ke baare",
-  "weintern kya hai"],
+  company: [
+    "weintern", "company", "about weintern", "tell me about weintern",
+    "info about weintern", "information about weintern",
+    "what is weintern", "who is weintern", "who are weintern",
+    "what does weintern do", "know about weintern",
+    "weintern ke baare", "weintern kya hai",
+    "ceo", "founder", "owner", "who founded", "who started",
+    "location", "address", "headquarter", "headquarters",
+    "introduce", "introduction", "overview", "info", "information",
+    "platform", "edtech", "about", "vision", "mission"
+  ],
   courses: ["course", "courses", "program", "training", "skill", "learn", "about course", "about courses", "course details", "course information", "program details", "program information", "training details", "training information", "skill development", "learn skills", "learn programming", "learn coding", "learn data science", "learn ai ml", "learn python", "learn java", "learn ui ux", "learn digital marketing", "learn cyber security", "learn cloud computing"],
   benefits: ["benefit", "benefits", "mentor", "doubt", "class", "recorded", "network", "soft skill", "softskills"],
   internship: ["internship", "intern", "onboarding", "attendance", "team", "selection", "daily task", "live project", "project", "register", "enroll", "apply", "payment", "upi", "eligible", "fresher", "beginner"],
@@ -428,6 +454,30 @@ function detectStrongCategory(queryTokens) {
     return "certificates";
   }
 
+  // CEO / Founder / Owner / Location / Named person → always company
+  if (
+    queryTokens.includes("ceo") ||
+    queryTokens.includes("founder") ||
+    queryTokens.includes("owner") ||
+    queryTokens.includes("founded") ||
+    queryTokens.includes("headquarter") ||
+    queryTokens.includes("headquarters") ||
+    queryTokens.includes("ashwin") ||
+    queryTokens.includes("gurao") ||
+    queryTokens.includes("namita") ||
+    queryTokens.includes("gope") ||
+    queryTokens.includes("kharadi") ||
+    queryTokens.includes("pune") ||
+    queryTokens.includes("cofounder") ||
+    (queryTokens.includes("location") && queryTokens.includes("weintern")) ||
+    (queryTokens.includes("address") && queryTokens.includes("weintern")) ||
+    (queryTokens.includes("introduce") && queryTokens.includes("weintern")) ||
+    (queryTokens.includes("overview") && queryTokens.includes("weintern")) ||
+    (queryTokens.includes("about") && queryTokens.includes("weintern") && !queryTokens.includes("course") && !queryTokens.includes("fee"))
+  ) {
+    return "company";
+  }
+
   for (const cat of directCategories) {
     if (queryTokens.includes(cat)) {
       return cat;
@@ -515,15 +565,35 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory) {
     "information",
     "company",
     "platform",
-    "tell"
+    "tell",
+    "introduce",
+    "introduction",
+    "overview",
+    "vision",
+    "mission"
+  ];
+
+  const companyIdentityKeywords = [
+    "ceo", "founder", "owner", "founded", "started",
+    "location", "address", "headquarter", "headquarters",
+    "introduce", "introduction", "overview"
   ];
 
   const hasAboutIntent = queryTokens.some((token) =>
     aboutKeywords.includes(token)
   );
 
+  const hasCompanyIdentityIntent = queryTokens.some((token) =>
+    companyIdentityKeywords.includes(token)
+  );
+
   if (hasAboutIntent && entry.category === "company" && !isCertificateQuery) {
     score += 25;
+  }
+
+  // Strong boost for CEO/founder/owner/location queries → company entries
+  if (hasCompanyIdentityIntent && entry.category === "company") {
+    score += 45;
   }
 
   if (

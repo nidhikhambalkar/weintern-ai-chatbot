@@ -7,22 +7,22 @@ function getGreetingResponse(rawText) {
   const isMarathiLatin = /\b(kasa\s*kay|kase\s*ahat|kasa\s*ahes|kashi\s*ahes|kse\s*ahat|ksa\s*kay)\b/.test(lower);
 
   if (isMarathiDevanagari || isMarathiLatin) {
-    return "नमस्कार! 👋 मी WeIntern AI Assistant आहे. मी तुम्हाला courses, internships, fees, certificates आणि WeIntern ची माहिती मिळवण्यासाठी मदत करण्यास इथे आहे. आज मी तुम्हाला कशी मदत करू शकेन?";
+    return "नमस्कार! 👋 मी WeIntern AI Assistant आहे. मी तुम्हाला WeIntern बद्दल माहिती, courses, internships, fees, certificates, placement आणि बरंच काही सांगू शकतो. आज मी तुम्हाला कशी मदत करू शकेन?"; 
   }
 
   // 2. Hindi / Hinglish Greetings
   const isHindiDevanagari = /नमस्ते|नमस्कार|प्रणाम|राम\s*राम|सत\s*श्री\s*अकाल|आदाब|कैसे\s*हो|कैसे\s*हैं/.test(text) || /\b(nmste|nmskar|prnam)\b/.test(lower);
   if (isHindiDevanagari) {
-    return "नमस्ते! 👋 मैं WeIntern AI Assistant हूँ। मैं आपकी courses, internships, fees, certificates और WeIntern की जानकारी पाने में मदद करने के लिए यहाँ हूँ। आज मैं आपकी क्या सहायता कर सकता हूँ?";
+    return "नमस्ते! 👋 मैं WeIntern AI Assistant हूँ। मैं आपको WeIntern के बारे में, courses, internships, fees, certificates, placement और बहुत कुछ बता सकता हूँ। आज मैं आपकी क्या सहायता कर सकता हूँ?";
   }
 
   const isHinglish = /\b(namaste|namaskar|pranam|ram\s*ram|sat\s*sri\s*akal|satsriakal|adab|kaise\s*ho|kaise\s*hain|kya\s*hal\s*hai|sab\s*badiya)\b/.test(lower);
   if (isHinglish) {
-    return "Namaste! 👋 Main WeIntern AI Assistant hoon. Main aapki courses, internships, fees, certificates aur WeIntern ki information me help karne ke liye yahan hoon. Aaj main aapki kya madad kar sakta hoon?";
+    return "Namaste! 👋 Main WeIntern AI Assistant hoon. Main aapko WeIntern ke baare mein, courses, internships, fees, certificates, placement aur bahut kuch bata sakta hoon. Aaj main aapki kya madad kar sakta hoon?";
   }
 
   // 3. English / Default Greeting Response
-  return "Hi! 👋 I’m the WeIntern AI Assistant. I’m here to help you with courses, internships, fees, certificates, and other WeIntern information. How can I help you today?";
+  return "Hi! 👋 I'm the WeIntern AI Assistant. I can tell you all about WeIntern — what it is, how it works, programs, courses, fees, certificates, mentorship, placement, and more. How can I help you today?";
 }
 
 function detectIntent(message = "") {
@@ -108,9 +108,41 @@ function detectIntent(message = "") {
     "time",
     "syllabus",
     "location",
+    "address",
     "whatsapp",
     "number",
     "office",
+    "ceo",
+    "founder",
+    "owner",
+    "who founded",
+    "who started",
+    "head",
+    "about",
+    "introduce",
+    "introduction",
+    "overview",
+    "info",
+    "information",
+    "ashwin",
+    "gurao",
+    "ashwin gurao",
+    "namita",
+    "gope",
+    "namita gope",
+    "co-founder",
+    "cofounder",
+    "kharadi",
+    "pune",
+    "maharashtra",
+    "city vista",
+    "founded",
+    "established",
+    "2024",
+    "2026",
+    "when was weintern",
+    "weintern pvt",
+    "private limited",
 
   // Internship
   "internship",

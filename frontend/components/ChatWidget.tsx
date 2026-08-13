@@ -148,14 +148,6 @@ export default function ChatWidget() {
         minute: "2-digit",
       }),
     },
-    {
-      sender: "bot",
-      text: "Ask me anything about internships, domains, certificates or registration.",
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    },
   ]);
 
   // Generate or load session ID & Initialize Web Speech API

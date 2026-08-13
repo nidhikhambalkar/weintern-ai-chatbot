@@ -20,7 +20,7 @@ services:
       - key: OLLAMA_MODEL
         value: llama3.2
       - key: ALLOWED_ORIGINS
-        value: https://frontend-six-eosin-97.vercel.app
+        value: https://frontend-six-eosin-97.vercel.app,https://weintern-ai-chatbot.vercel.app
 
 databases:
   - name: weintern-db
