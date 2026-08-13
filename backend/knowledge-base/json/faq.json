@@ -67,7 +67,7 @@
   {
     "category": "faq",
     "question": "WeIntern internship duration kitni hoti hai?",
-    "answer": "Program duration domain ke according vary karti hai. Different programs ki duration approximately 6 weeks se 12 weeks tak ho sakti hai."
+    "answer": "Program duration domain ke according vary karti hai: Full Stack Web Development (12 weeks), Mobile App Development (10 weeks), AI & Automation (8 weeks), Cloud Solutions & DevOps (10 weeks), Data Science & Analytics (12 weeks), Cloud Computing (12 weeks), DevOps Engineering (10 weeks), Python Programming (10 weeks), Java Programming (12 weeks), aur C/C++ Programming (10 weeks)."
   },
   {
     "category": "faq",
@@ -87,7 +87,7 @@
   {
     "category": "faq",
     "question": "WeIntern programs ki fees kitni hai?",
-    "answer": "Program fees selected domain aur duration ke according vary karti hai. Latest fee details official website par available hoti hain."
+    "answer": "Program fees selected domain aur duration ke according vary karti hai: Full Stack Web Development (12 weeks — ₹7,999), Mobile App Development (10 weeks — ₹12,999), AI & Automation (8 weeks — ₹7,999), Cloud Solutions & DevOps (10 weeks — ₹12,999), Data Science & Analytics (12 weeks — ₹7,999), Cloud Computing (12 weeks — ₹6,499), DevOps Engineering (10 weeks — ₹6,999), Python Programming (10 weeks — ₹3,999), Java Programming (12 weeks — ₹3,999), aur C/C++ Programming (10 weeks — ₹3,999)."
   },
   {
     "category": "faq",
@@ -119,7 +119,7 @@
     "question": "Can I work on live client projects?",
     "answer": "Based on performance and progress, students may get opportunities to contribute to live client projects under mentor supervision."
   },
-    {
+  {
     "category": "faq",
     "question": "Do I need prior coding experience for Full Stack Web Development?",
     "answer": "No. This internship is beginner-friendly and starts with web development fundamentals before moving to advanced concepts."
@@ -137,7 +137,7 @@
   {
     "category": "faq",
     "question": "What is the duration of the Full Stack Web Development program?",
-    "answer": "The Full Stack Web Development program duration is approximately 12 weeks with assignments, practical sessions, and project work."
+    "answer": "The Full Stack Web Development program duration is 12 weeks and the fee is ₹7,999, which includes assignments, practical sessions, and project work."
   },
   {
     "category": "faq",
@@ -148,6 +148,21 @@
     "category": "faq",
     "question": "Will I receive mentor support during Full Stack internship?",
     "answer": "Yes. Mentors provide guidance, doubt-solving sessions, code reviews, and project assistance throughout the internship."
+  },
+  {
+    "category": "faq",
+    "question": "How much does Full Stack Web Development course cost and how long is it?",
+    "answer": "The Full Stack Web Development course duration is 12 weeks and the price/fee is ₹7,999."
+  },
+  {
+    "category": "faq",
+    "question": "What is the price, fee, and duration for Full Stack Web Development?",
+    "answer": "The Full Stack Web Development course duration is 12 weeks and the price/fee is ₹7,999."
+  },
+  {
+    "category": "faq",
+    "question": "What is the fee for Full Stack Web Development?",
+    "answer": "The fee for Full Stack Web Development is ₹7,999 for a duration of 12 weeks."
   },
   {
     "category": "faq",
@@ -166,8 +181,23 @@
   },
   {
     "category": "faq",
+    "question": "How much does Java Programming course cost and how long is it?",
+    "answer": "The Java Programming course duration is 12 weeks and the price/fee is ₹3,999."
+  },
+  {
+    "category": "faq",
+    "question": "What is the price, fee, and duration for Java Programming?",
+    "answer": "The Java Programming course duration is 12 weeks and the price/fee is ₹3,999."
+  },
+  {
+    "category": "faq",
     "question": "Who can join Java Development internship?",
     "answer": "The program is suitable for college students, fresh graduates, and beginners who want to learn Java development."
+  },
+  {
+    "category": "faq",
+    "question": "What is the duration and fee for Java Programming?",
+    "answer": "The Java Programming course duration is 12 weeks and the fee is ₹3,999."
   },
   {
     "category": "faq",
@@ -181,6 +211,16 @@
   },
   {
     "category": "faq",
+    "question": "How much does Python Programming course cost and how long is it?",
+    "answer": "The Python Programming course duration is 10 weeks and the price/fee is ₹3,999."
+  },
+  {
+    "category": "faq",
+    "question": "What is the price, fee, and duration for Python Programming?",
+    "answer": "The Python Programming course duration is 10 weeks and the price/fee is ₹3,999."
+  },
+  {
+    "category": "faq",
     "question": "Will I create Python projects?",
     "answer": "Yes. You will build automation scripts, Python applications, APIs, and practical projects to improve your development skills."
   },
@@ -191,8 +231,23 @@
   },
   {
     "category": "faq",
+    "question": "What is the duration and fee for Python Programming?",
+    "answer": "The Python Programming course duration is 10 weeks and the fee is ₹3,999."
+  },
+  {
+    "category": "faq",
     "question": "Will I learn C and C++ in the internship?",
     "answer": "Yes. The program starts with C programming fundamentals and covers advanced C++ concepts including Object-Oriented Programming."
+  },
+  {
+    "category": "faq",
+    "question": "How much does C/C++ Programming course cost and how long is it?",
+    "answer": "The C/C++ Programming course duration is 10 weeks and the price/fee is ₹3,999."
+  },
+  {
+    "category": "faq",
+    "question": "What is the price, fee, and duration for C/C++ Programming?",
+    "answer": "The C/C++ Programming course duration is 10 weeks and the price/fee is ₹3,999."
   },
   {
     "category": "faq",
@@ -208,6 +263,21 @@
     "category": "faq",
     "question": "What projects will I build in C/C++?",
     "answer": "You will build projects like Student Management System, Library Management System, Banking System, and mini games."
+  },
+  {
+    "category": "faq",
+    "question": "What is the duration and fee for C/C++ Programming?",
+    "answer": "The C/C++ Programming course duration is 10 weeks and the fee is ₹3,999."
+  },
+  {
+    "category": "faq",
+    "question": "How much does Data Science & Analytics course cost and how long is it?",
+    "answer": "The Data Science & Analytics course duration is 12 weeks and the price/fee is ₹7,999."
+  },
+  {
+    "category": "faq",
+    "question": "What is the price, fee, and duration for Data Science & Analytics?",
+    "answer": "The Data Science & Analytics course duration is 12 weeks and the price/fee is ₹7,999."
   },
   {
     "category": "faq",
@@ -231,6 +301,21 @@
   },
   {
     "category": "faq",
+    "question": "How much does AI & Automation course cost and how long is it?",
+    "answer": "The AI & Automation course duration is 8 weeks and the price/fee is ₹7,999."
+  },
+  {
+    "category": "faq",
+    "question": "What is the price, fee, and duration for AI & Automation?",
+    "answer": "The AI & Automation course duration is 8 weeks and the price/fee is ₹7,999."
+  },
+  {
+    "category": "faq",
+    "question": "What is the duration and fee for Data Science & Analytics?",
+    "answer": "The Data Science & Analytics course duration is 12 weeks and the fee is ₹7,999."
+  },
+  {
+    "category": "faq",
     "question": "Do I need AI or Machine Learning knowledge?",
     "answer": "No. The AI & Machine Learning program starts with Python and AI basics before moving to advanced concepts."
   },
@@ -249,7 +334,22 @@
     "question": "Is AI & Automation internship suitable for beginners?",
     "answer": "Yes. The program is designed for students, freshers, and beginners who want to start learning AI and automation from scratch."
   },
-    {
+  {
+    "category": "faq",
+    "question": "How much does Cloud Computing course cost and how long is it?",
+    "answer": "The Cloud Computing course duration is 12 weeks and the price/fee is ₹6,499."
+  },
+  {
+    "category": "faq",
+    "question": "What is the price, fee, and duration for Cloud Computing?",
+    "answer": "The Cloud Computing course duration is 12 weeks and the price/fee is ₹6,499."
+  },
+  {
+    "category": "faq",
+    "question": "What is the duration and fee for AI & Automation?",
+    "answer": "The AI & Automation course duration is 8 weeks and the fee is ₹7,999."
+  },
+  {
     "category": "faq",
     "question": "Do I need prior Cloud Computing experience?",
     "answer": "No. The Cloud Computing program starts with cloud fundamentals and gradually covers advanced cloud concepts, making it suitable for beginners."
@@ -271,8 +371,33 @@
   },
   {
     "category": "faq",
+    "question": "How much does Cloud Solutions & DevOps course cost and how long is it?",
+    "answer": "The Cloud Solutions & DevOps course duration is 10 weeks and the price/fee is ₹12,999."
+  },
+  {
+    "category": "faq",
+    "question": "What is the price, fee, and duration for Cloud Solutions & DevOps?",
+    "answer": "The Cloud Solutions & DevOps course duration is 10 weeks and the price/fee is ₹12,999."
+  },
+  {
+    "category": "faq",
+    "question": "How much does DevOps Engineering course cost and how long is it?",
+    "answer": "The DevOps Engineering course duration is 10 weeks and the price/fee is ₹6,999."
+  },
+  {
+    "category": "faq",
+    "question": "What is the price, fee, and duration for DevOps Engineering?",
+    "answer": "The DevOps Engineering course duration is 10 weeks and the price/fee is ₹6,999."
+  },
+  {
+    "category": "faq",
     "question": "Will I learn cloud security?",
     "answer": "Yes. You will learn IAM, security practices, backup strategies, and cloud resource management."
+  },
+  {
+    "category": "faq",
+    "question": "What is the duration and fee for Cloud Computing?",
+    "answer": "The Cloud Computing course duration is 12 weeks and the fee is ₹6,499."
   },
   {
     "category": "faq",
@@ -291,6 +416,16 @@
   },
   {
     "category": "faq",
+    "question": "How much does Mobile App Development course cost and how long is it?",
+    "answer": "The Mobile App Development course duration is 10 weeks and the price/fee is ₹12,999."
+  },
+  {
+    "category": "faq",
+    "question": "What is the price, fee, and duration for Mobile App Development?",
+    "answer": "The Mobile App Development course duration is 10 weeks and the price/fee is ₹12,999."
+  },
+  {
+    "category": "faq",
     "question": "Is DevOps internship beginner friendly?",
     "answer": "Yes. The program is suitable for students, fresh graduates, and developers who want to build DevOps skills step-by-step."
   },
@@ -298,6 +433,16 @@
     "category": "faq",
     "question": "Will I learn Docker and Kubernetes?",
     "answer": "Yes. You will learn containerization using Docker and application orchestration using Kubernetes."
+  },
+  {
+    "category": "faq",
+    "question": "What is the duration and fee for Cloud Solutions & DevOps?",
+    "answer": "The Cloud Solutions & DevOps course duration is 10 weeks and the fee is ₹12,999."
+  },
+  {
+    "category": "faq",
+    "question": "What is the duration and fee for DevOps Engineering?",
+    "answer": "The DevOps Engineering course duration is 10 weeks and the fee is ₹6,999."
   },
   {
     "category": "faq",
@@ -322,7 +467,12 @@
   {
     "category": "faq",
     "question": "Will I learn app deployment?",
-    "answer": "Yes. You will learn application testing, building, and publishing processes."
+    "answer": "Program duration depends on the selected domain: AI & Automation is 8 weeks; Mobile App Development, Cloud Solutions & DevOps, DevOps Engineering, Python Programming, and C/C++ Programming are 10 weeks; Full Stack Web Development, Data Science & Analytics, Cloud Computing, and Java Programming are 12 weeks."
+  },
+  {
+    "category": "faq",
+    "question": "What is the duration and fee for Mobile App Development?",
+    "answer": "The Mobile App Development course duration is 10 weeks and the fee is ₹12,999."
   },
   {
     "category": "faq",
@@ -367,7 +517,7 @@
   {
     "category": "faq",
     "question": "How long are WeIntern programs?",
-    "answer": "Program duration depends on the selected domain. Programs generally range from 6 weeks to 12 weeks."
+    "answer": "Program duration depends on the selected domain: AI & Automation is 8 weeks; Mobile App Development, Cloud Solutions & DevOps, DevOps Engineering, Python Programming, and C/C++ Programming are 10 weeks; Full Stack Web Development, Data Science & Analytics, Cloud Computing, and Java Programming are 12 weeks."
   },
   {
     "category": "faq",
@@ -383,5 +533,15 @@
     "category": "faq",
     "question": "How can I contact WeIntern support?",
     "answer": "Students can contact WeIntern through official communication channels available on the website we-intern.in."
+  },
+  {
+    "category": "faq",
+    "question": "What are the exact prices and durations of all WeIntern courses?",
+    "answer": "The current course prices and durations are: Full Stack Web Development (12 weeks — ₹7,999), Mobile App Development (10 weeks — ₹12,999), AI & Automation (8 weeks — ₹7,999), Cloud Solutions & DevOps (10 weeks — ₹12,999), Data Science & Analytics (12 weeks — ₹7,999), Cloud Computing (12 weeks — ₹6,499), DevOps Engineering (10 weeks — ₹6,999), Python Programming (10 weeks — ₹3,999), Java Programming (12 weeks — ₹3,999), and C/C++ Programming (10 weeks — ₹3,999)."
+  },
+  {
+    "category": "faq",
+    "question": "What are the exact prices and durations of all WeIntern courses?",
+    "answer": "The current course prices and durations are: Full Stack Web Development (12 weeks — ₹7,999), Mobile App Development (10 weeks — ₹12,999), AI & Automation (8 weeks — ₹7,999), Cloud Solutions & DevOps (10 weeks — ₹12,999), Data Science & Analytics (12 weeks — ₹7,999), Cloud Computing (12 weeks — ₹6,499), DevOps Engineering (10 weeks — ₹6,999), Python Programming (10 weeks — ₹3,999), Java Programming (12 weeks — ₹3,999), and C/C++ Programming (10 weeks — ₹3,999)."
   }
 ]

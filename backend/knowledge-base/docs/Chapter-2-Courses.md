@@ -9,345 +9,241 @@ Students are encouraged to build technical skills, problem-solving abilities, co
 
 ## Available Internship Programs
 
-WeIntern provides internship opportunities in multiple domains. The available programs may include:
+WeIntern provides internship opportunities in the following 10 core domains:
 
-- Full Stack Development
-- Artificial Intelligence & Machine Learning
-- Data Science
-- Python Development
-- Java Development
-- Web Development
-- UI/UX Design
-- Digital Marketing
-- Cyber Security
-- Cloud Computing
+1. Full Stack Web Development (12 weeks)
+2. Mobile App Development (10 weeks)
+3. AI & Automation (8 weeks)
+4. Cloud Solutions & DevOps (10 weeks)
+5. Data Science & Analytics (12 weeks)
+6. Cloud Computing (12 weeks)
+7. DevOps Engineering (10 weeks)
+8. Python Programming (10 weeks)
+9. Java Programming (12 weeks)
+10. C/C++ Programming (10 weeks)
 
-The availability of specific programs may vary. Students should always refer to the latest official WeIntern announcements for current internship offerings.
+---
 
-## Full Stack Development
-Full Stack Development
+## 1. Full Stack Web Development
+
+**Duration:** 12 weeks
 
 Master the skills required to build complete web applications from frontend to backend. This program covers modern frontend technologies, backend development, databases, APIs, deployment, and real-world project development.
 
-Students learn to create responsive user interfaces, develop powerful backend systems, manage databases, and build industry-ready applications following professional development practices.
-
-Key Learning Areas:
-• Frontend Development (HTML, CSS, JavaScript, React)
+**Key Learning Areas:**
+• Frontend Development (HTML, CSS, JavaScript, React.js)
 • Backend Development (Node.js, Express.js)
-• Database Management (SQL, PostgreSQL)
-• API Development and Integration
-• Authentication and Security Basics
+• Database Management (MongoDB, SQL)
+• RESTful API Development and Integration
 • Version Control using Git & GitHub
-• Real-world Full Stack Projects
+• Real-world Full Stack Web Projects
 
-Career Opportunities:
+**Career Opportunities:**
 • Full Stack Developer
 • Frontend Developer
 • Backend Developer
 • Web Application Developer
-• Software Developer
 
-Project-Based Learning:
-Students work on live projects to gain practical experience and build a strong portfolio for industry opportunities.
-## Artificial Intelligence & Machine Learning
- Artificial Intelligence & Machine Learning
+---
 
-Learn how machines can analyze data, understand patterns, and make intelligent decisions. This program introduces students to the fundamentals of Artificial Intelligence and Machine Learning with practical implementation using modern tools and technologies.
+## 2. Mobile App Development
 
-Students gain knowledge of AI concepts, machine learning algorithms, data handling techniques, and real-world AI applications while working on industry-relevant projects.
+**Duration:** 10 weeks
 
-Key Learning Areas:
-• Fundamentals of Artificial Intelligence
-• Machine Learning Concepts and Algorithms
-• Data Processing and Analysis
-• Supervised and Unsupervised Learning
-• Neural Networks and Deep Learning Basics
-• Natural Language Processing (NLP)
-• AI Tools and Real-world Applications
-• Model Building and Evaluation
+Learn how to build cross-platform mobile applications for Android and iOS using modern frameworks and cloud backend services.
 
-Career Opportunities:
-• AI Engineer
-• Machine Learning Engineer
-• Data Scientist
-• AI Analyst
+**Key Learning Areas:**
+• Flutter & Dart Fundamentals
+• UI Components & Responsive Layouts
+• Firebase Integration & Realtime Database
+• REST API Consumption & State Management
+• App Testing, Building, and Deployment
+
+**Career Opportunities:**
+• Mobile App Developer
+• Flutter Developer
+• Android / iOS Developer
+
+---
+
+## 3. AI & Automation
+
+**Duration:** 8 weeks
+
+Learn practical Artificial Intelligence concepts, LLM API integration, prompt engineering, and business process automation workflows using modern AI tools.
+
+**Key Learning Areas:**
+• Python for AI & Automation
+• OpenAI API, LangChain, & LLM Applications
+• Workflow Automation (n8n, Make.com)
+• Building AI Chatbots & Q&A Assistants
+• Vector Databases & FastAPI Deployment
+
+**Career Opportunities:**
+• AI Developer / Engineer
 • Automation Specialist
-• Python Developer
+• AI Solutions Consultant
 
-Project-Based Learning:
-Students work on practical AI and ML projects to understand real-world problem solving and develop skills required for future technology careers.
-## Data Science
-Data Science
+---
 
-Develop the ability to collect, analyze, and interpret data to solve real-world problems. This program introduces students to data analysis techniques, statistical concepts, visualization methods, and modern data science tools used across industries.
+## 4. Cloud Solutions & DevOps
 
-Students learn how to transform raw data into meaningful insights and make data-driven decisions through practical learning and hands-on projects.
+**Duration:** 10 weeks
 
-Key Learning Areas:
-• Fundamentals of Data Science
-• Data Collection and Data Processing
-• Python for Data Analysis
-• Statistics and Probability Basics
-• Data Visualization Techniques
-• Exploratory Data Analysis (EDA)
-• Machine Learning Fundamentals
-• Working with Databases and Data Tools
+Understand cloud architecture, server management, containerization, and automated deployment pipelines to manage modern web infrastructure.
 
-Career Opportunities:
-• Data Analyst
+**Key Learning Areas:**
+• AWS Core Services (EC2, S3, IAM, VPC)
+• Linux Administration & Networking
+• Containerization with Docker & Orchestration with Kubernetes
+• CI/CD Automation with GitHub Actions & Jenkins
+• Infrastructure as Code using Terraform
+
+**Career Opportunities:**
+• Cloud & DevOps Engineer
+• Systems Administrator
+• Site Reliability Engineer (SRE)
+
+---
+
+## 5. Data Science & Analytics
+
+**Duration:** 12 weeks
+
+Develop the ability to collect, clean, analyze, and visualize data to solve business problems and build predictive machine learning models.
+
+**Key Learning Areas:**
+• Data Analysis with Python (Pandas, NumPy)
+• SQL & Database Queries
+• Data Visualization (Matplotlib, Seaborn, Power BI)
+• Exploratory Data Analysis & Statistics
+• Machine Learning Fundamentals (Scikit-Learn)
+
+**Career Opportunities:**
 • Data Scientist
-• Business Analyst
-• Data Engineer
-• Machine Learning Associate
-• Data Visualization Specialist
-
-Project-Based Learning:
-Students work on real-world datasets and practical projects to gain experience in data analysis, visualization, and solving industry-based problems.
-
-## Python Development
-Python Development
-
-Learn one of the most popular and versatile programming languages used in software development, automation, data science, and artificial intelligence. This program helps students build strong programming foundations and develop practical Python-based applications.
-
-Students learn Python programming concepts, problem-solving techniques, libraries, and real-world development practices through hands-on coding and projects.
-
-Key Learning Areas:
-• Python Programming Fundamentals
-• Variables, Data Types, and Operators
-• Conditional Statements and Loops
-• Functions and Object-Oriented Programming
-• File Handling and Exception Handling
-• Python Libraries and Frameworks
-• Database Connectivity
-• Automation and Application Development
-
-Career Opportunities:
-• Python Developer
-• Software Developer
-• Automation Engineer
-• Backend Developer
 • Data Analyst
-• AI/ML Developer
+• Business Intelligence Analyst
 
-Project-Based Learning:
-Students create practical Python projects to improve coding skills, logical thinking, and application development abilities required for industry roles.
-## Java Development
-Java Development
+---
 
-Build a strong foundation in Java programming and learn how to develop secure, scalable, and object-oriented applications. This program focuses on core Java concepts, programming practices, and application development used in the software industry.
+## 6. Cloud Computing
 
-Students learn Java fundamentals, object-oriented programming principles, database connectivity, and modern development approaches through practical coding exercises and projects.
+**Duration:** 12 weeks
 
-Key Learning Areas:
-• Java Programming Fundamentals
-• Object-Oriented Programming (OOP) Concepts
-• Classes, Objects, and Inheritance
-• Exception Handling and File Handling
-• Collections Framework
-• Database Connectivity using JDBC
-• Multithreading Basics
-• Application Development Concepts
+Gain hands-on experience with cloud infrastructure, virtualization, cloud storage, security, and cloud deployment practices.
 
-Career Opportunities:
-• Java Developer
-• Software Developer
-• Backend Developer
-• Application Developer
-• Android Developer
-• Software Engineer
+**Key Learning Areas:**
+• Cloud Computing Fundamentals & Service Models (IaaS, PaaS, SaaS)
+• AWS Core Infrastructure & Resource Management
+• Virtualization, Networking & Security Groups
+• Storage Management (S3, EBS, EFS)
+• Cloud Application Deployment & Monitoring
 
-Project-Based Learning:
-Students build Java-based applications and projects to strengthen programming skills, logical thinking, and software development knowledge required for industry opportunities.
-## Web Development
-Web Development
-
-Learn how to design and develop modern, responsive, and interactive websites using industry-standard technologies. This program covers the complete process of building websites, from creating user interfaces to implementing dynamic web functionality.
-
-Students gain practical knowledge of frontend development, web technologies, responsive design, and website deployment through hands-on learning and real-world projects.
-
-Key Learning Areas:
-• HTML5, CSS3, and JavaScript
-• Responsive Web Design
-• Frontend Development Concepts
-• Bootstrap and Modern UI Frameworks
-• React Basics and Component Development
-• Web Hosting and Deployment
-• Website Optimization Practices
-• Introduction to Backend Integration
-
-Career Opportunities:
-• Web Developer
-• Frontend Developer
-• UI Developer
-• JavaScript Developer
-• Website Designer
-• Software Developer
-
-Project-Based Learning:
-Students develop real-world websites and web applications to build practical skills, improve their portfolio, and understand professional web development workflows.
-
-## UI/UX Design
-UI/UX Design
-
-Learn how to create engaging, user-friendly, and visually appealing digital experiences. This program focuses on understanding user needs, designing intuitive interfaces, and applying design principles used in modern digital products.
-
-Students learn the complete design process from user research and wireframing to prototyping and creating responsive user interfaces using industry-standard design tools.
-
-Key Learning Areas:
-• Fundamentals of UI/UX Design
-• User Research and User Psychology
-• Wireframing and Prototyping
-• Design Principles and Visual Design
-• User Interface Design
-• Design Systems and Components
-• Responsive Design Concepts
-• UI/UX Tools and Collaboration
-
-Career Opportunities:
-• UI Designer
-• UX Designer
-• Product Designer
-• Interaction Designer
-• Visual Designer
-• UX Researcher
-
-Project-Based Learning:
-Students create practical design projects including wireframes, prototypes, and complete user interface designs to develop a strong design portfolio.
-
-## Digital Marketing
-Digital Marketing
-
-Learn how businesses use digital platforms to reach customers, build brands, and generate growth. This program covers essential digital marketing strategies, online advertising methods, and analytics tools used in modern marketing.
-
-Students gain practical knowledge of content creation, social media marketing, search engine optimization, and digital campaign management through hands-on activities.
-
-Key Learning Areas:
-• Fundamentals of Digital Marketing
-• Search Engine Optimization (SEO)
-• Social Media Marketing
-• Content Marketing Strategies
-• Email Marketing
-• Google Ads and Online Advertising
-• Digital Analytics and Reporting
-• Brand Building and Online Presence
-
-Career Opportunities:
-• Digital Marketing Executive
-• SEO Specialist
-• Social Media Manager
-• Content Marketing Specialist
-• Performance Marketing Associate
-• Digital Marketing Analyst
-
-Project-Based Learning:
-Students work on real digital marketing campaigns and practical projects to understand marketing strategies, audience engagement, and online growth techniques.
-## Cyber Security
-Cyber Security
-
-Understand how to protect digital systems, networks, and information from cyber threats. This program introduces students to security concepts, threat prevention techniques, and industry practices used to maintain secure digital environments.
-
-Students learn about cybersecurity fundamentals, ethical hacking concepts, network security, and data protection through practical learning.
-
-Key Learning Areas:
-• Fundamentals of Cyber Security
-• Network Security Basics
-• Cyber Threats and Vulnerabilities
-• Ethical Hacking Concepts
-• Data Protection and Privacy
-• Security Tools and Practices
-• Risk Management Basics
-• Incident Response Fundamentals
-
-Career Opportunities:
-• Cyber Security Analyst
-• Security Engineer
-• Ethical Hacker
-• Information Security Associate
-• Network Security Specialist
-• SOC Analyst
-
-Project-Based Learning:
-Students perform practical security exercises and projects to understand threat detection, prevention techniques, and cybersecurity best practices.
-
-## Cloud Computing
-
-Cloud Computing
-
-Learn how modern applications and services are developed, deployed, and managed using cloud technologies. This program introduces students to cloud concepts, infrastructure, and services used by organizations worldwide.
-
-Students gain knowledge of cloud platforms, virtualization, storage, networking, and cloud-based application deployment.
-
-Key Learning Areas:
-• Cloud Computing Fundamentals
-• Cloud Service Models (IaaS, PaaS, SaaS)
-• Virtualization Concepts
-• Cloud Storage and Databases
-• Cloud Security Basics
-• Application Deployment on Cloud
-• Introduction to Cloud Platforms
-• Cloud Infrastructure Management
-
-Career Opportunities:
+**Career Opportunities:**
 • Cloud Engineer
-• Cloud Support Associate
-• Cloud Administrator
-• DevOps Associate
-• System Administrator
-• Cloud Developer
+• Cloud Support Engineer
+• Cloud Infrastructure Associate
 
-Project-Based Learning:
-Students work on cloud-based projects to understand deployment processes, cloud services, and real-world infrastructure management.
+---
 
-## Internship Duration
+## 7. DevOps Engineering
 
-Internship Duration
+**Duration:** 10 weeks
 
-Our internship programs are designed to provide students with practical industry exposure and hands-on experience. The duration allows students to learn technologies, work on projects, and develop professional skills required for career growth.
+Focus on continuous integration, continuous delivery, infrastructure automation, container management, and cloud application lifecycle management.
 
-Duration:
-• Short-term and long-term internship programs available
-• Project-based learning with industry-oriented tasks
-• Practical experience under expert guidance
+**Key Learning Areas:**
+• Linux System Administration & Shell Scripting
+• Version Control & Collaborative Development (Git/GitHub)
+• Docker Containerization & Kubernetes Orchestration
+• CI/CD Pipelines (Jenkins, GitHub Actions)
+• Configuration Management & Infrastructure Automation (Ansible, Terraform)
+
+**Career Opportunities:**
+• DevOps Engineer
+• Build & Release Engineer
+• Infrastructure Automation Specialist
+
+---
+
+## 8. Python Programming
+
+**Duration:** 10 weeks
+
+Build a solid programming foundation using Python. Learn core programming concepts, object-oriented design, file handling, automation, and API integration.
+
+**Key Learning Areas:**
+• Python Fundamentals, Data Structures & Control Flow
+• Object-Oriented Programming (OOP)
+• File Handling & Exception Management
+• Working with APIs & Libraries
+• Automation Scripts & Mini Projects
+
+**Career Opportunities:**
+• Python Developer
+• Software Engineer
+• Automation Script Writer
+
+---
+
+## 9. Java Programming
+
+**Duration:** 12 weeks
+
+Learn Core Java programming, object-oriented concepts, exception handling, multithreading, database connectivity, and backend development.
+
+**Key Learning Areas:**
+• Java Fundamentals & Object-Oriented Programming (OOP)
+• Java Collections Framework & Exception Handling
+• Multithreading & File I/O
+• Database Connectivity (JDBC, SQL)
+• Introduction to Spring Boot & REST APIs
+
+**Career Opportunities:**
+• Java Developer
+• Backend Software Engineer
+• Application Developer
+
+---
+
+## 10. C/C++ Programming
+
+**Duration:** 10 weeks
+
+Master fundamental programming concepts, memory management, object-oriented programming in C++, and core Data Structures and Algorithms.
+
+**Key Learning Areas:**
+• C Programming Fundamentals & Pointers
+• Object-Oriented Programming in C++
+• Memory Management & File Handling
+• Data Structures (Arrays, Linked Lists, Stacks, Queues, Trees)
+• Algorithms (Searching, Sorting, Problem Solving)
+
+**Career Opportunities:**
+• C/C++ Developer
+• Systems Programmer
+• Software Developer (DSA Focus)
+
+---
+
+## Program Duration Summary
+
+• **8 Weeks:** AI & Automation
+• **10 Weeks:** Mobile App Development, Cloud Solutions & DevOps, DevOps Engineering, Python Programming, C/C++ Programming
+• **12 Weeks:** Full Stack Web Development, Data Science & Analytics, Cloud Computing, Java Programming
+
+---
 
 ## Eligibility
 
-Eligibility
-
-Students from different educational backgrounds who are interested in technology and skill development can enroll in our programs.
-
-Eligibility Criteria:
-• Students pursuing undergraduate or postgraduate courses
-• Freshers and beginners interested in technology careers
-• Basic computer knowledge is preferred
-• Passion for learning and building practical skills
+Students from any stream or background (Engineering, Science, Commerce, Arts) are eligible to apply. Most programs are designed to be beginner-friendly with step-by-step guidance.
 
 ## Course Outcomes
-Course Outcomes
 
 After completing the program, students will be able to:
-
 • Apply technical skills to solve real-world problems
 • Build industry-relevant projects and portfolios
 • Understand practical development workflows
 • Improve problem-solving and analytical abilities
 • Gain confidence for internships and job opportunities
-• Develop skills required for modern technology careers
-
-
-## Frequently Asked Questions
-Frequently Asked Questions
-
-Q1. Who can join these courses?
-Students, freshers, and beginners interested in technology and career development can join these programs.
-
-Q2. Are these courses beginner-friendly?
-Yes, courses are designed for beginners as well as students who want to improve their existing skills.
-
-Q3. Will students get practical project experience?
-Yes, students work on practical projects to gain real-world experience.
-
-Q4. Do these courses help with career opportunities?
-Yes, programs focus on industry-relevant skills required for internships and job roles.
-
-Q5. Will students receive guidance during the learning process?
-Yes, students receive mentorship and support throughout the program.
+• Receive official WeIntern certificates and performance-based stipend opportunities
