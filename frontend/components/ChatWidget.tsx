@@ -136,6 +136,8 @@ export default function ChatWidget() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const synthesisRef = useRef<any>(null);
+  const currentPausedTextRef = useRef<string>("");
+  const currentSpeakCharIndexRef = useRef<number>(0);
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -343,61 +345,58 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
     return null;
   };
 
+    const handleResumeOrContinueMessage = () => {
+    if (!synthesisRef.current) return;
+
+    if (synthesisRef.current.paused) {
+      synthesisRef.current.resume();
+      setPlaybackState("PLAYING");
+      setVoiceState("SPEAKING");
+      return;
+    }
+
+    if (currentPausedTextRef.current && currentSpeakCharIndexRef.current > 0) {
+      const fullText = currentPausedTextRef.current;
+      const offset = currentSpeakCharIndexRef.current;
+      handlePlayMessage(playingMessageIndex ?? -1, fullText, offset);
+      return;
+    }
+
+    const lastBot = getLastBotResponse();
+    if (lastBot) {
+      handlePlayMessage(lastBot.index, lastBot.text, 0);
+    }
+  };
+
   // Handles natural voice command detection and execution (supports Hindi/Hinglish variations)
   const detectAndExecuteVoiceCommand = (text: string): boolean => {
     const rawLower = text.toLowerCase().trim();
 
-    // 1. STOP
-    // English: stop, stop speaking, shut up, stop it, stop please
-    // Hindi/Hinglish: ruko, band karo, chup, chup ho jao, ruk
-    if (/^(stop|stop speaking|shut up|stop it|ruko|band karo|chup|chup ho jao|ruk)$/i.test(rawLower) || 
-        /\b(stop speaking|band karo|chup ho jao)\b/i.test(rawLower)) {
-      handleStopMessage();
-      return true;
-    }
-
-    // 2. PAUSE
-    // English: pause, pause speech, wait, hold on
-    // Hindi/Hinglish: pause, ruko thoda, thoda ruko, rokna, roko, hold karo
-    if (/^(pause|pause speech|wait|hold on|ruko thoda|thoda ruko|rokna|roko|hold karo)$/i.test(rawLower) ||
-        /\b(pause speech|thoda ruko|hold karo)\b/i.test(rawLower)) {
+    // 1. STOP & PAUSE
+    if (/^(stop|pause|stop speaking|pause speech|wait|hold on|quiet|ruko|band karo|chup|chup ho jao|ruk|roko|hold karo|ruko thoda|thoda ruko)$/i.test(rawLower) ||
+        /\b(stop speaking|pause speech|band karo|chup ho jao|thoda ruko|hold karo)\b/i.test(rawLower)) {
       handlePauseMessage();
       return true;
     }
 
-    // 3. RESUME
-    // English: resume, continue, play, go on
-    // Hindi/Hinglish: chalu karo, phir se chalu karo, continue karo, resume karo
-    if (/^(resume|continue|go on|chalu karo|phir se chalu karo|continue karo|resume karo)$/i.test(rawLower) ||
-        /\b(continue karo|phir se chalu karo|resume karo)\b/i.test(rawLower)) {
-      const lastBot = getLastBotResponse();
-      if (lastBot) {
-        if (playbackState === "PAUSED" && synthesisRef.current) {
-          synthesisRef.current.resume();
-          setPlaybackState("PLAYING");
-          setVoiceState("SPEAKING");
-        } else {
-          handlePlayMessage(lastBot.index, lastBot.text);
-        }
-      }
+    // 2. CONTINUE & RESUME
+    if (/^(continue|resume|go on|keep speaking|carry on|continue speaking|chalu karo|phir se chalu karo|continue karo|resume karo|aage bolo)$/i.test(rawLower) ||
+        /\b(continue karo|phir se chalu karo|resume karo|continue speaking|keep speaking|carry on)\b/i.test(rawLower)) {
+      handleResumeOrContinueMessage();
       return true;
     }
 
-    // 4. START / REPLAY / SPEAK AGAIN / REPEAT
-    // English: start, begin, repeat, speak again, replay, read again, say again, tell me again
-    // Hindi/Hinglish: shuru karo, shuru se, play karo, shuru, pehle se, phir se bolo, phir se, dobara bolo, wapas bolo
+    // 3. START / REPLAY / SPEAK AGAIN / REPEAT
     if (/^(start|begin|repeat|speak again|replay|read again|say again|tell me again|shuru karo|shuru se|play karo|shuru|pehle se|phir se bolo|phir se|dobara bolo|wapas bolo)$/i.test(rawLower) ||
         /\b(speak again|read again|say again|tell me again|shuru karo|pehle se|phir se bolo|dobara bolo|wapas bolo)\b/i.test(rawLower)) {
       const lastBot = getLastBotResponse();
       if (lastBot) {
-        handlePlayMessage(lastBot.index, lastBot.text);
+        handlePlayMessage(lastBot.index, lastBot.text, 0);
       }
       return true;
     }
 
-    // 5. MUTE
-    // English: mute, mute volume, turn off voice, silent
-    // Hindi/Hinglish: awaaz band, mute karo, silent karo, aawaz band
+    // 4. MUTE
     if (/^(mute|mute volume|turn off voice|silent|awaaz band|mute karo|silent karo|aawaz band)$/i.test(rawLower) ||
         /\b(mute volume|turn off voice|awaaz band|mute karo|silent karo|aawaz band)\b/i.test(rawLower)) {
       setIsSpeakerMuted(true);
@@ -405,9 +404,7 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
       return true;
     }
 
-    // 6. UNMUTE
-    // English: unmute, unmute volume, turn on voice, speak up, voice on
-    // Hindi/Hinglish: unmute, awaaz chalu, unmute karo, speak karo, aawaz chalu
+    // 5. UNMUTE
     if (/^(unmute|unmute volume|turn on voice|speak up|voice on|awaaz chalu|unmute karo|speak karo|aawaz chalu)$/i.test(rawLower) ||
         /\b(unmute volume|turn on voice|awaaz chalu|unmute karo|speak karo|aawaz chalu)\b/i.test(rawLower)) {
       setIsSpeakerMuted(false);
@@ -419,15 +416,15 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
 
   // Speaks response using Web Speech Synthesis (TTS)
   const speakResponse = (text: string) => {
-    handlePlayMessage(-1, text);
+    handlePlayMessage(-1, text, 0);
   };
 
-  const handlePlayMessage = (index: number, text: string) => {
+  const handlePlayMessage = (index: number, text: string, charOffset: number = 0) => {
     if (!synthesisRef.current) return;
 
     const isCurrentPlaying = playingMessageIndex === index || (playingMessageIndex === -1 && index === messages.length - 1);
 
-    if (isCurrentPlaying && playbackState === "PAUSED") {
+    if (isCurrentPlaying && playbackState === "PAUSED" && synthesisRef.current.paused) {
       synthesisRef.current.resume();
       setPlaybackState("PLAYING");
       setVoiceState("SPEAKING");
@@ -448,35 +445,30 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
       return;
     }
 
-    // ── Language-aware, human-like TTS ──────────────────────────────────────
-    // Detect language of the TEXT to speak (not just the last detected input lang)
+    const textToSpeak = charOffset > 0 ? cleanText.slice(charOffset) : cleanText;
+    if (!textToSpeak.trim()) {
+      setPlaybackState("IDLE");
+      setVoiceState("IDLE");
+      return;
+    }
+
     const hasDevanagari = /[\u0900-\u097F]/.test(cleanText);
     const hasMahratti  = /[\u0900-\u097F]/.test(cleanText) && /[\u0967-\u096F\u0964\u0965]/.test(cleanText);
-    
-    // Heuristic list of common Hindi/Hinglish helper words in Latin script
     const hindiWords = /\b(kya|hai|hain|mein|ko|se|karne|karta|karte|milta|milega|milegi|hoga|hogi|kiya|gaya|rha|raha|rahe|he|tha|thi|the|hu|hoon|aur|ya|par)\b/i;
     const isHinglish = hindiWords.test(cleanText);
-    
     const speakLang = hasMahratti ? "mr-IN" : (hasDevanagari || isHinglish || detectedLang === "hi-IN" ? "hi-IN" : "en-IN");
 
-    const utterance = new SpeechSynthesisUtterance(cleanText);
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
     utterance.lang = speakLang;
 
-    // Pick best human-like voice: prefer Google voices, then any matching locale
     const allVoices = synthesisRef.current.getVoices();
     const preferredVoice = (() => {
-      // Priority order of voice name patterns (human-sounding Google/Microsoft voices)
       const patterns = [
-        // Google Indian English (most natural)
         (v: SpeechSynthesisVoice) => v.lang === speakLang && /google/i.test(v.name) && /female|woman/i.test(v.name),
         (v: SpeechSynthesisVoice) => v.lang === speakLang && /google/i.test(v.name),
-        // Microsoft Indian voices
         (v: SpeechSynthesisVoice) => v.lang === speakLang && /neerja|heera|ravi|kalpana|hemant/i.test(v.name),
-        // Any same-locale voice
         (v: SpeechSynthesisVoice) => v.lang === speakLang,
-        // Fallback: Google en-IN
         (v: SpeechSynthesisVoice) => v.lang === "en-IN" && /google/i.test(v.name),
-        // Last resort: any en-IN
         (v: SpeechSynthesisVoice) => v.lang === "en-IN",
       ];
       for (const pattern of patterns) {
@@ -488,22 +480,32 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
 
     if (preferredVoice) utterance.voice = preferredVoice;
 
-    // Human-like prosody — natural, not robotic
-    utterance.rate  = speakLang === "en-IN" ? 1.0 : 0.92;  // Hindi/Marathi slightly slower
-    utterance.pitch = 1.05;  // Slightly above monotone for warmth
+    utterance.rate  = speakLang === "en-IN" ? 1.0 : 0.92;
+    utterance.pitch = 1.05;
     utterance.volume = 1.0;
-    // ────────────────────────────────────────────────────────────────────────
+
+    utterance.onboundary = (event: any) => {
+      if (event.charIndex !== undefined) {
+        currentSpeakCharIndexRef.current = charOffset + event.charIndex;
+      }
+    };
 
     utterance.onstart = () => {
       setPlayingMessageIndex(index);
       setPlaybackState("PLAYING");
       setVoiceState("SPEAKING");
+      currentPausedTextRef.current = cleanText;
+      if (charOffset === 0) {
+        currentSpeakCharIndexRef.current = 0;
+      }
     };
 
     utterance.onend = () => {
       setPlayingMessageIndex(null);
       setPlaybackState("IDLE");
       setVoiceState("IDLE");
+      currentPausedTextRef.current = "";
+      currentSpeakCharIndexRef.current = 0;
     };
 
     utterance.onerror = (e) => {
@@ -517,9 +519,12 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
   };
 
   const handlePauseMessage = () => {
-    if (synthesisRef.current && playbackState === "PLAYING") {
-      synthesisRef.current.pause();
+    if (synthesisRef.current) {
+      if (synthesisRef.current.speaking) {
+        synthesisRef.current.pause();
+      }
       setPlaybackState("PAUSED");
+      setVoiceState("IDLE");
     }
   };
 
@@ -529,6 +534,8 @@ Reach out to us for enrollment assistance, payment queries, certificate verifica
       setPlayingMessageIndex(null);
       setPlaybackState("IDLE");
       setVoiceState("IDLE");
+      currentPausedTextRef.current = "";
+      currentSpeakCharIndexRef.current = 0;
     }
   };
 
