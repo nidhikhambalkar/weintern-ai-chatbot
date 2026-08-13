@@ -280,16 +280,16 @@ export default function ChatWidget() {
       userLabel = "Domains";
       botReplyText = `WeIntern offers 10 specialized courses and domain training tracks with exact durations:
 
-1. Full Stack Web Development — 12 weeks (₹7,999)
-2. Mobile App Development — 10 weeks (₹12,999)
-3. AI & Automation — 8 weeks (₹7,999)
-4. Cloud Solutions & DevOps — 10 weeks (₹12,999)
-5. Data Science & Analytics — 12 weeks (₹7,999)
-6. Cloud Computing — 12 weeks (₹6,499)
-7. DevOps Engineering — 10 weeks (₹6,999)
-8. Python Programming — 10 weeks (₹3,999)
-9. Java Programming — 12 weeks (₹3,999)
-10. C/C++ Programming — 10 weeks (₹3,999)
+1. Full Stack Web Development — 12 weeks (₹6,599)
+2. Mobile App Development — 10 weeks (₹10,699)
+3. AI & Automation — 8 weeks (₹6,599)
+4. Data Science & Analytics — 12 weeks (₹6,599)
+5. Python Programming — 10 weeks (₹3,299)
+6. Java Programming — 12 weeks (₹3,299)
+7. C/C++ Programming — 10 weeks (₹3,299)
+8. UI/UX Design — 8 weeks (₹3,299)
+9. Cloud Computing — 12 weeks (₹5,399)
+10. Digital Marketing — 8 weeks (₹2,499)
 
 💼 **Internship Program Track Durations**:
 • 6-Month Internship Program: 6 Months (₹7,999) — includes 2 months training + live project + 100% placement guarantee.
