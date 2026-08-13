@@ -157,21 +157,35 @@ export default function ChatWidget() {
 
   const handleClearHistory = async () => {
     setShowClearConfirm(false);
-    if (!sessionId) return;
-    try {
-      await clearHistory(sessionId);
-      setMessages([
-        {
-          sender: "bot",
-          text: "👋 Hello! Welcome to WeIntern.",
-          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        },
-      ]);
-      setToastMessage("Chat history cleared");
-      setTimeout(() => setToastMessage(null), 2000);
-    } catch (err) {
-      console.error("Failed to clear history:", err);
+    const previousSessionId = sessionId;
+
+    const newSessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    if (typeof window !== "undefined") {
+      localStorage.setItem("weintern_session_id", newSessionId);
     }
+
+    setSessionId(newSessionId);
+    setMessages([
+      {
+        sender: "bot",
+        text: "👋 Hello! Welcome to WeIntern.",
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      },
+    ]);
+    setShowLeadForm(false);
+    setLeadStep(0);
+    setLeadData({ name: "", email: "", phone: "", domain: "" });
+
+    if (previousSessionId) {
+      try {
+        await clearHistory(previousSessionId);
+      } catch (err) {
+        console.error("Failed to clear history:", err);
+      }
+    }
+
+    setToastMessage("Chat history cleared");
+    setTimeout(() => setToastMessage(null), 2000);
   };
 
   const handleRetryMessage = async (userText: string) => {
