@@ -365,6 +365,24 @@ function detectStrongCategory(queryTokens) {
   ];
   
   // Virtual category routing to physical KB categories
+  const isCourseQuery = queryTokens.includes("course") || queryTokens.includes("courses");
+  if (isCourseQuery) {
+    if (
+      queryTokens.includes("fee") ||
+      queryTokens.includes("fees") ||
+      queryTokens.includes("price") ||
+      queryTokens.includes("cost") ||
+      queryTokens.includes("duration") ||
+      queryTokens.includes("weeks") ||
+      queryTokens.includes("all") ||
+      queryTokens.includes("each") ||
+      queryTokens.includes("how")
+    ) {
+      return "faq";
+    }
+    return "courses";
+  }
+
   if (queryTokens.includes("duration") || queryTokens.includes("weeks") || queryTokens.includes("months") || queryTokens.includes("long")) {
     return "internship";
   }
@@ -419,6 +437,21 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory) {
   const querySet = new Set(queryTokens);
 
   let score = 0;
+
+  const isCourseQuery = queryTokens.includes("course") || queryTokens.includes("courses");
+  const isFeeOrDurationQuery = queryTokens.includes("fee") || queryTokens.includes("fees") || queryTokens.includes("price") || queryTokens.includes("cost") || queryTokens.includes("duration") || queryTokens.includes("weeks") || queryTokens.includes("each") || queryTokens.includes("all");
+
+  if (isCourseQuery && isFeeOrDurationQuery) {
+    if (entryText.includes("full stack web development") && entryText.includes("7 999")) {
+      score += 45;
+    }
+    if (entry.category === "faq" || entry.category === "courses" || entry.category === "domains") {
+      score += 35;
+    }
+    if (entryText.includes("1 to 3 months") || entryText.includes("1 month 2 month") || entryText.includes("ranges from 1 to 3")) {
+      score -= 80;
+    }
+  }
 
   const isCertificateQuery = queryTokens.includes("certificate") || queryTokens.includes("certificates") || queryTokens.includes("certification") || queryTokens.includes("cert");
 
