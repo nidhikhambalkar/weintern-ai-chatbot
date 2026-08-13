@@ -27,7 +27,13 @@ function getGreetingResponse(rawText) {
 
 function detectIntent(message = "") {
   const rawText = String(message).trim();
-  const lower = rawText.toLowerCase();
+
+  // ── Normalize WeIntern name variants before any keyword matching ─────────
+  // This ensures "we intern", "weintrn", "wigton", "v intern" etc. all hit the
+  // correct intent branch instead of falling to out-of-domain.
+  const WEINTERN_VARIANT_RE = /\b(v\s+intern|w\s+intern|wee\s+intern|we\s+intern|we-intern|we\s+interne|weintrn|wintern|wenitern|wigton|vinturn|winturn|weinturm|weinturn|weentern|way\s+intern|vee\s+intern|be\s+intern|beintern|weinternship)\b/gi;
+  const normalizedRaw = rawText.replace(WEINTERN_VARIANT_RE, "WeIntern");
+  const lower = normalizedRaw.toLowerCase();
 
   const latinGreetingRegex = /^(hi+|hello+|hey+|hlo|good\s*morning|good\s*afternoon|good\s*evening|yo|sup|namaste|namaskar|pranam|ram\s*ram|satsriakal|adab|kaise\s*ho|kasa\s*kay|kase\s*ahat|nmste|nmskar|prnam|kse\s*ahat|ksa\s*kay)\b/i;
   const devanagariGreetingRegex = /^(नमस्ते|नमस्कार|प्रणाम|राम\s*राम|सत\s*श्री\s*अकाल|आदाब|कैसे\s*हो|कसा\s*काय|कसे\s*आहात|कसा\s*आहेस|कशी\s*आहेस)/;
@@ -54,22 +60,38 @@ function detectIntent(message = "") {
   const weinternKeywords = [
     "weintern",
     "internship",
+    "internsip",
+    "internshp",
+    "intrnship",
+    "intenrship",
     "course",
     "courses",
     "program",
     "training",
     "mentor",
+    "mentr",
+    "mntor",
     "certificate",
     "certification",
+    "certifcate",
+    "certificat",
+    "certficate",
     "placement",
+    "placment",
+    "placemnt",
     "resume",
     "interview",
     "fees",
     "fee",
+    "feez",
+    "phees",
     "emi",
     "payment",
     "refund",
     "domain",
+    "domains",
+    "doamin",
+    "domian",
     "full stack",
     "fullstack",
     "python",
@@ -83,12 +105,19 @@ function detectIntent(message = "") {
     "cyber security",
     "cloud",
     "orientation",
+    "orentation",
     "google meet",
     "support",
     "contact",
     "eligibility",
+    "eligibilty",
+    "elgibility",
     "register",
     "registration",
+    "regster",
+    "resgister",
+    "rgister",
+    "registrtion",
     "apply",
     "join",
     "live project",
@@ -97,16 +126,22 @@ function detectIntent(message = "") {
     "interns",
     "interning",
     "stipend",
+    "stipnd",
+    "stpend",
+    "stipent",
     "salary",
     "earn",
     "price",
     "cost",
     "charges",
     "duration",
+    "duraton",
+    "durtion",
     "weeks",
     "months",
     "time",
     "syllabus",
+    "sylabus",
     "location",
     "address",
     "whatsapp",

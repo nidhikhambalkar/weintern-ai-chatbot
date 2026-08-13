@@ -45,18 +45,28 @@ function normalizeSpeechInput(text: string): string {
     normalized = transliterateDevanagari(text);
   }
 
-  // 1. Normalize WeIntern name variations (case-insensitive)
+  // ── 1. Normalize WeIntern name variations (comprehensive) ──────────────
   const weinternRegexes = [
+    // Multi-word variants with spacing/hyphen
     /\b(v\s*intern|v-intern)\b/gi,
-    /\b(weintrn|we\s+in\s+turn|weinturn|wintern|we-intern|we\s+intern|we\s+inter|wee\s+intern|wee\s+intrn)\b/gi,
-    /\b(be\s*intern|beintern|way\s*intern|we\s+intent|we\s+entered|vee\s+intern|vee\s+intrn|vee\s+internship|v\s+internship)\b/gi,
-    /\b(we\s+entered\s+in|we\s+internship)\b/gi,
+    /\b(w\s+intern|w-intern)\b/gi,
+    /\b(wee\s+intern|wee\s+intrn|wee\s+internship)\b/gi,
+    /\b(we\s+intern|we-intern|we\s+interne|we\s+internship)\b/gi,
+    /\b(we\s+inter\b)/gi,
+    /\b(we\s+in\s+turn|we\s+inturn)\b/gi,
+    // Single-word phonetic / speech-to-text mistakes
+    /\b(weintrn|weinturn|wintern|wenitern|weinturm|weentern|weintearn)\b/gi,
+    /\b(wigton|vinturn|winturn|weintern)\b/gi,           // also ensures casing
+    /\b(way\s+intern|vee\s+intern|be\s+intern|beintern)\b/gi,
+    /\b(we\s+entered|we\s+entered\s+in)\b/gi,
+    /\b(we\s+intent|we\s+interns)\b/gi,
+    /\b(vee\s+internship|v\s+internship|weinternship)\b/gi,
   ];
   weinternRegexes.forEach((regex) => {
     normalized = normalized.replace(regex, "WeIntern");
   });
 
-  // 2. Normalize LOR variations
+  // ── 2. Normalize LOR variations ─────────────────────────────────────────
   const lorRegexes = [
     /\b(hello\s+r|hello\s+are|yellow\s+are|el\s+o\s+are|el\s+o\s+r|ell\s+o\s+are|elora|eller|alore|l\s+o\s+r)\b/gi,
     /\b(recommendation\s+letter|letter\s+of\s+recommendation)\b/gi,
@@ -65,7 +75,7 @@ function normalizeSpeechInput(text: string): string {
     normalized = normalized.replace(regex, "LOR");
   });
 
-  // 3. Normalize EMI variations
+  // ── 3. Normalize EMI variations ──────────────────────────────────────────
   const emiRegexes = [
     /\b(e\s+m\s+i|e\.m\.i\.|ami|emi)\b/gi,
   ];
@@ -73,17 +83,42 @@ function normalizeSpeechInput(text: string): string {
     normalized = normalized.replace(regex, "EMI");
   });
 
-  // 4. Normalize other common speech-to-text mistakes contextually
+  // ── 4. Speech-to-text phonetic / mishearing corrections ─────────────────
+  // Placement
   normalized = normalized.replace(/\bplace\s+ment\b/gi, "placement");
-  normalized = normalized.replace(/\bplacment\b/gi, "placement");
-  normalized = normalized.replace(/\b(stipent|stepend|stipond)\b/gi, "stipend");
+  normalized = normalized.replace(/\b(placment|placemnt|palcement)\b/gi, "placement");
+  // Stipend
+  normalized = normalized.replace(/\b(stipent|stepend|stipond|stipnd|stpend)\b/gi, "stipend");
+  // Certificate
+  normalized = normalized.replace(/\b(certifcate|certficate|certicate|certificat|srtiphiket|sartifiket|certifiate|cerificate)\b/gi, "certificate");
+  // Registration
+  normalized = normalized.replace(/\b(regster|resgister|registrtion|registation|resigtration)\b/gi, "registration");
+  // Internship
+  normalized = normalized.replace(/\b(internsip|internshp|intrnship|interniship|intenrship)\b/gi, "internship");
+  // Fees
+  normalized = normalized.replace(/\b(phees|feez|fes\b)/gi, "fees");
+  // Duration
+  normalized = normalized.replace(/\b(duraton|duartion|duraion|durtion)\b/gi, "duration");
 
-  // 5. Map common transliterated Hindi/Marathi words to standard English keywords
-  normalized = normalized.replace(/\bsrtiphiket\b/gi, "certificate");
-  normalized = normalized.replace(/\bsartifiket\b/gi, "certificate");
-  normalized = normalized.replace(/\bintrn\b/gi, "internship");
-  normalized = normalized.replace(/\bphees\b/gi, "fees");
+  // ── 5. Hinglish keyword normalizations ──────────────────────────────────
+  // Common Hinglish words → English equivalents so backend understands
   normalized = normalized.replace(/\b(kaam|kam)\b/gi, "work");
+  normalized = normalized.replace(/\bintrn\b/gi, "internship");
+  // "kitne month" → "how many months" (duration)
+  normalized = normalized.replace(/\bkitne\s+month(s?)\b/gi, "how many months");
+  normalized = normalized.replace(/\bkitna\s+month(s?)\b/gi, "how many months");
+  // "fees kitna" / "kitna fees"
+  normalized = normalized.replace(/\b(fees?)\s+kitna\b/gi, "fees how much");
+  normalized = normalized.replace(/\bkitna\s+(fees?)\b/gi, "fees how much");
+  normalized = normalized.replace(/\bcourse\s+ki\s+fees?\b/gi, "course fees");
+  // "register karna" / "enroll karna"
+  normalized = normalized.replace(/\b(register|enroll|apply)\s+karna\b/gi, "registration");
+  // "certificate milega"
+  normalized = normalized.replace(/\bcertif[a-z]*\s+milega\b/gi, "certificate");
+  // "stipend milega"
+  normalized = normalized.replace(/\bstipend\s+milega\b/gi, "stipend");
+  // "kya h" → "what is"
+  normalized = normalized.replace(/\bkya\s+h\b/gi, "what is");
 
   return normalized;
 }
@@ -92,11 +127,12 @@ function normalizeSpeechInput(text: string): string {
 function selectAndNormalizeTranscript(alternatives: string[]): string {
   if (!alternatives || alternatives.length === 0) return "";
 
-  // Heuristic: Check each alternative. If one contains a strong WeIntern keyword, prefer it.
+  // Heuristic: Check each alternative for strong domain keywords and prefer it
   const patterns = [
-    /\b(weintern|we\s+intern|v\s*intern|be\s*intern|wintern)\b/i,
+    /\b(weintern|we\s+intern|v\s*intern|be\s*intern|wintern|wigton|weintrn)\b/i,
     /\b(lor|letter\s+of\s+recommendation|hello\s+r|hello\s+are|yellow\s+are)\b/i,
     /\b(emi|e\s+m\s+i|installment|installments)\b/i,
+    /\b(certificate|certif|placement|stipend|internship|registration|fees?|duration|mentor|domain)\b/i,
   ];
 
   for (const pattern of patterns) {

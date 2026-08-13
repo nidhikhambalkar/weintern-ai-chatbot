@@ -171,29 +171,157 @@ const TOKEN_MAP = {
   profile: "placement",
 
   // C/C++ synonyms
-c: "c",
-cpp: "c++",
-cplusplus: "c++",
-"c++": "c++",
+  c: "c",
+  cpp: "c++",
+  cplusplus: "c++",
+  "c++": "c++",
 
-tool: "ide",
-tools: "ide",
-ide: "ide",
-editor: "ide",
-compiler: "compiler",
-compilers: "compiler",
+  tool: "ide",
+  tools: "ide",
+  ide: "ide",
+  editor: "ide",
+  compiler: "compiler",
+  compilers: "compiler",
 
-develop: "development",
-development: "development",
-coding: "programming",
-code: "programming",
+  develop: "development",
+  development: "development",
+  coding: "programming",
+  code: "programming",
 
-vscode: "visual studio code",
-visual: "visual",
-studio: "studio",
-gcc: "gcc",
-mingw: "mingw",
-codeblocks: "code blocks",
+  vscode: "visual studio code",
+  visual: "visual",
+  studio: "studio",
+  gcc: "gcc",
+  mingw: "mingw",
+  codeblocks: "code blocks",
+
+  // ── WeIntern single-token misspellings / speech variants ──────────────
+  weintrn:    "weintern",
+  wintern:    "weintern",
+  wenitern:   "weintern",
+  wigton:     "weintern",
+  vinturn:    "weintern",
+  winturn:    "weintern",
+  weinturm:   "weintern",
+  weinturn:   "weintern",
+  weentern:   "weintern",
+  weintearn:  "weintern",
+  wenitern:   "weintern",
+  wee:        "we",          // "wee intern" → will then match "we" + "intern"
+
+  // ── Certificate typos ─────────────────────────────────────────────────
+  certifcate:    "certificate",
+  certificat:    "certificate",
+  certficate:    "certificate",
+  certicate:     "certificate",
+  cretificate:   "certificate",
+  certiificate:  "certificate",
+  certifiate:    "certificate",
+  cerificate:    "certificate",
+
+  // ── Registration / register typos ─────────────────────────────────────
+  regster:      "register",
+  resgister:    "register",
+  rgister:      "register",
+  registrtion:  "registration",
+  registation:  "registration",
+  resigtration: "registration",
+  regsitration: "registration",
+
+  // ── Internship typos ──────────────────────────────────────────────────
+  internsip:    "internship",
+  internshp:    "internship",
+  intrnship:    "internship",
+  interniship:  "internship",
+  internshipe:  "internship",
+  internshipp:  "internship",
+  intenrship:   "internship",
+
+  // ── Placement typos ───────────────────────────────────────────────────
+  placment:   "placement",
+  placemnt:   "placement",
+  palcement:  "placement",
+  plcement:   "placement",
+  placsment:  "placement",
+
+  // ── Stipend typos ─────────────────────────────────────────────────────
+  stipnd:     "stipend",
+  stpend:     "stipend",
+  stiend:     "stipend",
+  stipened:   "stipend",
+  stipent:    "stipend",
+  stepend:    "stipend",
+  stipond:    "stipend",
+
+  // ── Duration typos ────────────────────────────────────────────────────
+  duraton:   "duration",
+  duartion:  "duration",
+  duraion:   "duration",
+  durtion:   "duration",
+
+  // ── Mentor typos ──────────────────────────────────────────────────────
+  mentr:  "mentor",
+  mntor:  "mentor",
+  metor:  "mentor",
+
+  // ── Domain typos ──────────────────────────────────────────────────────
+  doamin:  "domain",
+  domian:  "domain",
+  doman:   "domain",
+
+  // ── Course typos ──────────────────────────────────────────────────────
+  corse:   "course",
+  coure:   "course",
+  cource:  "course",
+  coures:  "course",
+  crouse:  "course",
+
+  // ── Fees typos ────────────────────────────────────────────────────────
+  feez: "fees",
+  fes:  "fees",
+
+  // ── Other key-term typos ──────────────────────────────────────────────
+  orentation:  "orientation",
+  orientaton:  "orientation",
+  eligibilty:  "eligibility",
+  elgibility:  "eligibility",
+  elibility:   "eligibility",
+  eligibity:   "eligibility",
+  sylabus:     "syllabus",
+  syllbus:     "syllabus",
+
+  // ── Hinglish shortforms & conversational tokens ───────────────────────
+  chahiye:  "want",
+  chahie:   "want",
+  chiye:    "want",
+  batao:    "tell",
+  btao:     "tell",
+  bata:     "tell",
+  janna:    "know",
+  jaanta:   "know",
+  pata:     "know",
+  abhi:     "now",
+  dobara:   "again",
+  sab:      "all",
+  koi:      "any",
+  kuch:     "some",
+  vo:       "that",
+  woh:      "that",
+  mujhe:    "me",
+  meri:     "my",
+  mera:     "my",
+  h:        "",             // "kya h" → "what" ("h" = "hai" in Hinglish)
+  hn:       "",             // "haan" variant
+  smjhao:   "explain",
+  samjhao:  "explain",
+  bhai:     "",             // vocative filler
+  yaar:     "",             // vocative filler
+  bro:      "",             // vocative filler
+
+  // Marathi shortforms
+  sandanga: "tell",
+  sangata:  "tell",
+  kasa:     "how",
 };
 
 const CATEGORY_HINTS = {
@@ -242,8 +370,70 @@ const CATEGORY_KEYWORD_MAP = {
   registration: ["register", "registration", "enroll", "enrollment", "apply"],
 };
 
+// ── Phrase-level pre-normalization ───────────────────────────────────────────
+// Runs BEFORE token-by-token normalization to handle multi-word variants and
+// Hinglish compound phrases that cannot be fixed at the individual token level.
+function preNormalize(text = "") {
+  let t = String(text).toLowerCase().trim();
+
+  // 1. WeIntern multi-word and phonetic name variants → "weintern"
+  //    Must run before special-char stripping so spaces/hyphens are still present
+  t = t.replace(
+    /\b(v\s+intern|w\s+intern|wee\s+intern|we\s+intern|we-intern|we\s+interne|weintrern|weintrn|wintern|wenitern|wigton|vinturn|winturn|weinturm|weinturn|weentern|wenitern|we\s+inter\b|way\s+intern|vee\s+intern|be\s+intern|beintern|weinternship)\b/gi,
+    "weintern"
+  );
+
+  // 2. Hinglish/informal phrase-level normalizations
+  const phraseMap = [
+    // Registration intent
+    [/\b(register|enroll|apply|join|signup)\s+karna\s+(hai|h|hoga|he)\b/gi, "registration want"],
+    [/\b(register|enroll|apply|join)\s+kaise\s+(kare|karu|karein|karna|hoga)\b/gi, "how registration"],
+    [/\bkaise\s+(register|enroll|apply)\s+(kare|karu|karein|karna)\b/gi, "how registration"],
+    [/\b(kaise|how)\s+(register|enroll|apply)\b/gi, "how registration"],
+    // Fees/cost intent
+    [/\b(kitna|kitni|kitne)\s+(fee|fees|paisa|paise|rupees|rs|rupay|cost|charge|amount)\b/gi, "fees how much"],
+    [/\b(fee|fees|paisa|paise)\s+(kitna|kitni|kitne|lagega|lagenge|hoga|hoge|hai|h)\b/gi, "fees how much"],
+    [/\binternship\s+fees?\s+kitna\b/gi, "internship fees how much"],
+    [/\bcourse\s+ki\s+fees?\b/gi, "course fees"],
+    [/\bfees?\s+kya\s+(h|hai)\b/gi, "fees what is"],
+    // Duration intent
+    [/\b(kitne|kitna)\s+(month|months|mahine|mahina|din|hafte|hafta|weeks|time)\b/gi, "duration months how many"],
+    [/\bkitne\s+month\s+ka\b/gi, "duration months"],
+    [/\bhow\s+many\s+months?\b/gi, "duration months"],
+    [/\bhow\s+long\s+is\b/gi, "duration"],
+    // Certificate intent
+    [/\b(certif[a-z]*|cert)\s+(milega|milte|milta|milenge|kab|kaise|hoga)\b/gi, "certificate get"],
+    // Stipend intent
+    [/\b(stipend|paise|paisa|earning)\s+(milega|milte|milta|milenge|kitna|kab)\b/gi, "stipend get"],
+    [/\bkitna\s+stipend\b/gi, "stipend how much"],
+    // Placement/job
+    [/\b(job|placement|naukri)\s+(milega|milte|milta|guarantee|pakka|hoga)\b/gi, "placement get"],
+    // What is / kya hai
+    [/\bkya\s+h\b/gi, "what is"],
+    [/\bkya\s+hai\b/gi, "what is"],
+    [/\bkya\s+hota\s+(hai|h)\b/gi, "what is"],
+    [/\bkaisa\s+(hota|hai|h)\b/gi, "how is"],
+    // "karna h" / "karna hai" → intent marker (want)
+    [/\bkarna\s+(h|hai|hoga)\b/gi, "want"],
+    [/\bkarna\s+chahta\b/gi, "want"],
+    // Short queries
+    [/\bkitna\s+(hai|h)\b/gi, "how much"],
+    [/\bkitne\s+(hai|h)\b/gi, "how many"],
+  ];
+
+  phraseMap.forEach(([pattern, replacement]) => {
+    t = t.replace(pattern, replacement);
+  });
+
+  return t;
+}
+
 function normalize(text = "") {
-  const cleaned = String(text)
+  // Phase 1: phrase-level pre-normalization (WeIntern variants, Hinglish phrases)
+  const pre = preNormalize(text);
+
+  // Phase 2: character-level cleaning
+  const cleaned = String(pre)
     .toLowerCase()
     .replace(/[^a-z0-9+\s]/g, " ")
     .replace(/\s+/g, " ")
@@ -253,6 +443,7 @@ function normalize(text = "") {
     return "";
   }
 
+  // Phase 3: token-by-token TOKEN_MAP substitution
   const tokens = cleaned.split(" ").filter(Boolean);
   const translated = tokens.flatMap((token) => {
     const mapped = TOKEN_MAP[token] || token;
@@ -265,6 +456,7 @@ function normalize(text = "") {
   const normalized = translated.join(" ").replace(/\s+/g, " ").trim();
   return normalized;
 }
+
 
 function levenshteinDistance(a = "", b = "") {
   const left = String(a).toLowerCase();
