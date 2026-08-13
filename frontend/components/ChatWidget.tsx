@@ -235,104 +235,13 @@ export default function ChatWidget() {
     }
   };
 
-  const quickReply = (question: string) => {
+  const quickReply = async (question: string) => {
     if (question.includes("Apply") || question.includes("Register")) {
       startLeadForm();
       return;
     }
-
     setMessage("");
-    const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
-    let userLabel = question;
-    let botReplyText = "";
-
-    if (question === "Fees & EMI" || question.includes("Fees")) {
-      userLabel = "Fees & EMI";
-      botReplyText = `Here are the complete fee and EMI details for WeIntern programs and courses:
-
-📌 **6-Month Internship Program — ₹6,599**
-• Duration: 6 months (includes 2 months industry training + live project)
-• Price: ₹6,599
-• EMI Option: Split in 30:40:30 ratio across 3 installments (30% enrollment, 40% midpoint, 30% end)
-• One-Time Discount: 10% off on full upfront payment
-• Features: Internship Certificate, Training Certificate, LOR, Mock Interview Prep, LinkedIn Profile Building, 100% Placement Guarantee, and performance stipend up to ₹10,000.
-
-📌 **3-Month Internship Program — ₹999**
-• Duration: 3 months
-• Price: ₹999 (one-time full payment)
-• Features: Industry Training, Live Project, Internship Certificate, LOR, Placement Support, and performance stipend up to ₹10,000.
-
-📌 **All 10 Courses (Exact Durations & Fees)**
-1. Full Stack Web Development — 12 weeks — ₹6,599
-2. Mobile App Development — 10 weeks — ₹10,699
-3. AI & Automation — 8 weeks — ₹6,599
-4. Data Science & Analytics — 12 weeks — ₹6,599
-5. Python Programming — 10 weeks — ₹3,299
-6. Java Programming — 12 weeks — ₹3,299
-7. C/C++ Programming — 10 weeks — ₹3,299
-8. UI/UX Design — 8 weeks — ₹3,299
-9. Cloud Computing — 12 weeks — ₹5,399
-10. Digital Marketing — 8 weeks — ₹2,499
-
-💳 **Payment Methods**: Razorpay (UPI, Credit/Debit Cards, Net Banking, Paytm, PhonePe, GPay).`;
-    } else if (question === "Domains" || question.includes("Domains")) {
-      userLabel = "Domains";
-      botReplyText = `WeIntern offers 10 specialized courses and domain training tracks with exact durations:
-
-1. Full Stack Web Development — 12 weeks (₹6,599)
-2. Mobile App Development — 10 weeks (₹10,699)
-3. AI & Automation — 8 weeks (₹6,599)
-4. Data Science & Analytics — 12 weeks (₹6,599)
-5. Python Programming — 10 weeks (₹3,299)
-6. Java Programming — 12 weeks (₹3,299)
-7. C/C++ Programming — 10 weeks (₹3,299)
-8. UI/UX Design — 8 weeks (₹3,299)
-9. Cloud Computing — 12 weeks (₹5,399)
-10. Digital Marketing — 8 weeks (₹2,499)
-
-💼 **Internship Program Track Durations**:
-• 6-Month Internship Program: 6 Months (₹6,599) — includes 2 months training + live project + 100% placement guarantee.
-• 3-Month Internship Program: 3 Months (₹999) — includes industry training + live project + placement support.`;
-    } else if (question === "Certificates" || question.includes("Certificates")) {
-      userLabel = "Certificates";
-      botReplyText = `WeIntern provides verified certificates based on your enrolled program:
-
-📜 **6-Month Internship Program (₹6,599)**:
-1. Internship Completion Certificate
-2. Training Certificate
-3. Letter of Recommendation (LOR)
-
-📜 **3-Month Internship Program (₹999)**:
-1. Internship Completion Certificate
-2. Letter of Recommendation (LOR)
-
-✨ All certificates are issued under the official WeIntern brand, include unique verification codes, and can be added directly to your LinkedIn profile and resume.`;
-    } else if (question === "Contact" || question.includes("Contact")) {
-      userLabel = "Contact";
-      botReplyText = `Here are the official contact details for WeIntern:
-
-📱 **WhatsApp**: +91 74149 74582
-📧 **Email**: contact@we-intern.in
-🌐 **Website**: https://we-intern.in
-⏰ **Support Hours**: Monday to Saturday, 9:00 AM – 7:00 PM IST
-
-Reach out to us for enrollment assistance, payment queries, certificate verification, or program guidance!`;
-    }
-
-    if (botReplyText) {
-      setMessages((prev) => [
-        ...prev,
-        { sender: "user", text: userLabel, time },
-        { sender: "bot", text: botReplyText, time },
-      ]);
-
-      if (voiceMode && !isSpeakerMuted) {
-        speakResponse(botReplyText);
-      }
-    } else {
-      processMessage(question, "text");
-    }
+    await processMessage(question, "text");
   };
 
   // Helper to fetch the last response spoken by WeIntern AI
