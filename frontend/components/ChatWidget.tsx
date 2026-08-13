@@ -155,47 +155,6 @@ export default function ChatWidget() {
     inputRef.current?.focus();
   };
 
-  const handleRefreshHistory = async () => {
-    if (!sessionId) return;
-    setIsTyping(true);
-    try {
-      const res = await getHistory(sessionId);
-      if (res.success && res.data) {
-        if (res.data.length === 0) {
-          setMessages([
-            {
-              sender: "bot",
-              text: "👋 Hello! Welcome to WeIntern.",
-              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-            },
-            {
-              sender: "bot",
-              text: "Ask me anything about internships, domains, certificates or registration.",
-              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-            },
-          ]);
-        } else {
-          setMessages(
-            res.data.map((msg: any) => ({
-              sender: msg.sender === "bot" ? "bot" : "user",
-              text: msg.message,
-              time: new Date(msg.timestamp).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              }),
-            }))
-          );
-        }
-        setToastMessage("History refreshed");
-        setTimeout(() => setToastMessage(null), 2000);
-      }
-    } catch (err) {
-      console.error("Failed to refresh history:", err);
-    } finally {
-      setIsTyping(false);
-    }
-  };
-
   const handleClearHistory = async () => {
     setShowClearConfirm(false);
     if (!sessionId) return;
@@ -205,11 +164,6 @@ export default function ChatWidget() {
         {
           sender: "bot",
           text: "👋 Hello! Welcome to WeIntern.",
-          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        },
-        {
-          sender: "bot",
-          text: "Ask me anything about internships, domains, certificates or registration.",
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         },
       ]);
@@ -228,14 +182,6 @@ export default function ChatWidget() {
     {
       sender: "bot",
       text: "👋 Hello! Welcome to WeIntern.",
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    },
-    {
-      sender: "bot",
-      text: "Ask me anything about internships, domains, certificates or registration.",
       time: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -977,15 +923,6 @@ export default function ChatWidget() {
             </div>
 
             <div className="flex gap-2 items-center">
-              {/* Refresh History */}
-              <button
-                onClick={handleRefreshHistory}
-                title="Refresh chat history"
-                className="hover:text-blue-200 transition-colors p-1"
-              >
-                <BsArrowClockwise size={18} />
-              </button>
-
               {/* Clear History */}
               <button
                 onClick={() => setShowClearConfirm(true)}
