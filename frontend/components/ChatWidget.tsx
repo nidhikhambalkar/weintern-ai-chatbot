@@ -239,6 +239,8 @@ export default function ChatWidget() {
       return;
     }
     
+    setMessage("");
+
     let query = question;
     if (question === "Fees & EMI" || question.includes("Fees")) {
       query = "What are the internship fees, EMI options, and course prices?";
@@ -1112,7 +1114,7 @@ export default function ChatWidget() {
             </button>
 
             <button
-              onClick={() => quickReply("Internship Fees")}
+              onClick={() => quickReply("Fees & EMI")}
               className="flex-shrink-0 border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200 touch-manipulation"
             >
               Fees & EMI
