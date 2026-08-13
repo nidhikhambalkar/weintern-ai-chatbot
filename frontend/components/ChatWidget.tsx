@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { BsChatDotsFill, BsX, BsMicFill, BsMicMuteFill, BsVolumeUpFill, BsVolumeMuteFill, BsPlayFill, BsPauseFill, BsStopFill } from "react-icons/bs";
+import { BsChatDotsFill, BsX, BsMicFill, BsMicMuteFill, BsVolumeUpFill, BsVolumeMuteFill, BsPlayFill, BsPauseFill, BsStopFill, BsCopy, BsPencilSquare, BsArrowClockwise, BsTrash, BsCheck2 } from "react-icons/bs";
 import { IoSend } from "react-icons/io5";
-import { sendChat, saveLead, getHistory } from "@/services/chatApi";
+import { sendChat, saveLead, getHistory, clearHistory } from "@/services/chatApi";
 
 type ChatMessage = {
   sender: "user" | "bot";
@@ -138,6 +138,91 @@ export default function ChatWidget() {
   const synthesisRef = useRef<any>(null);
   const currentPausedTextRef = useRef<string>("");
   const currentSpeakCharIndexRef = useRef<number>(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [showClearConfirm, setShowClearConfirm] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const handleCopyMessage = (index: number, text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
+  const handleEditMessage = (text: string) => {
+    setMessage(text);
+    inputRef.current?.focus();
+  };
+
+  const handleRefreshHistory = async () => {
+    if (!sessionId) return;
+    setIsTyping(true);
+    try {
+      const res = await getHistory(sessionId);
+      if (res.success && res.data) {
+        if (res.data.length === 0) {
+          setMessages([
+            {
+              sender: "bot",
+              text: "👋 Hello! Welcome to WeIntern.",
+              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            },
+            {
+              sender: "bot",
+              text: "Ask me anything about internships, domains, certificates or registration.",
+              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            },
+          ]);
+        } else {
+          setMessages(
+            res.data.map((msg: any) => ({
+              sender: msg.sender === "bot" ? "bot" : "user",
+              text: msg.message,
+              time: new Date(msg.timestamp).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            }))
+          );
+        }
+        setToastMessage("History refreshed");
+        setTimeout(() => setToastMessage(null), 2000);
+      }
+    } catch (err) {
+      console.error("Failed to refresh history:", err);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  const handleClearHistory = async () => {
+    setShowClearConfirm(false);
+    if (!sessionId) return;
+    try {
+      await clearHistory(sessionId);
+      setMessages([
+        {
+          sender: "bot",
+          text: "👋 Hello! Welcome to WeIntern.",
+          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        },
+        {
+          sender: "bot",
+          text: "Ask me anything about internships, domains, certificates or registration.",
+          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        },
+      ]);
+      setToastMessage("Chat history cleared");
+      setTimeout(() => setToastMessage(null), 2000);
+    } catch (err) {
+      console.error("Failed to clear history:", err);
+    }
+  };
+
+  const handleRetryMessage = async (userText: string) => {
+    await processMessage(userText, "text");
+  };
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -891,7 +976,25 @@ export default function ChatWidget() {
               </p>
             </div>
 
-            <div className="flex gap-2.5 items-center">
+            <div className="flex gap-2 items-center">
+              {/* Refresh History */}
+              <button
+                onClick={handleRefreshHistory}
+                title="Refresh chat history"
+                className="hover:text-blue-200 transition-colors p-1"
+              >
+                <BsArrowClockwise size={18} />
+              </button>
+
+              {/* Clear History */}
+              <button
+                onClick={() => setShowClearConfirm(true)}
+                title="Clear chat history"
+                className="hover:text-red-200 transition-colors p-1"
+              >
+                <BsTrash size={18} />
+              </button>
+
               {/* Speaker Output Toggle */}
               <button
                 onClick={() => {
@@ -935,6 +1038,42 @@ export default function ChatWidget() {
             </div>
           </div>
 
+          {/* Toast Notification */}
+          {toastMessage && (
+            <div className="absolute top-16 left-1/2 -translate-x-1/2 bg-gray-800/90 text-white text-xs px-3.5 py-1.5 rounded-full shadow-lg z-50 font-medium">
+              {toastMessage}
+            </div>
+          )}
+
+          {/* Clear History Confirmation Modal */}
+          {showClearConfirm && (
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-2xl p-5 shadow-2xl max-w-[280px] w-full text-center space-y-3 border border-gray-100">
+                <div className="w-11 h-11 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto text-lg">
+                  <BsTrash />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-800 text-sm">Clear Chat History?</h3>
+                  <p className="text-[11px] text-gray-500 mt-1">All saved messages for this session will be deleted.</p>
+                </div>
+                <div className="flex gap-2 justify-center pt-1">
+                  <button
+                    onClick={() => setShowClearConfirm(false)}
+                    className="px-3 py-1.5 text-xs rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium flex-1 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleClearHistory}
+                    className="px-3 py-1.5 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium flex-1 shadow transition"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Messages */}
           <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50 flex flex-col">
 
@@ -956,56 +1095,98 @@ export default function ChatWidget() {
                 >
                   <div className="whitespace-pre-line text-sm leading-relaxed">{msg.text}</div>
 
-                  {msg.sender === "bot" && (
-                    <div className="flex gap-4 sm:gap-2.5 mt-2 pt-1.5 border-t border-gray-100 justify-start items-center text-gray-400">
-                      {((playingMessageIndex === index) || (playingMessageIndex === -1 && index === messages.length - 1)) ? (
-                        <>
-                          {playbackState === "PLAYING" ? (
-                            <button
-                              onClick={handlePauseMessage}
-                              title="Pause response"
-                              className="hover:text-blue-600 transition duration-200 p-2 sm:p-0.5 flex items-center justify-center cursor-pointer touch-manipulation"
-                            >
-                              <BsPauseFill className="w-5 h-5 sm:w-3.5 sm:h-3.5" />
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handlePlayMessage(index, msg.text)}
-                              title="Resume response"
-                              className="hover:text-blue-600 transition duration-200 p-2 sm:p-0.5 flex items-center justify-center cursor-pointer touch-manipulation"
-                            >
-                              <BsPlayFill className="w-5 h-5 sm:w-3.5 sm:h-3.5" />
-                            </button>
-                          )}
-                          <button
-                            onClick={handleStopMessage}
-                            title="Stop response"
-                            className="hover:text-red-500 transition duration-200 p-2 sm:p-0.5 flex items-center justify-center cursor-pointer touch-manipulation"
-                          >
-                            <BsStopFill className="w-5 h-5 sm:w-3.5 sm:h-3.5" />
-                          </button>
-                          <span className="text-[10px] sm:text-[8px] text-blue-500 font-medium animate-pulse ml-1">
-                            {playbackState === "PLAYING" ? "speaking..." : "paused"}
-                          </span>
-                        </>
-                      ) : (
+                  {/* Action Bar & Footer */}
+                  <div
+                    className={`flex items-center justify-between gap-2 mt-2 pt-1.5 border-t text-[11px] ${
+                      msg.sender === "user" ? "border-blue-500 text-blue-100" : "border-gray-100 text-gray-400"
+                    }`}
+                  >
+                    {/* Action Buttons: Copy, Edit, Retry */}
+                    <div className="flex items-center gap-2">
+                      {/* Copy Button */}
+                      <button
+                        onClick={() => handleCopyMessage(index, msg.text)}
+                        title="Copy text"
+                        className="hover:opacity-80 transition duration-150 flex items-center gap-0.5 cursor-pointer"
+                      >
+                        {copiedIndex === index ? (
+                          <>
+                            <BsCheck2 className="w-3.5 h-3.5 text-green-400 font-bold" />
+                            <span className="text-[10px] text-green-400 font-semibold">Copied!</span>
+                          </>
+                        ) : (
+                          <BsCopy className="w-3 h-3" />
+                        )}
+                      </button>
+
+                      {/* Edit Button (User) */}
+                      {msg.sender === "user" && (
                         <button
-                          onClick={() => handlePlayMessage(index, msg.text)}
-                          title="Speak response"
-                          className="hover:text-blue-600 transition duration-200 p-2 sm:p-0.5 flex items-center justify-center cursor-pointer touch-manipulation"
+                          onClick={() => handleEditMessage(msg.text)}
+                          title="Edit message"
+                          className="hover:opacity-80 transition duration-150 flex items-center gap-0.5 cursor-pointer ml-1"
                         >
-                          <BsPlayFill className="w-5 h-5 sm:w-3.5 sm:h-3.5" />
+                          <BsPencilSquare className="w-3 h-3" />
+                        </button>
+                      )}
+
+                      {/* Retry Button (Bot) */}
+                      {msg.sender === "bot" && index > 0 && messages[index - 1]?.sender === "user" && (
+                        <button
+                          onClick={() => handleRetryMessage(messages[index - 1].text)}
+                          title="Retry response"
+                          className="hover:text-blue-600 transition duration-150 flex items-center gap-0.5 cursor-pointer ml-1"
+                        >
+                          <BsArrowClockwise className="w-3 h-3" />
                         </button>
                       )}
                     </div>
-                  )}
 
-                  <p
-                    className={`text-[9px] mt-1 text-right ${msg.sender === "user" ? "text-blue-100" : "text-gray-400"
-                      }`}
-                  >
-                    {msg.time}
-                  </p>
+                    {/* Right side: TTS Controls (Bot) + Timestamp */}
+                    <div className="flex items-center gap-2">
+                      {msg.sender === "bot" && (
+                        <div className="flex items-center gap-1.5">
+                          {((playingMessageIndex === index) || (playingMessageIndex === -1 && index === messages.length - 1)) ? (
+                            <>
+                              {playbackState === "PLAYING" ? (
+                                <button
+                                  onClick={handlePauseMessage}
+                                  title="Pause response"
+                                  className="hover:text-blue-600 transition duration-200 cursor-pointer"
+                                >
+                                  <BsPauseFill className="w-4 h-4" />
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handlePlayMessage(index, msg.text)}
+                                  title="Resume response"
+                                  className="hover:text-blue-600 transition duration-200 cursor-pointer"
+                                >
+                                  <BsPlayFill className="w-4 h-4" />
+                                </button>
+                              )}
+                              <button
+                                onClick={handleStopMessage}
+                                title="Stop response"
+                                className="hover:text-red-500 transition duration-200 cursor-pointer"
+                              >
+                                <BsStopFill className="w-4 h-4" />
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              onClick={() => handlePlayMessage(index, msg.text)}
+                              title="Speak response"
+                              className="hover:text-blue-600 transition duration-200 cursor-pointer"
+                            >
+                              <BsPlayFill className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      )}
+                      <span className="text-[9px]">{msg.time}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -1138,6 +1319,7 @@ export default function ChatWidget() {
           <div className="border-t p-3 flex gap-2 bg-white items-center">
 
             <input
+              ref={inputRef}
               type="text"
               placeholder={voiceState === "LISTENING" ? "Listening to your voice..." : "Type your message..."}
               value={message}
