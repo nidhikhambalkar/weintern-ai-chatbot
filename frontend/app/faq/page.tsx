@@ -2,7 +2,8 @@ import Link from "next/link";
 
 async function fetchFaqs() {
   try {
-    const response = await fetch("http://localhost:5000/api/faq", { cache: "no-store" });
+    const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000';
+    const response = await fetch(`${apiBase}/api/faq`, { cache: "no-store" });
     if (!response.ok) {
       throw new Error(`Failed to load FAQ: ${response.status}`);
     }
@@ -34,7 +35,7 @@ export default async function FaqPage() {
 
         {faqs === null ? (
           <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-800">
-            Unable to load FAQ data. Make sure the backend is running on <strong>http://localhost:5000</strong>.
+            Unable to load FAQ data. Please make sure the backend is running and reachable.
           </div>
         ) : (
           <div className="space-y-4">

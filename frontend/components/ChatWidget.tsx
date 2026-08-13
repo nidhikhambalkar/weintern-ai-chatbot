@@ -204,11 +204,6 @@ export default function ChatWidget() {
               text: "👋 Hello! Welcome to WeIntern.",
               time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             },
-            {
-              sender: "bot",
-              text: "Ask me anything about internships, domains, certificates or registration.",
-              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-            },
           ]);
         } else {
           setMessages(
@@ -241,11 +236,6 @@ export default function ChatWidget() {
         {
           sender: "bot",
           text: "👋 Hello! Welcome to WeIntern.",
-          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        },
-        {
-          sender: "bot",
-          text: "Ask me anything about internships, domains, certificates or registration.",
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         },
       ]);
