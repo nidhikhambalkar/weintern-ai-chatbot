@@ -322,8 +322,13 @@ export default function ChatWidget() {
   const isVoicePausedRef = useRef<boolean>(false);
   const isCancelledByCommandRef = useRef<boolean>(false);
   const pausedMessageIndexRef = useRef<number | null>(null);
+  const isSpeakerMutedRef = useRef<boolean>(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    isSpeakerMutedRef.current = isSpeakerMuted;
+  }, [isSpeakerMuted]);
 
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState<boolean>(false);
@@ -654,19 +659,39 @@ export default function ChatWidget() {
   };
 
   // ── Voice playback action handlers ──────────────────────────────────────
+  const handleMute = () => {
+    setIsSpeakerMuted(true);
+    isSpeakerMutedRef.current = true;
+    if (synthesisRef.current) {
+      try {
+        synthesisRef.current.cancel();
+      } catch (e) {}
+    }
+    isTtsSpeakingRef.current = false;
+    if (voiceState === "SPEAKING") {
+      setVoiceState("IDLE");
+    }
+  };
+
+  const handleUnmute = () => {
+    setIsSpeakerMuted(false);
+    isSpeakerMutedRef.current = false;
+    if (playbackState === "PLAYING" && currentPausedTextRef.current) {
+      const msgIdx = pausedMessageIndexRef.current ?? playingMessageIndex ?? -1;
+      playSentenceQueueAtIndex(msgIdx, currentSentenceIndexRef.current, sentenceCharOffsetRef.current);
+    }
+  };
+
   const handleResumeOrContinueMessage = () => {
-    // 1. Guard: If already playing, do nothing to avoid duplicate audio instances
+    // 1. Guard: If already actively speaking out loud, do nothing to avoid duplicate audio
     if (playbackState === "PLAYING" && synthesisRef.current && synthesisRef.current.speaking && !synthesisRef.current.paused) {
       return;
     }
 
-    // 2. Fallback: If no currentPausedText exists, attempt to pull from last bot message
-    if (!currentPausedTextRef.current) {
-      const lastBot = getLastBotResponse();
-      if (lastBot) {
-        currentPausedTextRef.current = lastBot.text;
-        pausedMessageIndexRef.current = lastBot.index;
-      }
+    // 2. Guard: Resume must NOT continue something that was completely stopped or never started!
+    if (playbackState === "IDLE" && !isVoicePausedRef.current && pausedMessageIndexRef.current === null && !currentPausedTextRef.current) {
+      console.log("No active paused speech to continue.");
+      return;
     }
 
     if (!currentPausedTextRef.current) {
@@ -677,22 +702,23 @@ export default function ChatWidget() {
     isVoicePausedRef.current = false;
     if (!synthesisRef.current) return;
 
-    // 3. Try native browser resume first if browser synthesis is currently paused
-    if (synthesisRef.current.paused) {
-      isTtsSpeakingRef.current = true;
-      stopSpeechRecognition();
-      startInterruptListener();
-      synthesisRef.current.resume();
-      setPlaybackState("PLAYING");
-      setVoiceState("SPEAKING");
+    const msgIdx = pausedMessageIndexRef.current ?? playingMessageIndex ?? -1;
+
+    // Cross-browser reliable resume: cancel native synthesis if paused/stuck and restart sentence queue at stored index & offset
+    try {
+      if (synthesisRef.current.paused || synthesisRef.current.speaking) {
+        synthesisRef.current.cancel();
+      }
+    } catch (e) {}
+
+    setPlaybackState("PLAYING");
+    setVoiceState("SPEAKING");
+
+    if (isSpeakerMutedRef.current) {
       return;
     }
 
-    // 4. Fall back: resume from exact character offset without re-synthesizing spoken portion
-    const fullText = currentPausedTextRef.current;
-    const offset = currentSpeakCharIndexRef.current || 0;
-    const msgIdx = pausedMessageIndexRef.current ?? playingMessageIndex ?? -1;
-    handlePlayMessage(msgIdx, fullText, offset);
+    playSentenceQueueAtIndex(msgIdx, currentSentenceIndexRef.current, sentenceCharOffsetRef.current);
   };
 
   // Handles natural voice command detection and execution (supports English, Hindi, and Marathi variations)
@@ -722,12 +748,11 @@ export default function ChatWidget() {
         return true;
       }
       if (cmdType === "MUTE") {
-        setIsSpeakerMuted(true);
-        handleStopMessage();
+        handleMute();
         return true;
       }
       if (cmdType === "UNMUTE") {
-        setIsSpeakerMuted(false);
+        handleUnmute();
         return true;
       }
     }
@@ -816,6 +841,10 @@ export default function ChatWidget() {
 
   // Speaks response using Web Speech Synthesis (TTS)
   const speakResponse = (text: string) => {
+    if (isSpeakerMutedRef.current) {
+      console.log("Speaker is muted. Skipping TTS output.");
+      return;
+    }
     if (isVoicePausedRef.current) {
       console.log("Voice reading paused by user. Skipping TTS until user says continue or resume.");
       return;
@@ -852,6 +881,15 @@ export default function ChatWidget() {
 
     if (!sentenceToSpeak.trim()) {
       playSentenceQueueAtIndex(msgIdx, sentenceIdx + 1, 0);
+      return;
+    }
+
+    if (isSpeakerMutedRef.current) {
+      isTtsSpeakingRef.current = false;
+      stopInterruptListener();
+      setPlayingMessageIndex(msgIdx);
+      setPlaybackState("PLAYING");
+      setVoiceState("SPEAKING");
       return;
     }
 
@@ -937,18 +975,6 @@ export default function ChatWidget() {
     isVoicePausedRef.current = false;
     if (!synthesisRef.current) return;
 
-    const isCurrentPlaying = playingMessageIndex === index || (playingMessageIndex === -1 && index === messages.length - 1);
-
-    if (isCurrentPlaying && playbackState === "PAUSED" && synthesisRef.current.paused) {
-      isTtsSpeakingRef.current = true;
-      stopSpeechRecognition();
-      startInterruptListener();
-      synthesisRef.current.resume();
-      setPlaybackState("PLAYING");
-      setVoiceState("SPEAKING");
-      return;
-    }
-
     isTtsSpeakingRef.current = true;
     stopSpeechRecognition();
     synthesisRef.current.cancel();
@@ -964,6 +990,8 @@ export default function ChatWidget() {
 
     const sentences = splitTextIntoSentenceQueue(cleanText);
     sentenceQueueRef.current = sentences;
+    currentPausedTextRef.current = sentences.join(". ");
+    pausedMessageIndexRef.current = index;
 
     let cumulative = 0;
     let startSentenceIdx = 0;
@@ -1544,13 +1572,10 @@ export default function ChatWidget() {
               {/* Speaker Output Toggle */}
               <button
                 onClick={() => {
-                  const val = !isSpeakerMuted;
-                  setIsSpeakerMuted(val);
-                  if (val && synthesisRef.current) {
-                    synthesisRef.current.cancel();
-                    if (voiceState === "SPEAKING") {
-                      setVoiceState("IDLE");
-                    }
+                  if (isSpeakerMuted) {
+                    handleUnmute();
+                  } else {
+                    handleMute();
                   }
                 }}
                 title={isSpeakerMuted ? "Unmute bot output" : "Mute bot output"}
@@ -1704,7 +1729,7 @@ export default function ChatWidget() {
                                 </button>
                               ) : (
                                 <button
-                                  onClick={() => handlePlayMessage(index, msg.text)}
+                                  onClick={() => playbackState === "PAUSED" ? handleResumeOrContinueMessage() : handlePlayMessage(index, msg.text)}
                                   title="Resume response"
                                   className="hover:text-blue-600 transition duration-200 cursor-pointer"
                                 >
