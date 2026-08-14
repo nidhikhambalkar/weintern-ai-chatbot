@@ -468,8 +468,19 @@ export default function ChatWidget() {
     isVoicePausedRef.current = false;
     if (!synthesisRef.current) return;
 
-    // If we have a saved position from a commanded stop/pause, resume from exact position
-    if (currentPausedTextRef.current && currentSpeakCharIndexRef.current >= 0) {
+    // 1. Primary: Native SpeechSynthesis resume (continues speech natively from paused position)
+    if (synthesisRef.current.paused) {
+      isTtsSpeakingRef.current = true;
+      stopSpeechRecognition();
+      startInterruptListener();
+      synthesisRef.current.resume();
+      setPlaybackState("PLAYING");
+      setVoiceState("SPEAKING");
+      return;
+    }
+
+    // 2. Fallback: If browser engine lost paused utterance, resume from exact character index offset
+    if (currentPausedTextRef.current && currentSpeakCharIndexRef.current > 0) {
       const fullText = currentPausedTextRef.current;
       const offset = currentSpeakCharIndexRef.current;
       const msgIdx = pausedMessageIndexRef.current ?? playingMessageIndex ?? -1;
@@ -477,17 +488,7 @@ export default function ChatWidget() {
       return;
     }
 
-    // Fall back: browser resume
-    if (synthesisRef.current.paused) {
-      isTtsSpeakingRef.current = true;
-      stopSpeechRecognition();
-      synthesisRef.current.resume();
-      setPlaybackState("PLAYING");
-      setVoiceState("SPEAKING");
-      return;
-    }
-
-    // Fall back: replay last bot message from start
+    // 3. Fallback: Replay last bot message from start
     const lastBot = getLastBotResponse();
     if (lastBot) {
       handlePlayMessage(lastBot.index, lastBot.text, 0);
