@@ -107,17 +107,16 @@ app.get("/health", async (req, res) => {
   let dbError = null;
 
   try {
-    const { pool } = require("./database/db");
+    const { query, pool } = require("./database/db");
 
-    if (pool && getIsPgConnected()) {
-      const result = await pool.query("SELECT NOW()");
-      dbStatus =
-        result.rows.length > 0 ? "CONNECTED" : "UNHEALTHY";
+    if (pool) {
+      const result = await query("SELECT NOW()");
+      dbStatus = result.rows.length > 0 ? "CONNECTED" : "UNHEALTHY";
     } else {
       dbStatus = "IN_MEMORY_FALLBACK";
     }
   } catch (err) {
-    dbStatus = "DISCONNECTED";
+    dbStatus = "IN_MEMORY_FALLBACK";
     dbError = err.message;
   }
 

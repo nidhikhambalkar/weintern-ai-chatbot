@@ -130,10 +130,14 @@ const initDatabase = async () => {
 
 // Function: Executes an SQL query using PostgreSQL pool
 const query = async (text, params = []) => {
+  if (!isPgConnected && pool) {
+    console.log('🔄 [Database] Connection offline. Attempting to reconnect/reinitialize...');
+    await initDatabase();
+  }
   if (isPgConnected) {
     return await pool.query(text, params); // Run query on real PostgreSQL
   }
-  throw new Error('PostgreSQL not connected'); // Throw error to trigger fallback in server.js
+  throw new Error('PostgreSQL not connected'); // Throw error to trigger fallback
 };
 
 // Export database functions and in-memory object for use in server.js
