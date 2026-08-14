@@ -465,33 +465,36 @@ export default function ChatWidget() {
 
   // ── Voice playback action handlers ──────────────────────────────────────
   const handleResumeOrContinueMessage = () => {
-    isVoicePausedRef.current = false;
-    if (!synthesisRef.current) return;
-
-    // If we have a saved position from a commanded stop/pause, resume from exact position
-    if (currentPausedTextRef.current && currentSpeakCharIndexRef.current >= 0) {
-      const fullText = currentPausedTextRef.current;
-      const offset = currentSpeakCharIndexRef.current;
-      const msgIdx = pausedMessageIndexRef.current ?? playingMessageIndex ?? -1;
-      handlePlayMessage(msgIdx, fullText, offset);
+    // 1. Guard: If already playing, do nothing to avoid duplicate audio instances
+    if (playbackState === "PLAYING" && synthesisRef.current && synthesisRef.current.speaking && !synthesisRef.current.paused) {
       return;
     }
 
-    // Fall back: browser resume
+    // 2. Guard: If stopped or no active paused text exists, DO NOTHING (Strict Requirements 4 & 6)
+    if (!currentPausedTextRef.current || (!isVoicePausedRef.current && playbackState !== "PAUSED")) {
+      console.log("No paused speech available to continue.");
+      return;
+    }
+
+    isVoicePausedRef.current = false;
+    if (!synthesisRef.current) return;
+
+    // 3. Try native browser resume first if browser synthesis is currently paused
     if (synthesisRef.current.paused) {
       isTtsSpeakingRef.current = true;
       stopSpeechRecognition();
+      startInterruptListener();
       synthesisRef.current.resume();
       setPlaybackState("PLAYING");
       setVoiceState("SPEAKING");
       return;
     }
 
-    // Fall back: replay last bot message from start
-    const lastBot = getLastBotResponse();
-    if (lastBot) {
-      handlePlayMessage(lastBot.index, lastBot.text, 0);
-    }
+    // 4. Fall back: resume from exact character offset without re-synthesizing spoken portion
+    const fullText = currentPausedTextRef.current;
+    const offset = currentSpeakCharIndexRef.current || 0;
+    const msgIdx = pausedMessageIndexRef.current ?? playingMessageIndex ?? -1;
+    handlePlayMessage(msgIdx, fullText, offset);
   };
 
   // Handles natural voice command detection and execution (supports English, Hindi, and Marathi variations)
@@ -778,8 +781,14 @@ export default function ChatWidget() {
   };
 
   const handlePauseMessage = () => {
+    if (playbackState === "PAUSED") return;
+
     isVoicePausedRef.current = true;
     isTtsSpeakingRef.current = false;
+    if (playingMessageIndex !== null) {
+      pausedMessageIndexRef.current = playingMessageIndex;
+    }
+
     if (typeof window !== "undefined" && window.speechSynthesis) {
       try {
         window.speechSynthesis.pause();
@@ -805,6 +814,7 @@ export default function ChatWidget() {
     setVoiceState("IDLE");
     currentPausedTextRef.current = "";
     currentSpeakCharIndexRef.current = 0;
+    pausedMessageIndexRef.current = null;
   };
 
   // Start Speech-to-Text (STT) Recognition
