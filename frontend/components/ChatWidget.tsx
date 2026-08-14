@@ -129,57 +129,64 @@ export function cleanTextForSpeech(rawText: string): string {
 
   let cleaned = String(rawText);
 
-  // 1. Remove Code blocks (```code```) and Inline Code (`code`)
+  // 1. Convert Arrow Flows (e.g. "Learn → Build → Work → Earn" -> "Learn, Build, Work, and Earn")
+  cleaned = cleaned.replace(/(\b[\w\s-]+)\s*(?:→|->|⇒|➜|➤|➔|➞|➡|►)\s*(\b[\w\s-]+)\s*(?:→|->|⇒|➜|➤|➔|➞|➡|►)\s*(\b[\w\s-]+)\s*(?:→|->|⇒|➜|➤|➔|➞|➡|►)\s*(\b[\w\s-]+)/gi, "$1, $2, $3, and $4");
+  cleaned = cleaned.replace(/(\b[\w\s-]+)\s*(?:→|->|⇒|➜|➤|➔|➞|➡|►)\s*(\b[\w\s-]+)\s*(?:→|->|⇒|➜|➤|➔|➞|➡|►)\s*(\b[\w\s-]+)/gi, "$1, $2, and $3");
+  cleaned = cleaned.replace(/\s*(?:→|->|⇒|➜|➤|➔|➞|➡|►)\s*/g, ", ");
+
+  // 2. Remove Code blocks (```code```) and Inline Code (`code`)
   cleaned = cleaned.replace(/```[\s\S]*?```/g, "");
   cleaned = cleaned.replace(/`([^`]+)`/g, "$1");
 
-  // 2. Remove HTML tags (<tag>...</tag> or <tag/>)
+  // 3. Remove HTML tags (<tag>...</tag> or <tag/>)
   cleaned = cleaned.replace(/<[^>]*>/g, "");
 
-  // 3. Remove JSON syntax artifacts (e.g. {"key": "val"})
+  // 4. Remove JSON syntax artifacts (e.g. {"key": "val"})
   cleaned = cleaned.replace(/\{[^{}]*\}/g, "");
 
-  // 4. Remove URLs (http, https, www)
+  // 5. Remove Markdown links [Link Text](http://...) -> Link Text
+  cleaned = cleaned.replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1");
+  cleaned = cleaned.replace(/\[([^\]]+)\]/g, "$1");
+
+  // 6. Remove URLs (http, https, www) and Email addresses
   cleaned = cleaned.replace(/https?:\/\/[^\s]+/gi, "");
   cleaned = cleaned.replace(/www\.[^\s]+/gi, "");
-
-  // 5. Remove Email addresses (e.g. contact@we-intern.in)
   cleaned = cleaned.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/gi, "");
 
-  // 6. Remove standalone domain names (e.g. we-intern.in)
+  // 7. Remove standalone domain names (e.g. we-intern.in)
   cleaned = cleaned.replace(/\bwe-intern\.in\b/gi, "");
 
-  // 7. Remove Markdown headings (#, ##, ### at start of line)
+  // 8. Remove Markdown headings (#, ##, ### at start of line)
   cleaned = cleaned.replace(/^#{1,6}\s+/gm, "");
 
-  // 8. Remove Markdown formatting (bold, italics, strikethrough: **, *, __, _, ~~)
+  // 9. Remove Markdown formatting (bold, italics, strikethrough: **, *, __, _, ~~)
   cleaned = cleaned.replace(/(\*\*|__)(.*?)\1/g, "$2");
   cleaned = cleaned.replace(/(\*|_)(.*?)\1/g, "$2");
   cleaned = cleaned.replace(/~~(.*?)~~/g, "$1");
 
-  // 9. Remove Markdown horizontal rules (---, ***, ___)
+  // 10. Remove Markdown horizontal rules (---, ***, ___)
   cleaned = cleaned.replace(/^[\-\*_]{3,}\s*$/gm, "");
 
-  // 10. Remove list/bullet prefix symbols at start of line (e.g. "1. ", "• ", "- ", "* ", "+ ")
-  cleaned = cleaned.replace(/^[\s]*[•\-\*\+\d+\.]+\s+/gm, "");
+  // 11. Remove list/bullet prefix symbols at start of line (e.g. "1. ", "• ", "- ", "* ", "+ ")
+  cleaned = cleaned.replace(/^[\s]*[•◦▪▫\-\*\+]\s+/gm, "");
+  cleaned = cleaned.replace(/^[\s]*\d+[\.\)]\s+/gm, "");
 
-  // 11. Remove Emojis & Pictographic Unicode ranges comprehensively
+  // 12. Convert "+" used as conjunction (e.g. "2-month training + live project" -> "2-month training and live project")
+  cleaned = cleaned.replace(/(\b\w+)\s*\+\s*(\b\w+)/g, "$1 and $2");
+
+  // 13. Remove Emojis & Pictographic Unicode ranges comprehensively
   cleaned = cleaned.replace(
     /[\u{1F300}-\u{1F9FF}]|[\u{1FA00}-\u{1FAFF}]|[\u{2600}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E6}-\u{1F1FF}]|[\u{2B00}-\u{2BFF}]|[\u{2300}-\u{23FF}]|[\u{200D}]|[\u{FE00}-\u{FE0F}]|[\u{20E3}]/gu,
     ""
   );
 
-  // 12. Remove leftover decorative symbols
-  cleaned = cleaned.replace(/[📌📜✨🟢🚀📍📱📧⏰💳👤✍️💡🎓💼💰🏆👨‍🏫🎯⚡]/g, "");
+  // 14. Remove decorative symbols, pipes, hashtags
+  cleaned = cleaned.replace(/[📌📜✨🟢🚀📍📱📧⏰💳👤✍️💡🎓💼💰🏆👨‍🏫🎯⚡|~`#^]/g, "");
 
-  // 13. Remove brackets around tags [Tag] -> Tag
-  cleaned = cleaned.replace(/\[([^\]]+)\]/g, "$1");
-
-  // 14. Clean up dangling label artifacts (e.g. "Website:", "Email:" if URL/Email was stripped)
+  // 15. Clean up dangling label artifacts (e.g. "Website:", "Email:" if URL/Email was stripped)
   cleaned = cleaned.replace(/\b(Website|Email|Link):\s*(?=[.!?]|$|\n)/gi, "");
 
-  // 15. Brand & Technical Phonetic Pronunciation Normalization Layer (TTS only)
-  // Normalizes "WeIntern", "weintern", "WEINTERN", "we-intern" → "We Intern" for natural speech
+  // 16. Brand & Technical Phonetic Pronunciation Normalization Layer (TTS only)
   cleaned = cleaned.replace(/\bwe[\-_]?intern's\b/gi, "We Intern's");
   cleaned = cleaned.replace(/\bwe[\-_]?interns\b/gi, "We Intern's");
   cleaned = cleaned.replace(/\bwe[\-_]?intern\b/gi, "We Intern");
@@ -188,16 +195,17 @@ export function cleanTextForSpeech(rawText: string): string {
   cleaned = cleaned.replace(/\bai\/ml\b/gi, "AI ML");
   cleaned = cleaned.replace(/\bci\/cd\b/gi, "CI CD");
 
-  // 16. Normalize multi-line breaks into clean sentences
+  // 17. Normalize multi-line breaks into clean sentences
   cleaned = cleaned
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean)
     .join(". ");
 
-  // 17. Clean up punctuation artifacts (e.g. ":." -> ":", ". ." -> ".")
+  // 18. Clean up punctuation artifacts (e.g. ":," -> ":", ":." -> ":", ". ." -> ".")
   cleaned = cleaned
-    .replace(/:\s*\./g, ":")
+    .replace(/:\s*[,.]/g, ":")
+    .replace(/,\s*\./g, ".")
     .replace(/\s+([.,?!;])/g, "$1")
     .replace(/([.,?!;])\1+/g, "$1")
     .replace(/\s+/g, " ")
