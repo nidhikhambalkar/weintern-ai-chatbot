@@ -60,13 +60,13 @@ const TOKEN_MAP = {
   hai: "",
   hain: "",
   nahi: "not",
-  refund: "fees",
+  refund: "refund",
   payment: "fees",
   pay: "fees",
   upi: "fees",
   emi: "fees",
-  scholarship: "fees",
-  scholarships: "fees",
+  scholarship: "scholarship",
+  scholarships: "scholarship",
  
   interviews: "placement",
   
@@ -79,29 +79,29 @@ const TOKEN_MAP = {
   whatsapp: "contact",
   email: "contact",
   contact: "contact",
-  ceo: "company",
-  founder: "company",
-  owner: "company",
-  founded: "company",
-  started: "company",
-  location: "company",
-  located: "location",
-  address: "company",
-  headquarter: "company",
-  headquarters: "company",
-  introduce: "company",
-  introduction: "company",
-  overview: "company",
-  info: "company",
+  ceo: "ceo",
+  founder: "founder",
+  owner: "founder",
+  founded: "founded",
+  started: "started",
+  location: "location",
+  located: "located",
+  address: "address",
+  headquarter: "headquarters",
+  headquarters: "headquarters",
+  introduce: "introduce",
+  introduction: "introduce",
+  overview: "overview",
+  info: "info",
   platform: "company",
-  ashwin: "company",
-  gurao: "company",
-  namita: "company",
-  gope: "company",
-  kharadi: "company",
-  pune: "company",
-  cofounder: "company",
-  "co-founder": "company",
+  ashwin: "ashwin",
+  gurao: "gurao",
+  namita: "namita",
+  gope: "gope",
+  kharadi: "kharadi",
+  pune: "pune",
+  cofounder: "cofounder",
+  "co-founder": "cofounder",
   mission: "mission",
   cert: "certificate",
   lor: "certificate",              // Letter of Recommendation → certificates
@@ -826,6 +826,33 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory) {
       score += 80;
     } else if (normQ.includes("what is weintern") || normQ.includes("introduce")) {
       score -= 40;
+    }
+  }
+
+  // Boost the specific "address" entry when address/office is asked
+  const isAddressQuery = queryTokens.includes("address") || queryTokens.includes("office");
+  if (isAddressQuery && entry.category === "company") {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("address") || normQ.includes("office") || normQ.includes("located")) {
+      score += 120;
+    }
+  }
+
+  // Boost the specific "ceo" entry when CEO is asked
+  const isCeoQuery = queryTokens.includes("ceo");
+  if (isCeoQuery && entry.category === "company") {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("ceo")) {
+      score += 150;
+    }
+  }
+
+  // Boost the specific "founder" entry when founder/owner/cofounder is asked
+  const isFounderQuery = queryTokens.includes("founder") || queryTokens.includes("owner") || queryTokens.includes("cofounder");
+  if (isFounderQuery && entry.category === "company") {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("founder") || normQ.includes("owner") || normQ.includes("cofounder")) {
+      score += 120;
     }
   }
 

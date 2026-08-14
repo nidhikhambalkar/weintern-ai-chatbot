@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 async function fetchFaqs() {
   try {
     const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000';
