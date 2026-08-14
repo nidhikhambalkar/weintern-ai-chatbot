@@ -572,6 +572,52 @@ export default function ChatWidget() {
     return false;
   };
 
+  // ── Concurrent interrupt listener for voice commands while bot is speaking/paused ──
+  const startInterruptListener = () => {
+    const intRec = interruptRecRef.current;
+    if (!intRec) return;
+
+    try { intRec.stop(); } catch (e) {}
+
+    intRec.onresult = (event: any) => {
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const transcript = (event.results[i][0]?.transcript || "").trim();
+        if (!transcript) continue;
+
+        // Check if user spoke a voice command (Pause, Continue/Resume, Stop, Mute, Unmute)
+        const isExecuted = detectAndExecuteVoiceCommand(transcript);
+        if (isExecuted) {
+          console.log(`🎤 Voice command executed: "${transcript}"`);
+          try { intRec.stop(); } catch (e) {}
+          return;
+        }
+      }
+    };
+
+    intRec.onerror = (event: any) => {
+      if (event.error === "no-speech" || event.error === "aborted") return;
+    };
+
+    intRec.onend = () => {
+      // Keep interrupt listener active if TTS is speaking or paused
+      if (isTtsSpeakingRef.current || (synthesisRef.current && synthesisRef.current.paused)) {
+        try { intRec.start(); } catch (e) {}
+      }
+    };
+
+    try {
+      intRec.start();
+    } catch (e) {}
+  };
+
+  const stopInterruptListener = () => {
+    if (interruptRecRef.current) {
+      try {
+        interruptRecRef.current.stop();
+      } catch (e) {}
+    }
+  };
+
   // Speaks response using Web Speech Synthesis (TTS)
   const speakResponse = (text: string) => {
     if (isVoicePausedRef.current) {
@@ -590,6 +636,7 @@ export default function ChatWidget() {
     if (isCurrentPlaying && playbackState === "PAUSED" && synthesisRef.current.paused) {
       isTtsSpeakingRef.current = true;
       stopSpeechRecognition();
+      startInterruptListener();
       synthesisRef.current.resume();
       setPlaybackState("PLAYING");
       setVoiceState("SPEAKING");
@@ -611,6 +658,7 @@ export default function ChatWidget() {
 
     if (!cleanText) {
       isTtsSpeakingRef.current = false;
+      stopInterruptListener();
       setVoiceState("IDLE");
       return;
     }
@@ -618,6 +666,7 @@ export default function ChatWidget() {
     const textToSpeak = charOffset > 0 ? cleanText.slice(charOffset) : cleanText;
     if (!textToSpeak.trim()) {
       isTtsSpeakingRef.current = false;
+      stopInterruptListener();
       setPlaybackState("IDLE");
       setVoiceState("IDLE");
       return;
@@ -667,6 +716,7 @@ export default function ChatWidget() {
       if (activeUtteranceRef.current !== utterance) return;
       isTtsSpeakingRef.current = true;
       stopSpeechRecognition();
+      startInterruptListener();
       setPlayingMessageIndex(index);
       setPlaybackState("PLAYING");
       setVoiceState("SPEAKING");
@@ -679,6 +729,7 @@ export default function ChatWidget() {
     utterance.onpause = () => {
       if (activeUtteranceRef.current !== utterance) return;
       isTtsSpeakingRef.current = false;
+      startInterruptListener();
       setPlaybackState("PAUSED");
       setVoiceState("PAUSED");
     };
@@ -687,12 +738,14 @@ export default function ChatWidget() {
       if (activeUtteranceRef.current !== utterance) return;
       isTtsSpeakingRef.current = true;
       stopSpeechRecognition();
+      startInterruptListener();
       setPlaybackState("PLAYING");
       setVoiceState("SPEAKING");
     };
 
     utterance.onend = () => {
       if (activeUtteranceRef.current !== utterance && activeUtteranceRef.current !== null) return;
+      stopInterruptListener();
       isTtsSpeakingRef.current = false;
       activeUtteranceRef.current = null;
       setPlayingMessageIndex(null);
@@ -705,6 +758,7 @@ export default function ChatWidget() {
     utterance.onerror = (e) => {
       console.error("TTS Error:", e);
       if (activeUtteranceRef.current !== utterance && activeUtteranceRef.current !== null) return;
+      stopInterruptListener();
       isTtsSpeakingRef.current = false;
       activeUtteranceRef.current = null;
       setPlayingMessageIndex(null);
@@ -725,6 +779,7 @@ export default function ChatWidget() {
         window.speechSynthesis.pause();
       } catch (e) {}
     }
+    startInterruptListener();
     setPlaybackState("PAUSED");
     setVoiceState("PAUSED");
   };
@@ -732,6 +787,7 @@ export default function ChatWidget() {
   const handleStopMessage = () => {
     isVoicePausedRef.current = false;
     isTtsSpeakingRef.current = false;
+    stopInterruptListener();
     if (typeof window !== "undefined" && window.speechSynthesis) {
       try {
         window.speechSynthesis.cancel();
