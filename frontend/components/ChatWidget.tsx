@@ -616,8 +616,16 @@ export default function ChatWidget() {
       return;
     }
 
-    // 2. Guard: If stopped or no active paused text exists, DO NOTHING (Strict Requirements 4 & 6)
-    if (!currentPausedTextRef.current || (!isVoicePausedRef.current && playbackState !== "PAUSED")) {
+    // 2. Fallback: If no currentPausedText exists, attempt to pull from last bot message
+    if (!currentPausedTextRef.current) {
+      const lastBot = getLastBotResponse();
+      if (lastBot) {
+        currentPausedTextRef.current = lastBot.text;
+        pausedMessageIndexRef.current = lastBot.index;
+      }
+    }
+
+    if (!currentPausedTextRef.current) {
       console.log("No paused speech available to continue.");
       return;
     }
@@ -645,34 +653,64 @@ export default function ChatWidget() {
 
   // Handles natural voice command detection and execution (supports English, Hindi, and Marathi variations)
   const detectAndExecuteVoiceCommand = (text: string): boolean => {
-    const rawLower = text.toLowerCase().trim();
-    if (!rawLower) return false;
+    if (!text) return false;
 
-    // 1. STOP COMMAND (Completely stops reading & resets speech index)
+    // 1. First check dedicated COMMAND_PATTERNS (handles Devanagari & transliteration)
+    const cmdType = detectVoiceCommandType(text);
+    if (cmdType) {
+      if (cmdType === "STOP") {
+        executeVoiceControlCommand("stop");
+        return true;
+      }
+      if (cmdType === "PAUSE") {
+        executeVoiceControlCommand("pause");
+        return true;
+      }
+      if (cmdType === "RESUME") {
+        executeVoiceControlCommand("continue");
+        return true;
+      }
+      if (cmdType === "REPEAT" || cmdType === "START") {
+        const lastBot = getLastBotResponse();
+        if (lastBot) {
+          handlePlayMessage(lastBot.index, lastBot.text, 0);
+        }
+        return true;
+      }
+      if (cmdType === "MUTE") {
+        setIsSpeakerMuted(true);
+        handleStopMessage();
+        return true;
+      }
+      if (cmdType === "UNMUTE") {
+        setIsSpeakerMuted(false);
+        return true;
+      }
+    }
+
+    // 2. Secondary fallback matching for raw lower text
+    const rawLower = text.toLowerCase().trim();
+
     const isStop =
       /^(stop|stop reading|stop speaking|stop talking|stop it|stop now|please stop|stop please|shut up|quiet|halt|cancel reading|cancel speech|band karo|बंद करो|thambva|thaambva|थांबवा|chup|chup ho jao|bas karo|rok do|band kar do|awaaz band|aawaz band)$/i.test(rawLower) ||
       /\b(stop reading|stop speaking|stop talking|stop it|please stop|stop please|shut up|band karo|बंद करो|thambva|thaambva|थांबवा|chup ho jao|bas karo|rok do|band kar do|awaaz band|aawaz band)\b/i.test(rawLower) ||
-      /^(stop|band karo|बंद करो|thambva|thaambva|थांबवा)$/i.test(rawLower) ||
-      (/^\b(stop|band karo|thambva|thaambva)\b/i.test(rawLower) && !/\b(non-stop|bus stop|one stop|stop by)\b/i.test(rawLower));
+      /^(stop|band karo|बंद करो|thambva|thaambva|थांबवा)$/i.test(rawLower);
 
     if (isStop) {
       executeVoiceControlCommand("stop");
       return true;
     }
 
-    // 2. PAUSE COMMAND (Pauses reading in-place)
     const isPause =
       /^(pause|pause reading|pause speaking|pause talking|pause it|pause now|please pause|pause please|wait|hold on|pause speech|ruko|roko|thoda ruko|ruko thoda|thamba|thaamb|रुको|थांब|hold karo|thoda wait|rokna)$/i.test(rawLower) ||
       /\b(pause reading|pause speaking|pause talking|pause it|please pause|pause please|hold on|pause speech|ruko thoda|thoda ruko|thamba|thaamb|रुको|थांब|hold karo|thoda wait|thoda roko)\b/i.test(rawLower) ||
-      /^(pause|wait|ruko|roko|thamba|thaamb|रुको|थांब)$/i.test(rawLower) ||
-      /^\b(pause|wait|ruko|roko|thamba|thaamb|रुको|थांब)\b/i.test(rawLower);
+      /^(pause|wait|ruko|roko|thamba|thaamb|रुको|थांब)$/i.test(rawLower);
 
     if (isPause) {
       executeVoiceControlCommand("pause");
       return true;
     }
 
-    // 3. CONTINUE & RESUME
     const isResume =
       /^(continue|resume|go on|keep speaking|carry on|continue speaking|jari rakho|जारी रखो|punha suru|punha shuru|पुन्हा सुरू|chalu karo|phir se chalu karo|continue karo|resume karo|aage bolo)$/i.test(rawLower) ||
       /\b(continue karo|phir se chalu karo|resume karo|continue speaking|keep speaking|carry on|jari rakho|जारी रखो|punha suru|punha shuru|पुन्हा सुरू)\b/i.test(rawLower) ||
@@ -680,43 +718,6 @@ export default function ChatWidget() {
 
     if (isResume) {
       executeVoiceControlCommand("continue");
-      return true;
-    }
-
-    // 4. START / REPLAY / SPEAK AGAIN / REPEAT
-    const isRepeat =
-      /^(start|begin|repeat|speak again|replay|read again|say again|tell me again|shuru karo|shuru se|play karo|shuru|pehle se|phir se bolo|phir se|dobara bolo|wapas bolo)$/i.test(rawLower) ||
-      /\b(speak again|read again|say again|tell me again|shuru karo|pehle se|phir se bolo|dobara bolo|wapas bolo)\b/i.test(rawLower) ||
-      /^(repeat|replay)$/i.test(rawLower);
-
-    if (isRepeat) {
-      const lastBot = getLastBotResponse();
-      if (lastBot) {
-        handlePlayMessage(lastBot.index, lastBot.text, 0);
-      }
-      return true;
-    }
-
-    // 5. MUTE
-    const isMute =
-      /^(mute|mute volume|turn off voice|silent|mute karo|silent karo)$/i.test(rawLower) ||
-      /\b(mute volume|turn off voice|mute karo|silent karo)\b/i.test(rawLower) ||
-      /^(mute)$/i.test(rawLower);
-
-    if (isMute) {
-      setIsSpeakerMuted(true);
-      handleStopMessage();
-      return true;
-    }
-
-    // 6. UNMUTE
-    const isUnmute =
-      /^(unmute|unmute volume|turn on voice|speak up|voice on|awaaz chalu|unmute karo|speak karo|aawaz chalu)$/i.test(rawLower) ||
-      /\b(unmute volume|turn on voice|awaaz chalu|unmute karo|speak karo|aawaz chalu)\b/i.test(rawLower) ||
-      /^(unmute)$/i.test(rawLower);
-
-    if (isUnmute) {
-      setIsSpeakerMuted(false);
       return true;
     }
 
