@@ -366,25 +366,26 @@ export default function ChatWidget() {
     try {
       const res = await getHistory(sessionId);
       if (res.success && res.data) {
+        const welcomeMsg: ChatMessage = {
+          sender: "bot",
+          text: "👋 Hello! Welcome to WeIntern.",
+          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        };
+
         if (res.data.length === 0) {
-          setMessages([
-            {
-              sender: "bot",
-              text: "👋 Hello! Welcome to WeIntern.",
-              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-            },
-          ]);
+          setMessages([welcomeMsg]);
         } else {
-          setMessages(
-            res.data.map((msg: any) => ({
-              sender: msg.sender === "bot" ? "bot" : "user",
-              text: msg.message,
-              time: new Date(msg.timestamp).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              }),
-            }))
-          );
+          const loadedMsgs = res.data.map((msg: any) => ({
+            sender: msg.sender === "bot" ? "bot" : "user",
+            text: msg.message,
+            time: new Date(msg.timestamp).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          }));
+
+          const hasWelcome = loadedMsgs.length > 0 && loadedMsgs[0].text.includes("Welcome to WeIntern");
+          setMessages(hasWelcome ? loadedMsgs : [welcomeMsg, ...loadedMsgs]);
         }
         setToastMessage("History refreshed");
         setTimeout(() => setToastMessage(null), 2000);
@@ -518,16 +519,23 @@ export default function ChatWidget() {
       try {
         const res = await getHistory(sessionId);
         if (res.success && res.data && res.data.length > 0) {
-          setMessages(
-            res.data.map((msg: any) => ({
-              sender: msg.sender === "bot" ? "bot" : "user",
-              text: msg.message,
-              time: new Date(msg.timestamp).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              }),
-            }))
-          );
+          const welcomeMsg: ChatMessage = {
+            sender: "bot",
+            text: "👋 Hello! Welcome to WeIntern.",
+            time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          };
+
+          const loadedMsgs = res.data.map((msg: any) => ({
+            sender: msg.sender === "bot" ? "bot" : "user",
+            text: msg.message,
+            time: new Date(msg.timestamp).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          }));
+
+          const hasWelcome = loadedMsgs.length > 0 && loadedMsgs[0].text.includes("Welcome to WeIntern");
+          setMessages(hasWelcome ? loadedMsgs : [welcomeMsg, ...loadedMsgs]);
         }
       } catch (err) {
         console.error("Failed to load chat history:", err);
