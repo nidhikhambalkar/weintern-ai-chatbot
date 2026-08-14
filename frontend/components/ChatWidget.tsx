@@ -463,12 +463,35 @@ export default function ChatWidget() {
     return null;
   };
 
+  const executeVoiceControlCommand = (command: "pause" | "continue" | "stop") => {
+    if (command === "stop") {
+      handleStopMessage();
+      return;
+    }
+
+    if (command === "pause") {
+      handlePauseMessage();
+      return;
+    }
+
+    handleResumeOrContinueMessage();
+  };
+
   // ── Voice playback action handlers ──────────────────────────────────────
   const handleResumeOrContinueMessage = () => {
-    isVoicePausedRef.current = false;
     if (!synthesisRef.current) return;
 
-    // 1. Primary: Native SpeechSynthesis resume (continues speech natively from paused position)
+    const hasPausedContent = Boolean(currentPausedTextRef.current) || isVoicePausedRef.current || playbackState === "PAUSED";
+    if (!hasPausedContent) {
+      const lastBot = getLastBotResponse();
+      if (lastBot) {
+        handlePlayMessage(lastBot.index, lastBot.text, 0);
+      }
+      return;
+    }
+
+    isVoicePausedRef.current = false;
+
     if (synthesisRef.current.paused) {
       isTtsSpeakingRef.current = true;
       stopSpeechRecognition();
@@ -479,19 +502,17 @@ export default function ChatWidget() {
       return;
     }
 
-    // 2. Fallback: If browser engine lost paused utterance, resume from exact character index offset
-    if (currentPausedTextRef.current && currentSpeakCharIndexRef.current > 0) {
-      const fullText = currentPausedTextRef.current;
-      const offset = currentSpeakCharIndexRef.current;
-      const msgIdx = pausedMessageIndexRef.current ?? playingMessageIndex ?? -1;
-      handlePlayMessage(msgIdx, fullText, offset);
+    const resumeText = currentPausedTextRef.current || getLastBotResponse()?.text || "";
+    const offset = Math.max(currentSpeakCharIndexRef.current, 0);
+    const msgIdx = pausedMessageIndexRef.current ?? playingMessageIndex ?? getLastBotResponse()?.index ?? -1;
+
+    if (resumeText && offset > 0) {
+      handlePlayMessage(msgIdx, resumeText, offset);
       return;
     }
 
-    // 3. Fallback: Replay last bot message from start
-    const lastBot = getLastBotResponse();
-    if (lastBot) {
-      handlePlayMessage(lastBot.index, lastBot.text, 0);
+    if (resumeText) {
+      handlePlayMessage(msgIdx, resumeText, 0);
     }
   };
 
@@ -508,7 +529,7 @@ export default function ChatWidget() {
       (/^\b(stop|band karo|thambva|thaambva)\b/i.test(rawLower) && !/\b(non-stop|bus stop|one stop|stop by)\b/i.test(rawLower));
 
     if (isStop) {
-      handleStopMessage();
+      executeVoiceControlCommand("stop");
       return true;
     }
 
@@ -520,7 +541,7 @@ export default function ChatWidget() {
       /^\b(pause|wait|ruko|roko|thamba|thaamb|रुको|थांब)\b/i.test(rawLower);
 
     if (isPause) {
-      handlePauseMessage();
+      executeVoiceControlCommand("pause");
       return true;
     }
 
@@ -531,7 +552,7 @@ export default function ChatWidget() {
       /^(continue|resume|जारी रखो|पुन्हा सुरू)$/i.test(rawLower);
 
     if (isResume) {
-      handleResumeOrContinueMessage();
+      executeVoiceControlCommand("continue");
       return true;
     }
 
@@ -779,13 +800,26 @@ export default function ChatWidget() {
   };
 
   const handlePauseMessage = () => {
+    if (!synthesisRef.current) return;
+    if (playbackState === "PAUSED" && synthesisRef.current.paused) return;
+
+    const activeMessageIndex = playingMessageIndex ?? pausedMessageIndexRef.current ?? getLastBotResponse()?.index ?? null;
+    if (activeMessageIndex !== null) {
+      pausedMessageIndexRef.current = activeMessageIndex;
+    }
+
+    if (!currentPausedTextRef.current) {
+      const lastBot = getLastBotResponse();
+      if (lastBot) {
+        currentPausedTextRef.current = lastBot.text;
+      }
+    }
+
     isVoicePausedRef.current = true;
     isTtsSpeakingRef.current = false;
-    if (typeof window !== "undefined" && window.speechSynthesis) {
-      try {
-        window.speechSynthesis.pause();
-      } catch (e) {}
-    }
+    try {
+      synthesisRef.current.pause();
+    } catch (e) {}
     startInterruptListener();
     setPlaybackState("PAUSED");
     setVoiceState("PAUSED");
@@ -795,17 +829,21 @@ export default function ChatWidget() {
     isVoicePausedRef.current = false;
     isTtsSpeakingRef.current = false;
     stopInterruptListener();
-    if (typeof window !== "undefined" && window.speechSynthesis) {
+    stopSpeechRecognition();
+
+    if (synthesisRef.current) {
       try {
-        window.speechSynthesis.cancel();
+        synthesisRef.current.cancel();
       } catch (e) {}
     }
+
     activeUtteranceRef.current = null;
     setPlayingMessageIndex(null);
     setPlaybackState("IDLE");
     setVoiceState("IDLE");
     currentPausedTextRef.current = "";
     currentSpeakCharIndexRef.current = 0;
+    pausedMessageIndexRef.current = null;
   };
 
   // Start Speech-to-Text (STT) Recognition
