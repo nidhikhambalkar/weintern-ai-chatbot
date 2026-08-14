@@ -168,6 +168,7 @@ export default function ChatWidget() {
   const [playingMessageIndex, setPlayingMessageIndex] = useState<number | null>(null);
   const [playbackState, setPlaybackState] = useState<"IDLE" | "PLAYING" | "PAUSED">("IDLE");
   const [detectedLang, setDetectedLang] = useState<string>("en-IN"); // tracks last detected speech language
+  const [isSpeechSupported, setIsSpeechSupported] = useState<boolean>(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -294,6 +295,7 @@ export default function ChatWidget() {
 
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       if (SpeechRecognition) {
+        setIsSpeechSupported(true);
         const rec = new SpeechRecognition();
         rec.continuous = false;
         rec.interimResults = true;
@@ -755,7 +757,11 @@ export default function ChatWidget() {
       currentSpeakCharIndexRef.current = 0;
     };
 
-    utterance.onerror = (e) => {
+    utterance.onerror = (e: any) => {
+      // Ignore normal interrupted / canceled events when user pauses or stops speech
+      if (e.error === "interrupted" || e.error === "canceled") {
+        return;
+      }
       console.error("TTS Error:", e);
       if (activeUtteranceRef.current !== utterance && activeUtteranceRef.current !== null) return;
       stopInterruptListener();
@@ -1676,7 +1682,7 @@ export default function ChatWidget() {
             />
 
             {/* Voice Input Mic Button */}
-            {voiceMode && recognitionRef.current && (
+            {voiceMode && isSpeechSupported && (
               <button
                 onClick={handleMicClick}
                 title={voiceState === "LISTENING" ? "Stop recording" : "Record voice message"}
