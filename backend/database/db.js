@@ -32,7 +32,7 @@ const poolConfig = process.env.DATABASE_URL
 // Initialize PostgreSQL Connection Pool instance if module is available
 const pool = Pool ? new Pool({
   ...poolConfig,               // Spread connection configuration object
-  connectionTimeoutMillis: 3000 // Timeout after 3 seconds if DB is unreachable
+  connectionTimeoutMillis: 10000 // Timeout after 10 seconds if DB is unreachable
 }) : null;
 
 
