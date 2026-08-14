@@ -949,6 +949,7 @@ export default function ChatWidget() {
   };
 
   const handlePauseMessage = () => {
+    if (playbackState === "PAUSED") return;
 
     isVoicePausedRef.current = true;
     isTtsSpeakingRef.current = false;
@@ -961,28 +962,6 @@ export default function ChatWidget() {
         window.speechSynthesis.pause();
       } catch (e) {}
     }
-=======
-    if (!synthesisRef.current) return;
-    if (playbackState === "PAUSED" && synthesisRef.current.paused) return;
-
-    const activeMessageIndex = playingMessageIndex ?? pausedMessageIndexRef.current ?? getLastBotResponse()?.index ?? null;
-    if (activeMessageIndex !== null) {
-      pausedMessageIndexRef.current = activeMessageIndex;
-    }
-
-    if (!currentPausedTextRef.current) {
-      const lastBot = getLastBotResponse();
-      if (lastBot) {
-        currentPausedTextRef.current = lastBot.text;
-      }
-    }
-
-    isVoicePausedRef.current = true;
-    isTtsSpeakingRef.current = false;
-    try {
-      synthesisRef.current.pause();
-    } catch (e) {}
->>>>>>> origin/fix/faq-api-resilience
     startInterruptListener();
     setPlaybackState("PAUSED");
     setVoiceState("PAUSED");
@@ -992,7 +971,6 @@ export default function ChatWidget() {
     isVoicePausedRef.current = false;
     isTtsSpeakingRef.current = false;
     stopInterruptListener();
-<<<<<<< HEAD
 
     // Abort active LLM HTTP generation immediately
     if (abortControllerRef.current) {
@@ -1003,13 +981,8 @@ export default function ChatWidget() {
     }
 
     if (typeof window !== "undefined" && window.speechSynthesis) {
-=======
-    stopSpeechRecognition();
-
-    if (synthesisRef.current) {
->>>>>>> origin/fix/faq-api-resilience
       try {
-        synthesisRef.current.cancel();
+        window.speechSynthesis.cancel();
       } catch (e) {}
     }
 
