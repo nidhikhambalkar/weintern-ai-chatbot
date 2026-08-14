@@ -331,6 +331,8 @@ export default function ChatWidget() {
   }, [isSpeakerMuted]);
 
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editText, setEditText] = useState<string>("");
   const [showClearConfirm, setShowClearConfirm] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -340,9 +342,22 @@ export default function ChatWidget() {
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
-  const handleEditMessage = (text: string) => {
-    setMessage(text);
-    inputRef.current?.focus();
+  const handleEditMessage = (index: number, text: string) => {
+    setEditingIndex(index);
+    setEditText(text);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingIndex(null);
+    setEditText("");
+  };
+
+  const handleSaveEditedMessage = async (index: number) => {
+    if (!editText.trim()) return;
+    const updatedText = editText.trim();
+    setEditingIndex(null);
+    setEditText("");
+    await processEditedMessage(index, updatedText);
   };
 
   const handleRefreshHistory = async () => {
@@ -1526,6 +1541,60 @@ export default function ChatWidget() {
     }
   };
 
+  const processEditedMessage = async (targetIdx: number, updatedText: string) => {
+    handleStopMessage();
+
+    const updatedUserMsg: ChatMessage = {
+      sender: "user",
+      text: updatedText,
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
+
+    setMessages((prev) => [...prev.slice(0, targetIdx), updatedUserMsg]);
+
+    setIsTyping(true);
+    setVoiceState("PROCESSING");
+
+    try {
+      const data = await sendChat(updatedText, "text", sessionId, null);
+      if (!data.success) {
+        throw new Error(data.message || "Failed to get response");
+      }
+
+      const botReply = data.reply;
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: "bot",
+          text: botReply,
+          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        },
+      ]);
+
+      if (voiceMode && !isSpeakerMuted) {
+        speakResponse(botReply);
+      } else {
+        setVoiceState("IDLE");
+      }
+    } catch (error) {
+      console.error("Chat Edit API Error:", error);
+      const errorMessageText = error instanceof Error ? error.message : String(error);
+      const errorReply = `Sorry, I'm unable to connect to the WeIntern AI right now. (${errorMessageText}) Please try again.`;
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: "bot",
+          text: errorReply,
+          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        },
+      ]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
   const sendMessage = async () => {
     if (!message.trim()) return;
     const userMessage = message.trim();
@@ -1664,7 +1733,42 @@ export default function ChatWidget() {
                       : "bg-white text-gray-900 border border-gray-100 rounded-bl-none"
                     }`}
                 >
-                  <div className="whitespace-pre-line text-sm leading-relaxed">{msg.text}</div>
+                  {editingIndex === index ? (
+                    <div className="space-y-2 min-w-[200px]">
+                      <textarea
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSaveEditedMessage(index);
+                          } else if (e.key === "Escape") {
+                            handleCancelEdit();
+                          }
+                        }}
+                        autoFocus
+                        rows={Math.max(2, editText.split("\n").length)}
+                        className="w-full bg-white text-gray-900 text-sm p-2 rounded-lg border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+                      />
+                      <div className="flex justify-end gap-1.5 pt-0.5">
+                        <button
+                          onClick={handleCancelEdit}
+                          className="px-2.5 py-1 text-[11px] rounded-md bg-blue-700/80 text-white hover:bg-blue-800 font-medium transition cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => handleSaveEditedMessage(index)}
+                          className="px-2.5 py-1 text-[11px] rounded-md bg-emerald-500 text-white hover:bg-emerald-600 font-semibold shadow transition cursor-pointer flex items-center gap-1"
+                        >
+                          <BsCheck2 className="w-3.5 h-3.5 font-bold" />
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="whitespace-pre-line text-sm leading-relaxed">{msg.text}</div>
+                  )}
 
                   {/* Action Bar & Footer */}
                   <div
@@ -1693,9 +1797,11 @@ export default function ChatWidget() {
                       {/* Edit Button (User) */}
                       {msg.sender === "user" && (
                         <button
-                          onClick={() => handleEditMessage(msg.text)}
+                          onClick={() => handleEditMessage(index, msg.text)}
                           title="Edit message"
-                          className="hover:opacity-80 transition duration-150 flex items-center gap-0.5 cursor-pointer ml-1"
+                          className={`hover:opacity-80 transition duration-150 flex items-center gap-0.5 cursor-pointer ml-1 ${
+                            editingIndex === index ? "text-yellow-300 font-bold" : ""
+                          }`}
                         >
                           <BsPencilSquare className="w-3 h-3" />
                         </button>
