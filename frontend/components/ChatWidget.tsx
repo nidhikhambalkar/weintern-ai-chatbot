@@ -171,12 +171,16 @@ export default function ChatWidget() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+  // Dedicated interrupt-only recognition that runs concurrently with TTS
+  const interruptRecRef = useRef<any>(null);
   const synthesisRef = useRef<any>(null);
   const isTtsSpeakingRef = useRef<boolean>(false);
   const activeUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const currentPausedTextRef = useRef<string>("");
   const currentSpeakCharIndexRef = useRef<number>(0);
   const isVoicePausedRef = useRef<boolean>(false);
+  const isCancelledByCommandRef = useRef<boolean>(false);
+  const pausedMessageIndexRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -294,10 +298,16 @@ export default function ChatWidget() {
         rec.continuous = false;
         rec.interimResults = true;
         rec.maxAlternatives = 5;
-        // Multi-language: accepts English, Hindi and Marathi; browser picks the best match
-        // Chrome supports comma-separated langs via grammars; fallback is en-IN for Hinglish
         rec.lang = "en-IN";
         recognitionRef.current = rec;
+
+        // Separate instance for interrupt commands — runs concurrently with TTS
+        const intRec = new SpeechRecognition();
+        intRec.continuous = true;       // keep listening while TTS plays
+        intRec.interimResults = true;   // fire on partial results for instant reaction
+        intRec.maxAlternatives = 3;
+        intRec.lang = "en-IN";
+        interruptRecRef.current = intRec;
       }
       synthesisRef.current = window.speechSynthesis;
     }
@@ -364,7 +374,7 @@ export default function ChatWidget() {
     await processMessage(question, "text");
   };
 
-  // Helper to fetch the last response spoken by WeIntern AI
+  // ── Helper to fetch the last response spoken by WeIntern AI ─────────────
   const getLastBotResponse = () => {
     for (let i = messages.length - 1; i >= 0; i--) {
       if (messages[i].sender === "bot") {
@@ -374,10 +384,98 @@ export default function ChatWidget() {
     return null;
   };
 
+  // ── Helper to clean and normalize input for command detection ───────────
+  const cleanCommandText = (rawText: string): string => {
+    if (!rawText) return "";
+    let text = String(rawText).trim();
+    text = text.replace(/^[\s.,!?;:।'"\-_()]+|[\s.,!?;:।'"\-_()]+$/g, "").trim();
+    return text;
+  };
+
+  const normalizeCommandInput = (text: string): { raw: string; transliterated: string } => {
+    const cleaned = cleanCommandText(text).toLowerCase();
+    if (/[\u0900-\u097F]/.test(cleaned)) {
+      const transliterated = transliterateDevanagari(cleaned).toLowerCase();
+      return { raw: cleaned, transliterated };
+    }
+    return { raw: cleaned, transliterated: cleaned };
+  };
+
+  const QUESTION_KEYWORDS_REGEX = /\b(course|courses|internship|internships|certificate|certificates|certification|lor|fee|fees|price|cost|domain|domains|placement|stipend|eligibility|eligible|duration|month|months|week|weeks|syllabus|project|projects|register|registration|apply|admission|refund|emi|contact|email|phone|whatsapp|who|what|when|where|why|how|kya|kaise|kitna|kitne|kab|kaha|kahan|kaun)\b/i;
+
+  const COMMAND_PATTERNS = {
+    STOP: [
+      /^(please\s+)?(stop|stop it|stop speaking|stop audio|stop voice|quiet|shut up)(\s+please)?$/i,
+      /^(please\s+)?(ruko|ruk|roko|band karo|band karo ab|chup|chup ho jao|chup raho|bas|bas karo|bas karo ab|thamba|thamb|band kara)(\s+please)?$/i,
+      /^(रुको|रुक|रोको|बंद करो|चुप|चुप हो जाओ|चुप रहो|बस|बस करो|थांबा|थांब)$/i
+    ],
+    PAUSE: [
+      /^(please\s+)?(pause|pause it|pause speaking|pause audio|pause speech|pause please|wait|wait please|wait a minute|hold on|hold)(\s+please)?$/i,
+      /^(please\s+)?(ruko thoda|thoda ruko|ek minute ruko|ek minute|hold karo|pause karo|jara thamba|thoda thamba)(\s+please)?$/i,
+      /^(पॉज|पॉज़|रुको थोड़ा|थोड़ा रुको|एक मिनट|जरा थांबा)$/i
+    ],
+    RESUME: [
+      /^(please\s+)?(continue|resume|continue please|resume please|go on|keep speaking|carry on|continue speaking|resume speaking|play|play speech|unpause)(\s+please)?$/i,
+      /^(please\s+)?(chalu karo|chalu kijiye|phir se chalu karo|continue karo|resume karo|aage bolo|aage batao|bolo|aage badho|boliye|pudhe sanga|pudhe bola|chalu kara)(\s+please)?$/i,
+      /^(कंटिन्यू|चालू करा|चालू करो|आगे बोलो|आगे बताओ|फिर से चालू करो|पुढे बोला)$/i
+    ],
+    REPEAT: [
+      /^(please\s+)?(repeat|repeat it|repeat please|speak again|say again|tell me again|read again|read it again|replay|replay please)(\s+please)?$/i,
+      /^(please\s+)?(dobara bolo|phir se bolo|wapas bolo|ek baar aur bolo|dobara batao|phir se batao|wapas batao|repeat karo|replay karo|punha sanga|parat sanga|punha bola)(\s+please)?$/i,
+      /^(दोबारा बोलो|फिर से बोलो|वापस बोलो|एक बार और बोलो|पुन्हा बोला|परत सांगा)$/i
+    ],
+    START: [
+      /^(please\s+)?(start|start again|start from beginning|start from the beginning|begin|start over)(\s+please)?$/i,
+      /^(please\s+)?(shuru se|pehle se|shuru karo|shuru se bolo|shuru se batao|suru karo|suru se|starting se|starting se bolo|surwat pasun|suru pasun)(\s+please)?$/i,
+      /^(शुरू से|शुरू करो|पहले से|सुरुवात करा|सुरुवातीपासून)$/i
+    ],
+    MUTE: [
+      /^(please\s+)?(mute|mute it|mute voice|mute audio|turn off voice|turn off speech|turn off audio|silent|go silent|be silent)(\s+please)?$/i,
+      /^(please\s+)?((awaaz|aawaz|awaz)\s+band(\s+(karo|kara|kijiye))?|mute karo|silent karo)(\s+please)?$/i,
+      /^(आवाज बंद|आवाज बंद करा|म्यूट)$/i
+    ],
+    UNMUTE: [
+      /^(please\s+)?(unmute|unmute it|unmute voice|unmute audio|turn on voice|turn on speech|turn on audio|speak up|voice on)(\s+please)?$/i,
+      /^(please\s+)?((awaaz|aawaz|awaz)\s+(chalu|shuru|open)(\s+(karo|kara|kijiye))?|unmute karo|speak karo|voice on karo)(\s+please)?$/i,
+      /^(आवाज चालू|आवाज चालू करा|अनम्यूट)$/i
+    ]
+  };
+
+  const detectVoiceCommandType = (inputText: string): string | null => {
+    const { raw, transliterated } = normalizeCommandInput(inputText);
+    if (!raw) return null;
+
+    const wordCount = raw.split(/\s+/).length;
+    // Guard against normal questions containing keywords
+    if (wordCount > 4 && QUESTION_KEYWORDS_REGEX.test(raw)) {
+      return null;
+    }
+
+    for (const [cmdType, patterns] of Object.entries(COMMAND_PATTERNS)) {
+      for (const pattern of patterns) {
+        if (pattern.test(raw) || pattern.test(transliterated)) {
+          return cmdType;
+        }
+      }
+    }
+    return null;
+  };
+
+  // ── Voice playback action handlers ──────────────────────────────────────
   const handleResumeOrContinueMessage = () => {
     isVoicePausedRef.current = false;
     if (!synthesisRef.current) return;
 
+    // If we have a saved position from a commanded stop/pause, resume from exact position
+    if (currentPausedTextRef.current && currentSpeakCharIndexRef.current >= 0) {
+      const fullText = currentPausedTextRef.current;
+      const offset = currentSpeakCharIndexRef.current;
+      const msgIdx = pausedMessageIndexRef.current ?? playingMessageIndex ?? -1;
+      handlePlayMessage(msgIdx, fullText, offset);
+      return;
+    }
+
+    // Fall back: browser resume
     if (synthesisRef.current.paused) {
       isTtsSpeakingRef.current = true;
       stopSpeechRecognition();
@@ -387,13 +485,7 @@ export default function ChatWidget() {
       return;
     }
 
-    if (currentPausedTextRef.current && currentSpeakCharIndexRef.current > 0) {
-      const fullText = currentPausedTextRef.current;
-      const offset = currentSpeakCharIndexRef.current;
-      handlePlayMessage(playingMessageIndex ?? -1, fullText, offset);
-      return;
-    }
-
+    // Fall back: replay last bot message from start
     const lastBot = getLastBotResponse();
     if (lastBot) {
       handlePlayMessage(lastBot.index, lastBot.text, 0);
@@ -698,7 +790,6 @@ export default function ChatWidget() {
 
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
-          // Gather all alternative transcripts for the final result block
           for (let j = 0; j < event.results[i].length; j++) {
             if (event.results[i][j]?.transcript) {
               alternatives.push(event.results[i][j].transcript);
@@ -707,6 +798,15 @@ export default function ChatWidget() {
           final += event.results[i][0].transcript;
         } else {
           interim += event.results[i][0].transcript;
+          // ── Intercept stop/continue commands from INTERIM results ───────
+          // ── Intercept voice commands from INTERIM results for instant responsiveness ───────
+          const isExecuted = detectAndExecuteVoiceCommand(interim);
+          if (isExecuted) {
+            try { rec.stop(); } catch (_) {}
+            setInterimTranscript("");
+            setVoiceState("IDLE");
+            return;
+          }
         }
       }
       if (interim) {

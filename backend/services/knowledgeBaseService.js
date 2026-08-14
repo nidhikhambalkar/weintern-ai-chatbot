@@ -85,6 +85,7 @@ const TOKEN_MAP = {
   founded: "company",
   started: "company",
   location: "company",
+  located: "location",
   address: "company",
   headquarter: "company",
   headquarters: "company",
@@ -101,6 +102,7 @@ const TOKEN_MAP = {
   pune: "company",
   cofounder: "company",
   "co-founder": "company",
+  mission: "mission",
   cert: "certificate",
   lor: "certificate",              // Letter of Recommendation → certificates
   recommendation: "certificate",  // "letter of recommendation" → certificates
@@ -646,7 +648,7 @@ function detectStrongCategory(queryTokens) {
     return "certificates";
   }
 
-  // CEO / Founder / Owner / Location / Named person → always company
+  // CEO / Founder / Owner / Location / Mission / Chatbot / Named person → always company
   if (
     queryTokens.includes("ceo") ||
     queryTokens.includes("founder") ||
@@ -661,7 +663,12 @@ function detectStrongCategory(queryTokens) {
     queryTokens.includes("kharadi") ||
     queryTokens.includes("pune") ||
     queryTokens.includes("cofounder") ||
-    (queryTokens.includes("location") && queryTokens.includes("weintern")) ||
+    queryTokens.includes("location") ||
+    queryTokens.includes("located") ||
+    queryTokens.includes("mission") ||
+    queryTokens.includes("chatbot") ||
+    queryTokens.includes("bot") ||
+    (queryTokens.includes("created") && queryTokens.includes("why")) ||
     (queryTokens.includes("address") && queryTokens.includes("weintern")) ||
     (queryTokens.includes("introduce") && queryTokens.includes("weintern")) ||
     (queryTokens.includes("overview") && queryTokens.includes("weintern")) ||
@@ -786,6 +793,53 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory) {
   // Strong boost for CEO/founder/owner/location queries → company entries
   if (hasCompanyIdentityIntent && entry.category === "company") {
     score += 45;
+  }
+
+  // ── Specific company question boosters ──────────────────────────────────
+  // Boost the specific "where is ... located" entry over the generic intro
+  const isLocationQuery = queryTokens.includes("location") || queryTokens.includes("located");
+  if (isLocationQuery && entry.category === "company") {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("located") || normQ.includes("location") || normQ.includes("address")) {
+      score += 70; // strong preference for the location-specific entry
+    } else if (normQ.includes("what is weintern") || normQ.includes("introduce")) {
+      score -= 40; // penalise generic intro for location queries
+    }
+  }
+
+  // Boost the specific "mission" entry over the generic intro
+  const isMissionQuery = queryTokens.includes("mission");
+  if (isMissionQuery && entry.category === "company") {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("mission")) {
+      score += 70; // strong preference for the mission-specific entry
+    } else if (normQ.includes("what is weintern") || normQ.includes("introduce")) {
+      score -= 40; // penalise generic intro for mission queries
+    }
+  }
+
+  // Boost the specific "why was this chatbot created" entry when asking about chatbot
+  const isChatbotPurposeQuery = queryTokens.includes("chatbot") || queryTokens.includes("bot") || (queryTokens.includes("created") && (queryTokens.includes("why") || queryTokens.includes("purpose")));
+  if (isChatbotPurposeQuery && entry.category === "company") {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("chatbot") || normQ.includes("purpose")) {
+      score += 80;
+    } else if (normQ.includes("what is weintern") || normQ.includes("introduce")) {
+      score -= 40;
+    }
+  }
+
+  // Boost the specific "what is weintern" entry for direct overview questions
+  const isWhatIsWeInternQuery = (queryTokens.includes("what") || queryTokens.includes("tell") || queryTokens.includes("about") || queryTokens.includes("kya") || queryTokens.includes("who")) && queryTokens.includes("weintern") && !queryTokens.includes("address") && !queryTokens.includes("location") && !queryTokens.includes("ceo") && !queryTokens.includes("founder") && !queryTokens.includes("mission") && !queryTokens.includes("fee") && !queryTokens.includes("course") && !queryTokens.includes("domain") && !queryTokens.includes("certificate") && !queryTokens.includes("stipend") && !queryTokens.includes("placement");
+  if (isWhatIsWeInternQuery && entry.category === "company") {
+    const normQ = normalize(entry.question || "");
+    // Exact-match boost: only "What is WeIntern?" / "Who is WeIntern?" / "Tell me about WeIntern" — NOT "What is WeIntern's address/vision/..."
+    const isExactOverviewEntry = /^(what is weintern|who is weintern|who are weintern|tell me about weintern|weintern kya hai|weintern ke baare mein batao)/.test(normQ) && !normQ.includes("address") && !normQ.includes("vision") && !normQ.includes("ceo") && !normQ.includes("founder");
+    if (isExactOverviewEntry) {
+      score += 150; // strong boost for the exact overview entry
+    } else if (normQ.includes("address") || normQ.includes("located") || normQ.includes("vision") || normQ.includes("weinterns address") || normQ.includes("weinterns vision")) {
+      score -= 200; // strongly penalise sub-entries like "What is WeIntern's address?"
+    }
   }
 
   if (
@@ -977,6 +1031,35 @@ function searchKnowledgeBase(message = "") {
   const query = normalize(message);
   const queryTokens = query.split(" ").filter(Boolean);
   const categoryHints = inferCategoryHints(queryTokens);
+
+  // ── EXACT QUESTION MATCH SHORTCUT ────────────────────────────────────────
+  // Before running the full scoring loop, check if the user's normalised query
+  // exactly matches (or very closely matches) a KB entry's question text.
+  // This prevents near-identical entries (e.g. "What is WeIntern's address?")
+  // from winning over the direct target (e.g. "What is WeIntern?").
+  const normalizedQuery = query.trim();
+  for (const [cat, entries] of Object.entries(knowledgeIndex)) {
+    for (const entry of entries) {
+      const normEntryQ = normalize(entry.question || "").trim();
+      if (normEntryQ === normalizedQuery) {
+        const exactMatch = {
+          category: cat,
+          question: entry.question || "",
+          answer: entry.answer || "",
+          score: 9999,
+        };
+        const contextText = `Category: ${cat}. Question: ${entry.question}. Answer: ${entry.answer}`;
+        console.log("EXACT MATCH SHORTCUT:", entry.question);
+        return {
+          query: normalizedQuery,
+          matches: [exactMatch],
+          contextText,
+          hasMatch: true,
+        };
+      }
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────
 
   // Pre-detect plan-price certificate questions before token-based detection
   // e.g. "What is included in 6599 plan?" or "999 wale plan mein kya milega?"
