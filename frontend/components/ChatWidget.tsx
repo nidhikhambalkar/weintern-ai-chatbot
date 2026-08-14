@@ -313,6 +313,7 @@ export default function ChatWidget() {
   const isVoicePausedRef = useRef<boolean>(false);
   const isCancelledByCommandRef = useRef<boolean>(false);
   const pausedMessageIndexRef = useRef<number | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -956,6 +957,15 @@ export default function ChatWidget() {
     isVoicePausedRef.current = false;
     isTtsSpeakingRef.current = false;
     stopInterruptListener();
+
+    // Abort active LLM HTTP generation immediately
+    if (abortControllerRef.current) {
+      try {
+        abortControllerRef.current.abort();
+      } catch (e) {}
+      abortControllerRef.current = null;
+    }
+
     if (typeof window !== "undefined" && window.speechSynthesis) {
       try {
         window.speechSynthesis.cancel();
@@ -968,6 +978,7 @@ export default function ChatWidget() {
     setPlayingMessageIndex(null);
     setPlaybackState("IDLE");
     setVoiceState("IDLE");
+    setIsTyping(false);
     currentPausedTextRef.current = "";
     currentSpeakCharIndexRef.current = 0;
     pausedMessageIndexRef.current = null;
