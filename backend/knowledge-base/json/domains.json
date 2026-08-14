@@ -76,6 +76,46 @@
   },
   {
     "category": "domains",
+    "question": "Tell me about the data science course.",
+    "answer": "Data Science & Analytics is a 12-week intermediate program priced at ₹6,599. It covers Python, Pandas, NumPy, Scikit-learn, Matplotlib, Seaborn, Tableau, and SQL. You complete 3 real data projects. Certificate and stipend included."
+  },
+  {
+    "category": "domains",
+    "question": "Tell me about Data Science.",
+    "answer": "Data Science & Analytics is a 12-week intermediate program priced at ₹6,599. It covers Python, Pandas, NumPy, Scikit-learn, Matplotlib, Seaborn, Tableau, and SQL. You complete 3 real data projects. Certificate and stipend included."
+  },
+  {
+    "category": "domains",
+    "question": "Data Science course details",
+    "answer": "Data Science & Analytics is a 12-week intermediate program priced at ₹6,599. It covers Python, Pandas, NumPy, Scikit-learn, Matplotlib, Seaborn, Tableau, and SQL. You complete 3 real data projects. Certificate and stipend included."
+  },
+  {
+    "category": "domains",
+    "question": "Data science course kitne weeks ka hai?",
+    "answer": "Data Science & Analytics course 12 weeks (3 months) ka program hai. Price/fee ₹6,599 hai. Isme Python, Pandas, NumPy, Machine Learning, Tableau aur SQL sikhaya jata hai."
+  },
+  {
+    "category": "domains",
+    "question": "Data Science mein kya sikhate ho?",
+    "answer": "Data Science & Analytics program mein Python, Pandas, NumPy, Scikit-learn, Matplotlib, Seaborn, Tableau aur SQL sikhaya jata hai. Total 3 real data projects include hote hain."
+  },
+  {
+    "category": "domains",
+    "question": "How long is the Data Science course?",
+    "answer": "The Data Science & Analytics course is 12 weeks (3 months) long and priced at ₹6,599."
+  },
+  {
+    "category": "domains",
+    "question": "Is Data Science available?",
+    "answer": "Yes! WeIntern offers a 12-week Data Science & Analytics course priced at ₹6,599 with live projects, certification, and performance-based stipend."
+  },
+  {
+    "category": "domains",
+    "question": "Data Science course duration?",
+    "answer": "The Data Science & Analytics course duration is 12 weeks (3 months)."
+  },
+  {
+    "category": "domains",
     "question": "Which is the cheapest course at WeIntern?",
     "answer": "The most affordable WeIntern program is Digital Marketing at ₹2,499 (8 weeks), followed by UI/UX Design, Python, Java, and C/C++ Programming at ₹3,299."
   },

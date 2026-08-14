@@ -857,7 +857,7 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory) {
   }
 
   // Boost the specific "what is weintern" entry for direct overview questions
-  const isWhatIsWeInternQuery = (queryTokens.includes("what") || queryTokens.includes("tell") || queryTokens.includes("about") || queryTokens.includes("kya") || queryTokens.includes("who")) && queryTokens.includes("weintern") && !queryTokens.includes("address") && !queryTokens.includes("location") && !queryTokens.includes("ceo") && !queryTokens.includes("founder") && !queryTokens.includes("mission") && !queryTokens.includes("fee") && !queryTokens.includes("course") && !queryTokens.includes("domain") && !queryTokens.includes("certificate") && !queryTokens.includes("stipend") && !queryTokens.includes("placement");
+  const isWhatIsWeInternQuery = (queryTokens.includes("what") || queryTokens.includes("tell") || queryTokens.includes("about") || queryTokens.includes("kya") || queryTokens.includes("who")) && queryTokens.includes("weintern") && !queryTokens.includes("address") && !queryTokens.includes("location") && !queryTokens.includes("ceo") && !queryTokens.includes("founder") && !queryTokens.includes("mission") && !queryTokens.includes("fee") && !queryTokens.includes("course") && !queryTokens.includes("domain") && !queryTokens.includes("certificate") && !queryTokens.includes("stipend") && !queryTokens.includes("placement") && !queryTokens.includes("data") && !queryTokens.includes("science");
   if (isWhatIsWeInternQuery && entry.category === "company") {
     const normQ = normalize(entry.question || "");
     // Exact-match boost: only "What is WeIntern?" / "Who is WeIntern?" / "Tell me about WeIntern" — NOT "What is WeIntern's address/vision/..."
@@ -869,12 +869,37 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory) {
     }
   }
 
+  const isSpecificTopicAsked = queryTokens.includes("data") || queryTokens.includes("science") || queryTokens.includes("course") || queryTokens.includes("fee") || queryTokens.includes("domain") || queryTokens.includes("internship") || queryTokens.includes("certificate") || queryTokens.includes("placement") || queryTokens.includes("ceo") || queryTokens.includes("founder") || queryTokens.includes("address") || queryTokens.includes("location");
+
   if (
     hasAboutIntent &&
     entry.question &&
-    normalize(entry.question).includes("what is weintern")
+    normalize(entry.question).includes("what is weintern") &&
+    queryTokens.includes("weintern") &&
+    !isSpecificTopicAsked
   ) {
     score += 30;
+  }
+
+  // Domain Specificity Boosters:
+  const isDataScienceQuery = queryTokens.includes("data") || queryTokens.includes("science") || queryTokens.includes("pandas") || queryTokens.includes("tableau");
+  if (isDataScienceQuery) {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("data science")) {
+      score += 200;
+    } else if (entry.category === "company" && normQ.includes("what is weintern")) {
+      score -= 150;
+    }
+  }
+
+  const isFullStackQuery = queryTokens.includes("fullstack") || (queryTokens.includes("full") && queryTokens.includes("stack"));
+  if (isFullStackQuery) {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("full stack")) {
+      score += 200;
+    } else if (entry.category === "company" && normQ.includes("what is weintern")) {
+      score -= 150;
+    }
   }
 
   queryTokens.forEach((token) => {
@@ -1080,6 +1105,7 @@ function searchKnowledgeBase(message = "") {
         return {
           query: normalizedQuery,
           matches: [exactMatch],
+          topMatch: exactMatch,
           contextText,
           hasMatch: true,
         };

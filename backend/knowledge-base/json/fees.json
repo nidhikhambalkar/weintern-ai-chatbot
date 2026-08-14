@@ -6,6 +6,11 @@
   },
   {
     "category": "fees",
+    "question": "What is the fee?",
+    "answer": "WeIntern program fees depend on the track and domain:\n\n• **6-Month Internship Program**: ₹6,599 (EMI available in 30:40:30 ratio)\n• **3-Month Internship Program**: ₹999 (one-time full payment)\n\nIndividual course fees range from ₹2,499 to ₹10,699 (e.g. Data Science: ₹6,599, Digital Marketing: ₹2,499). Which specific program or domain would you like the exact fee for?"
+  },
+  {
+    "category": "fees",
     "question": "What are the WeIntern program options?",
     "answer": "WeIntern offers two main internship programs: 1) 6-Month Internship Program at ₹6,599 — includes 2 months of industry training + live project experience + 100% placement guarantee + mock interviews + LinkedIn profile building + stipend up to ₹10,000. 2) 3-Month Internship Program at ₹999 — includes industry training + internship certificate + stipend up to ₹10,000 (subject to project availability) + placement support (not 100% guaranteed)."
   },
