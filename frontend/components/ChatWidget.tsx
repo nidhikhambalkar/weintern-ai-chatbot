@@ -464,14 +464,11 @@ export default function ChatWidget() {
     return selectedVoiceRef.current;
   };
 
-  // Generate or load session ID & Initialize Web Speech API
+  // Initialize fresh session ID per page load & Web Speech API
   useEffect(() => {
     if (typeof window !== "undefined") {
-      let id = localStorage.getItem("weintern_session_id");
-      if (!id) {
-        id = "session_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
-        localStorage.setItem("weintern_session_id", id);
-      }
+      localStorage.removeItem("weintern_session_id");
+      const id = "session_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
       setSessionId(id);
 
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -503,31 +500,6 @@ export default function ChatWidget() {
       }
     }
   }, []);
-
-  // Fetch chat history from PostgreSQL / In-Memory fallback on startup
-  useEffect(() => {
-    if (!sessionId) return;
-    const fetchHistory = async () => {
-      try {
-        const res = await getHistory(sessionId);
-        if (res.success && res.data && res.data.length > 0) {
-          setMessages(
-            res.data.map((msg: any) => ({
-              sender: msg.sender === "bot" ? "bot" : "user",
-              text: msg.message,
-              time: new Date(msg.timestamp).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              }),
-            }))
-          );
-        }
-      } catch (err) {
-        console.error("Failed to load chat history:", err);
-      }
-    };
-    fetchHistory();
-  }, [sessionId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
