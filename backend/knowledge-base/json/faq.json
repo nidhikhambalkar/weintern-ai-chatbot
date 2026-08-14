@@ -7,7 +7,7 @@
   {
     "category": "faq",
     "question": "Does WeIntern offer internships?",
-    "answer": "Yes. WeIntern offers structured internship programs in Full Stack Web Development, Mobile App Development, AI & Automation, Cloud Solutions & DevOps, UI/UX Design, Digital Marketing, and Data Science & Analytics."
+    "answer": "Yes. WeIntern offers structured internship programs in Full Stack Web Development, Mobile App Development, AI & Automation, Data Science & Analytics, Python Programming, Java Programming, C/C++ Programming, UI/UX Design, Cloud Computing, and Digital Marketing."
   },
   {
     "category": "faq",
@@ -67,7 +67,7 @@
   {
     "category": "faq",
     "question": "WeIntern internship duration kitni hoti hai?",
-    "answer": "Program duration domain ke according vary karti hai: Full Stack Web Development (12 weeks), Mobile App Development (10 weeks), AI & Automation (8 weeks), Cloud Solutions & DevOps (10 weeks), Data Science & Analytics (12 weeks), Cloud Computing (12 weeks), DevOps Engineering (10 weeks), Python Programming (10 weeks), Java Programming (12 weeks), aur C/C++ Programming (10 weeks)."
+    "answer": "Program duration domain ke according vary karti hai: Full Stack Web Development (12 weeks), Mobile App Development (10 weeks), AI & Automation (8 weeks), Data Science & Analytics (12 weeks), Python Programming (10 weeks), Java Programming (12 weeks), C/C++ Programming (10 weeks), UI/UX Design (8 weeks), Cloud Computing (12 weeks), aur Digital Marketing (8 weeks)."
   },
   {
     "category": "faq",
@@ -371,23 +371,23 @@
   },
   {
     "category": "faq",
-    "question": "How much does Cloud Solutions & DevOps course cost and how long is it?",
-    "answer": "The Cloud Solutions & DevOps course duration is 10 weeks and the price/fee is ₹10,699."
+    "question": "How much does Cloud Computing course cost and how long is it?",
+    "answer": "The Cloud Computing course duration is 12 weeks and the price/fee is ₹5,399."
   },
   {
     "category": "faq",
-    "question": "What is the price, fee, and duration for Cloud Solutions & DevOps?",
-    "answer": "The Cloud Solutions & DevOps course duration is 10 weeks and the price/fee is ₹10,699."
+    "question": "What is the price, fee, and duration for Cloud Computing?",
+    "answer": "The Cloud Computing course duration is 12 weeks and the price/fee is ₹5,399."
   },
   {
     "category": "faq",
-    "question": "How much does DevOps Engineering course cost and how long is it?",
-    "answer": "The DevOps Engineering course duration is 10 weeks and the price/fee is ₹5,399."
+    "question": "How much does Cloud Computing course cost and how long is it?",
+    "answer": "The Cloud Computing course duration is 12 weeks and the price/fee is ₹5,399."
   },
   {
     "category": "faq",
-    "question": "What is the price, fee, and duration for DevOps Engineering?",
-    "answer": "The DevOps Engineering course duration is 10 weeks and the price/fee is ₹5,399."
+    "question": "What is the price, fee, and duration for Cloud Computing?",
+    "answer": "The Cloud Computing course duration is 12 weeks and the price/fee is ₹5,399."
   },
   {
     "category": "faq",
@@ -436,13 +436,13 @@
   },
   {
     "category": "faq",
-    "question": "What is the duration and fee for Cloud Solutions & DevOps?",
-    "answer": "The Cloud Solutions & DevOps course duration is 10 weeks and the fee is ₹10,699."
+    "question": "What is the duration and fee for Cloud Computing?",
+    "answer": "The Cloud Computing course duration is 12 weeks and the fee is ₹5,399."
   },
   {
     "category": "faq",
-    "question": "What is the duration and fee for DevOps Engineering?",
-    "answer": "The DevOps Engineering course duration is 10 weeks and the fee is ₹5,399."
+    "question": "What is the duration and fee for Cloud Computing?",
+    "answer": "The Cloud Computing course duration is 12 weeks and the fee is ₹5,399."
   },
   {
     "category": "faq",
@@ -467,7 +467,7 @@
   {
     "category": "faq",
     "question": "Will I learn app deployment?",
-    "answer": "Program duration depends on the selected domain: AI & Automation is 8 weeks; Mobile App Development, Cloud Solutions & DevOps, DevOps Engineering, Python Programming, and C/C++ Programming are 10 weeks; Full Stack Web Development, Data Science & Analytics, Cloud Computing, and Java Programming are 12 weeks."
+    "answer": "Program duration depends on the selected domain: AI & Automation, UI/UX Design, and Digital Marketing are 8 weeks; Mobile App Development, Python Programming, and C/C++ Programming are 10 weeks; Full Stack Web Development, Data Science & Analytics, Cloud Computing, and Java Programming are 12 weeks."
   },
   {
     "category": "faq",
@@ -517,7 +517,7 @@
   {
     "category": "faq",
     "question": "How long are WeIntern programs?",
-    "answer": "Program duration depends on the selected domain: AI & Automation is 8 weeks; Mobile App Development, Cloud Solutions & DevOps, DevOps Engineering, Python Programming, and C/C++ Programming are 10 weeks; Full Stack Web Development, Data Science & Analytics, Cloud Computing, and Java Programming are 12 weeks."
+    "answer": "Program duration depends on the selected domain: AI & Automation, UI/UX Design, and Digital Marketing are 8 weeks; Mobile App Development, Python Programming, and C/C++ Programming are 10 weeks; Full Stack Web Development, Data Science & Analytics, Cloud Computing, and Java Programming are 12 weeks."
   },
   {
     "category": "faq",

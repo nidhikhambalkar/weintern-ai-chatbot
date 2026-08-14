@@ -1,12 +1,12 @@
 const express = require('express');
+const { ObjectId } = require('mongodb');
 const router = express.Router();
-const { query, getIsPgConnected, inMemoryDb } = require('../database/db');
+const { getCollection, getIsDbConnected, inMemoryDb } = require('../database/db');
 
-// ==============================================================================
+// ============================================================================== 
 // LEAD MANAGEMENT ENDPOINTS
-// ==============================================================================
+// ============================================================================== 
 
-// POST /api/leads -> Save a new student lead
 router.post('/leads', async (req, res) => {
   try {
     const { name, email, phone, preferred_domain, domain } = req.body;
@@ -23,7 +23,6 @@ router.post('/leads', async (req, res) => {
     const trimmedEmail = email.trim();
     const trimmedPhone = phone.trim();
 
-    // Secure format validations
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(trimmedEmail)) {
       return res.status(400).json({
@@ -40,29 +39,25 @@ router.post('/leads', async (req, res) => {
       });
     }
 
-    if (getIsPgConnected()) {
-      const sql = `
-        INSERT INTO leads (name, email, phone, preferred_domain)
-        VALUES ($1, $2, $3, $4)
-        RETURNING *;
-      `;
-      const result = await query(sql, [trimmedName, trimmedEmail, trimmedPhone, targetDomain]);
-      return res.status(201).json({
-        success: true,
-        message: 'Lead captured successfully in PostgreSQL!',
-        data: result.rows[0]
-      });
-    }
-
-    // Fallback mode (In-Memory)
     const newLead = {
-      id: inMemoryDb.autoId.leads++,
       name: trimmedName,
       email: trimmedEmail,
       phone: trimmedPhone,
       preferred_domain: targetDomain,
-      created_at: new Date().toISOString()
+      created_at: new Date()
     };
+
+    if (getIsDbConnected()) {
+      const collection = getCollection('leads');
+      const result = await collection.insertOne(newLead);
+      return res.status(201).json({
+        success: true,
+        message: 'Lead captured successfully in MongoDB!',
+        data: { ...newLead, _id: result.insertedId }
+      });
+    }
+
+    newLead.id = inMemoryDb.autoId.leads++;
     inMemoryDb.leads.push(newLead);
 
     return res.status(201).json({
@@ -76,15 +71,15 @@ router.post('/leads', async (req, res) => {
   }
 });
 
-// GET /api/leads & GET /api/admin/leads -> Retrieve all leads
 const getLeadsHandler = async (req, res) => {
   try {
-    if (getIsPgConnected()) {
-      const result = await query(`SELECT * FROM leads ORDER BY created_at DESC;`);
+    if (getIsDbConnected()) {
+      const collection = getCollection('leads');
+      const result = await collection.find({}).sort({ created_at: -1 }).toArray();
       return res.status(200).json({
         success: true,
-        count: result.rows.length,
-        data: result.rows
+        count: result.length,
+        data: result
       });
     }
 
@@ -102,11 +97,10 @@ const getLeadsHandler = async (req, res) => {
 router.get('/leads', getLeadsHandler);
 router.get('/admin/leads', getLeadsHandler);
 
-// ==============================================================================
+// ============================================================================== 
 // CONVERSATION HISTORY ENDPOINTS
-// ==============================================================================
+// ============================================================================== 
 
-// GET /api/history -> Get chat history for a session_id
 router.get('/history', async (req, res) => {
   try {
     const sessionId = req.query.session_id || req.query.sessionId;
@@ -118,18 +112,18 @@ router.get('/history', async (req, res) => {
       });
     }
 
-    if (getIsPgConnected()) {
-      const sql = `SELECT * FROM messages WHERE session_id = $1 ORDER BY timestamp ASC;`;
-      const result = await query(sql, [sessionId]);
+    if (getIsDbConnected()) {
+      const collection = getCollection('messages');
+      const result = await collection.find({ session_id: sessionId }).sort({ timestamp: 1 }).toArray();
       return res.status(200).json({
         success: true,
         session_id: sessionId,
-        count: result.rows.length,
-        data: result.rows
+        count: result.length,
+        data: result
       });
     }
 
-    const filteredMessages = inMemoryDb.messages.filter(m => m.session_id === sessionId);
+    const filteredMessages = inMemoryDb.messages.filter((m) => m.session_id === sessionId);
     return res.status(200).json({
       success: true,
       session_id: sessionId,
@@ -142,7 +136,6 @@ router.get('/history', async (req, res) => {
   }
 });
 
-// POST /api/history -> Save a single chat message
 router.post('/history', async (req, res) => {
   try {
     const { session_id, sender, message } = req.body;
@@ -154,14 +147,27 @@ router.post('/history', async (req, res) => {
       });
     }
 
-    if (getIsPgConnected()) {
-      await query(`INSERT INTO sessions (session_id) VALUES ($1) ON CONFLICT (session_id) DO NOTHING;`, [session_id]);
-      const sql = `INSERT INTO messages (session_id, sender, message) VALUES ($1, $2, $3) RETURNING *;`;
-      const result = await query(sql, [session_id, sender, message]);
+    if (getIsDbConnected()) {
+      const sessionCollection = getCollection('sessions');
+      const messageCollection = getCollection('messages');
+
+      await sessionCollection.updateOne(
+        { session_id },
+        { $setOnInsert: { session_id, created_at: new Date() } },
+        { upsert: true }
+      );
+
+      const doc = {
+        session_id,
+        sender,
+        message,
+        timestamp: new Date()
+      };
+      const result = await messageCollection.insertOne(doc);
 
       return res.status(201).json({
         success: true,
-        data: result.rows[0]
+        data: { ...doc, _id: result.insertedId }
       });
     }
 
@@ -184,7 +190,6 @@ router.post('/history', async (req, res) => {
   }
 });
 
-// DELETE /api/history -> Clear chat history for a session_id
 router.delete('/history', async (req, res) => {
   try {
     const sessionId = req.query.session_id || req.query.sessionId || req.body?.session_id;
@@ -196,17 +201,17 @@ router.delete('/history', async (req, res) => {
       });
     }
 
-    if (getIsPgConnected()) {
-      const sql = `DELETE FROM messages WHERE session_id = $1;`;
-      await query(sql, [sessionId]);
+    if (getIsDbConnected()) {
+      const collection = getCollection('messages');
+      await collection.deleteMany({ session_id: sessionId });
       return res.status(200).json({
         success: true,
-        message: 'Chat history cleared successfully from database.',
+        message: 'Chat history cleared successfully from MongoDB.',
         session_id: sessionId
       });
     }
 
-    inMemoryDb.messages = inMemoryDb.messages.filter(m => m.session_id !== sessionId);
+    inMemoryDb.messages = inMemoryDb.messages.filter((m) => m.session_id !== sessionId);
     return res.status(200).json({
       success: true,
       message: 'Chat history cleared successfully.',
@@ -218,11 +223,10 @@ router.delete('/history', async (req, res) => {
   }
 });
 
-// ==============================================================================
+// ============================================================================== 
 // HUMAN ESCALATION ENDPOINTS
-// ==============================================================================
+// ============================================================================== 
 
-// POST /api/escalate & POST /api/escalations -> Create support ticket
 const createEscalationHandler = async (req, res) => {
   try {
     const { session_id, issue } = req.body;
@@ -234,22 +238,26 @@ const createEscalationHandler = async (req, res) => {
       });
     }
 
-    if (getIsPgConnected()) {
-      const sql = `INSERT INTO escalations (session_id, issue, status) VALUES ($1, $2, 'pending') RETURNING *;`;
-      const result = await query(sql, [session_id, issue.trim()]);
+    const doc = {
+      session_id,
+      issue: issue.trim(),
+      status: 'pending',
+      created_at: new Date()
+    };
+
+    if (getIsDbConnected()) {
+      const collection = getCollection('escalations');
+      const result = await collection.insertOne(doc);
       return res.status(201).json({
         success: true,
         message: 'Escalation ticket created successfully!',
-        data: result.rows[0]
+        data: { ...doc, _id: result.insertedId }
       });
     }
 
     const newEscalation = {
       id: inMemoryDb.autoId.escalations++,
-      session_id,
-      issue: issue.trim(),
-      status: 'pending',
-      created_at: new Date().toISOString()
+      ...doc
     };
     inMemoryDb.escalations.push(newEscalation);
 
@@ -267,15 +275,15 @@ const createEscalationHandler = async (req, res) => {
 router.post('/escalate', createEscalationHandler);
 router.post('/escalations', createEscalationHandler);
 
-// GET /api/escalations & GET /api/admin/escalations
 const getEscalationsHandler = async (req, res) => {
   try {
-    if (getIsPgConnected()) {
-      const result = await query(`SELECT * FROM escalations ORDER BY created_at DESC;`);
+    if (getIsDbConnected()) {
+      const collection = getCollection('escalations');
+      const result = await collection.find({}).sort({ created_at: -1 }).toArray();
       return res.status(200).json({
         success: true,
-        count: result.rows.length,
-        data: result.rows
+        count: result.length,
+        data: result
       });
     }
 
@@ -293,7 +301,6 @@ const getEscalationsHandler = async (req, res) => {
 router.get('/escalations', getEscalationsHandler);
 router.get('/admin/escalations', getEscalationsHandler);
 
-// PATCH /api/escalations/:id & PATCH /api/admin/escalations/:id
 const patchEscalationHandler = async (req, res) => {
   try {
     const { id } = req.params;
@@ -307,16 +314,22 @@ const patchEscalationHandler = async (req, res) => {
       });
     }
 
-    if (getIsPgConnected()) {
-      const sql = `UPDATE escalations SET status = $1 WHERE id = $2 RETURNING *;`;
-      const result = await query(sql, [status, id]);
-      if (result.rows.length === 0) {
+    if (getIsDbConnected()) {
+      const collection = getCollection('escalations');
+      const result = await collection.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: { status } },
+        { returnDocument: 'after' }
+      );
+
+      if (!result.value) {
         return res.status(404).json({ success: false, error: 'Ticket not found.' });
       }
-      return res.status(200).json({ success: true, data: result.rows[0] });
+
+      return res.status(200).json({ success: true, data: result.value });
     }
 
-    const ticket = inMemoryDb.escalations.find(e => e.id === Number(id));
+    const ticket = inMemoryDb.escalations.find((e) => e.id === Number(id));
     if (!ticket) {
       return res.status(404).json({ success: false, error: 'Ticket not found.' });
     }
@@ -332,25 +345,25 @@ const patchEscalationHandler = async (req, res) => {
 router.patch('/escalations/:id', patchEscalationHandler);
 router.patch('/admin/escalations/:id', patchEscalationHandler);
 
-// GET /api/summary & GET /api/admin/summary
 const getSummaryHandler = async (req, res) => {
   try {
     let leadsCount = 0;
     let escalationsCount = 0;
     let pendingCount = 0;
 
-    if (getIsPgConnected()) {
-      const leadsRes = await query(`SELECT COUNT(*) FROM leads;`);
-      const escRes = await query(`SELECT COUNT(*) FROM escalations;`);
-      const pendingRes = await query(`SELECT COUNT(*) FROM escalations WHERE status = 'pending';`);
+    if (getIsDbConnected()) {
+      const leadsCollection = getCollection('leads');
+      const escalationsCollection = getCollection('escalations');
 
-      leadsCount = parseInt(leadsRes.rows[0].count, 10);
-      escalationsCount = parseInt(escRes.rows[0].count, 10);
-      pendingCount = parseInt(pendingRes.rows[0].count, 10);
+      if (leadsCollection) leadsCount = await leadsCollection.countDocuments({});
+      if (escalationsCollection) {
+        escalationsCount = await escalationsCollection.countDocuments({});
+        pendingCount = await escalationsCollection.countDocuments({ status: 'pending' });
+      }
     } else {
       leadsCount = inMemoryDb.leads.length;
       escalationsCount = inMemoryDb.escalations.length;
-      pendingCount = inMemoryDb.escalations.filter(e => e.status === 'pending').length;
+      pendingCount = inMemoryDb.escalations.filter((e) => e.status === 'pending').length;
     }
 
     return res.status(200).json({

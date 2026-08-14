@@ -7,27 +7,33 @@ function getGreetingResponse(rawText) {
   const isMarathiLatin = /\b(kasa\s*kay|kase\s*ahat|kasa\s*ahes|kashi\s*ahes|kse\s*ahat|ksa\s*kay)\b/.test(lower);
 
   if (isMarathiDevanagari || isMarathiLatin) {
-    return "नमस्कार! 👋 मी WeIntern AI Assistant आहे. मी तुम्हाला courses, internships, fees, certificates आणि WeIntern ची माहिती मिळवण्यासाठी मदत करण्यास इथे आहे. आज मी तुम्हाला कशी मदत करू शकेन?";
+    return "नमस्कार! 👋 मी WeIntern AI Assistant आहे. मी तुम्हाला WeIntern बद्दल माहिती, courses, internships, fees, certificates, placement आणि बरंच काही सांगू शकतो. आज मी तुम्हाला कशी मदत करू शकेन?"; 
   }
 
   // 2. Hindi / Hinglish Greetings
   const isHindiDevanagari = /नमस्ते|नमस्कार|प्रणाम|राम\s*राम|सत\s*श्री\s*अकाल|आदाब|कैसे\s*हो|कैसे\s*हैं/.test(text) || /\b(nmste|nmskar|prnam)\b/.test(lower);
   if (isHindiDevanagari) {
-    return "नमस्ते! 👋 मैं WeIntern AI Assistant हूँ। मैं आपकी courses, internships, fees, certificates और WeIntern की जानकारी पाने में मदद करने के लिए यहाँ हूँ। आज मैं आपकी क्या सहायता कर सकता हूँ?";
+    return "नमस्ते! 👋 मैं WeIntern AI Assistant हूँ। मैं आपको WeIntern के बारे में, courses, internships, fees, certificates, placement और बहुत कुछ बता सकता हूँ। आज मैं आपकी क्या सहायता कर सकता हूँ?";
   }
 
   const isHinglish = /\b(namaste|namaskar|pranam|ram\s*ram|sat\s*sri\s*akal|satsriakal|adab|kaise\s*ho|kaise\s*hain|kya\s*hal\s*hai|sab\s*badiya)\b/.test(lower);
   if (isHinglish) {
-    return "Namaste! 👋 Main WeIntern AI Assistant hoon. Main aapki courses, internships, fees, certificates aur WeIntern ki information me help karne ke liye yahan hoon. Aaj main aapki kya madad kar sakta hoon?";
+    return "Namaste! 👋 Main WeIntern AI Assistant hoon. Main aapko WeIntern ke baare mein, courses, internships, fees, certificates, placement aur bahut kuch bata sakta hoon. Aaj main aapki kya madad kar sakta hoon?";
   }
 
   // 3. English / Default Greeting Response
-  return "Hi! 👋 I’m the WeIntern AI Assistant. I’m here to help you with courses, internships, fees, certificates, and other WeIntern information. How can I help you today?";
+  return "Hi! 👋 I'm the WeIntern AI Assistant. I can tell you all about WeIntern — what it is, how it works, programs, courses, fees, certificates, mentorship, placement, and more. How can I help you today?";
 }
 
 function detectIntent(message = "") {
   const rawText = String(message).trim();
-  const lower = rawText.toLowerCase();
+
+  // ── Normalize WeIntern name variants before any keyword matching ─────────
+  // This ensures "we intern", "weintrn", "wigton", "v intern" etc. all hit the
+  // correct intent branch instead of falling to out-of-domain.
+  const WEINTERN_VARIANT_RE = /\b(v\s+intern|w\s+intern|wee\s+intern|we\s+intern|we-intern|we\s+interne|weintrn|wintern|wenitern|wigton|vinturn|winturn|weinturm|weinturn|weentern|way\s+intern|vee\s+intern|be\s+intern|beintern|weinternship)\b/gi;
+  const normalizedRaw = rawText.replace(WEINTERN_VARIANT_RE, "WeIntern");
+  const lower = normalizedRaw.toLowerCase();
 
   const latinGreetingRegex = /^(hi+|hello+|hey+|hlo|good\s*morning|good\s*afternoon|good\s*evening|yo|sup|namaste|namaskar|pranam|ram\s*ram|satsriakal|adab|kaise\s*ho|kasa\s*kay|kase\s*ahat|nmste|nmskar|prnam|kse\s*ahat|ksa\s*kay)\b/i;
   const devanagariGreetingRegex = /^(नमस्ते|नमस्कार|प्रणाम|राम\s*राम|सत\s*श्री\s*अकाल|आदाब|कैसे\s*हो|कसा\s*काय|कसे\s*आहात|कसा\s*आहेस|कशी\s*आहेस)/;
@@ -39,7 +45,9 @@ function detectIntent(message = "") {
     "fee", "fees", "price", "cost", "duration", "weeks", "months", "apply", "register",
     "registration", "enroll", "placement", "stipend", "certificate", "certification",
     "lor", "syllabus", "project", "projects", "contact", "phone", "email", "refund", "emi",
-    "fullstack", "full stack", "python", "java", "devops", "cloud", "ai", "datascience"
+    "fullstack", "full stack", "python", "java", "devops", "cloud", "ai", "datascience",
+    "domain", "domains", "course", "courses", "internship", "internships", "help", "support",
+    "mentor", "mentorship", "about", "ceo", "founder", "location", "address", "office", "orientation"
   ];
   const hasQuestionKeyword = questionKeywords.some(kw => lower.includes(kw));
 
@@ -54,22 +62,38 @@ function detectIntent(message = "") {
   const weinternKeywords = [
     "weintern",
     "internship",
+    "internsip",
+    "internshp",
+    "intrnship",
+    "intenrship",
     "course",
     "courses",
     "program",
     "training",
     "mentor",
+    "mentr",
+    "mntor",
     "certificate",
     "certification",
+    "certifcate",
+    "certificat",
+    "certficate",
     "placement",
+    "placment",
+    "placemnt",
     "resume",
     "interview",
     "fees",
     "fee",
+    "feez",
+    "phees",
     "emi",
     "payment",
     "refund",
     "domain",
+    "domains",
+    "doamin",
+    "domian",
     "full stack",
     "fullstack",
     "python",
@@ -83,12 +107,19 @@ function detectIntent(message = "") {
     "cyber security",
     "cloud",
     "orientation",
+    "orentation",
     "google meet",
     "support",
     "contact",
     "eligibility",
+    "eligibilty",
+    "elgibility",
     "register",
     "registration",
+    "regster",
+    "resgister",
+    "rgister",
+    "registrtion",
     "apply",
     "join",
     "live project",
@@ -97,20 +128,58 @@ function detectIntent(message = "") {
     "interns",
     "interning",
     "stipend",
+    "stipnd",
+    "stpend",
+    "stipent",
     "salary",
     "earn",
     "price",
     "cost",
     "charges",
     "duration",
+    "duraton",
+    "durtion",
     "weeks",
     "months",
     "time",
     "syllabus",
+    "sylabus",
     "location",
+    "address",
     "whatsapp",
     "number",
     "office",
+    "ceo",
+    "founder",
+    "owner",
+    "who founded",
+    "who started",
+    "head",
+    "about",
+    "introduce",
+    "introduction",
+    "overview",
+    "info",
+    "information",
+    "ashwin",
+    "gurao",
+    "ashwin gurao",
+    "namita",
+    "gope",
+    "namita gope",
+    "co-founder",
+    "cofounder",
+    "kharadi",
+    "pune",
+    "maharashtra",
+    "city vista",
+    "founded",
+    "established",
+    "2024",
+    "2026",
+    "when was weintern",
+    "weintern pvt",
+    "private limited",
 
   // Internship
   "internship",

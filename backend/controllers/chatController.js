@@ -1,7 +1,7 @@
 const { searchKnowledgeBase } = require("../services/knowledgeBaseService");
 const { generateChatResponse } = require("../services/ollamaService");
 const { detectIntent } = require("../services/intentService");
-const { query, getIsPgConnected, inMemoryDb } = require("../database/db");
+const { getCollection, getIsDbConnected, inMemoryDb } = require("../database/db");
 const {
   sanitizeMessage,
   shouldUseKbFastPath,
@@ -25,17 +25,30 @@ function detectEscalation(message = "") {
 async function saveMessageToHistory(sessionId, sender, messageText, source = "text", voiceMetadata = null) {
   if (!sessionId) return;
   try {
-    if (getIsPgConnected()) {
-      // Ensure session exists
-      await query(`INSERT INTO sessions (session_id) VALUES ($1) ON CONFLICT (session_id) DO NOTHING;`, [sessionId]);
-      // Save message
-      await query(
-        `INSERT INTO messages (session_id, sender, message, source, voice_metadata) VALUES ($1, $2, $3, $4, $5);`,
-        [sessionId, sender, messageText, source, voiceMetadata ? JSON.stringify(voiceMetadata) : null]
-      );
+    if (getIsDbConnected()) {
+      const sessionsCollection = getCollection("sessions");
+      const messagesCollection = getCollection("messages");
+
+      if (sessionsCollection) {
+        await sessionsCollection.updateOne(
+          { session_id: sessionId },
+          { $setOnInsert: { session_id: sessionId, created_at: new Date() } },
+          { upsert: true }
+        );
+      }
+
+      if (messagesCollection) {
+        await messagesCollection.insertOne({
+          session_id: sessionId,
+          sender,
+          message: messageText,
+          source,
+          voice_metadata: voiceMetadata,
+          timestamp: new Date(),
+        });
+      }
     } else {
-      // In-Memory Fallback
-      if (!inMemoryDb.sessions.some(s => s.session_id === sessionId)) {
+      if (!inMemoryDb.sessions.some((s) => s.session_id === sessionId)) {
         inMemoryDb.sessions.push({ session_id: sessionId, created_at: new Date().toISOString() });
       }
       inMemoryDb.messages.push({
@@ -45,7 +58,7 @@ async function saveMessageToHistory(sessionId, sender, messageText, source = "te
         message: messageText,
         source,
         voice_metadata: voiceMetadata,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
   } catch (error) {

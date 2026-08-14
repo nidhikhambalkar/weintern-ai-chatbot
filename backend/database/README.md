@@ -1,38 +1,37 @@
-# WeIntern AI Chatbot - Database & Backend APIs (Backend Intern 2 / 4th Intern)
+# WeIntern AI Chatbot - Database & Backend APIs (MongoDB Version)
 
 Welcome! This folder contains the backend database and API code built for the **WeIntern AI Chatbot**.
-It has been designed with a **simple, beginner-friendly layout** so that anyone can read and understand how databases and APIs work.
+It has been designed with a **simple, beginner-friendly layout** using **MongoDB & Mongoose**.
 
 ---
 
-## 📁 Why We Created Each File (File Overview)
-
-Here is a simple explanation of every file in this folder and why it exists:
+## 📁 File Overview
 
 | File Name | Purpose & Why It Exists |
 | :--- | :--- |
-| **`schema.sql`** | Defines the structure (tables and columns) of our PostgreSQL database. Think of this like the blueprint for a spreadsheet where our data is saved. |
-| **`db.js`** | Connects our Node.js app to PostgreSQL. It also has a fallback mode so the app works even if PostgreSQL is not installed locally on your machine. |
-| **`server.js`** | The main Express web server. It contains all API routes (`/api/leads`, `/api/history`, `/api/escalate`, `/api/admin/*`) with detailed explanations for every line. |
-| **`.env.example`** | A template showing the configuration settings (like DB host, username, password, port) needed to run the project. |
-| **`package.json`** | Lists the required Node.js libraries (`express`, `pg`, `cors`, `dotenv`) needed to run this project. |
-| **`test_api.js`** | A 1-click test script that automatically tests all 8 backend API endpoints to prove that everything works! |
+| **`db.js`** | Connects our Node.js app to MongoDB using Mongoose. Includes in-memory fallback for testing without MongoDB running. |
+| **`server.js`** | The main Express web server containing all API routes (`/api/leads`, `/api/history`, `/api/escalate`, `/api/admin/*`). |
+| **`.env.example`** | Environment configuration template containing `MONGODB_URI`. |
+| **`package.json`** | Lists required Node.js packages (`express`, `mongodb`, `mongoose`, `cors`, `dotenv`). |
+| **`test_api.js`** | 1-click test script to test all backend API endpoints. |
 
 ---
 
 ## 🚀 How to Run the Server
 
-1. **Install dependencies** (if not done already):
+1. **Install dependencies**:
    ```bash
    npm install
    ```
 
 2. **Start the backend server**:
    ```bash
-   node server.js
+   npm start
+   # or for development:
+   npm run dev
    ```
 
-3. **Run the automated test script** (in another terminal):
+3. **Run automated API tests** (in another terminal):
    ```bash
    node test_api.js
    ```

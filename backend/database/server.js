@@ -1,111 +1,80 @@
 // ==============================================================================
 // FILE: server.js
-// PURPOSE: Main Express Web Server and API Endpoint Handler.
+// PURPOSE: Main Express Web Server and API Endpoint Handler (MongoDB version).
 // WHY WE CREATED THIS FILE:
 // 1. Receives requests from the Next.js frontend (e.g. chat messages, lead forms).
 // 2. Contains all backend routes cleanly organized in one file so beginners can follow along easily.
-// 3. Connects to database (db.js) to store and retrieve data.
+// 3. Connects to database (db.js) using MongoDB to store and retrieve data.
 // ==============================================================================
 
-// Line 1: Import 'express' web framework to handle HTTP requests
 const express = require('express');
-
-// Line 2: Import 'cors' middleware to allow frontend (Next.js) to make requests to backend
 const cors = require('cors');
-
-// Line 3: Import 'dotenv' to read environment variables from .env file
 const dotenv = require('dotenv');
+const { ObjectId } = require('mongodb');
+const { initDatabase, getIsDbConnected, getCollection, inMemoryDb } = require('./db');
 
-// Line 4: Import database connection and fallback tools from db.js
-const { query, initDatabase, getIsPgConnected, inMemoryDb } = require('./db');
-
-// Line 5: Load environment variables into process.env
 dotenv.config();
 
-// Line 6: Create an instance of Express application
 const app = express();
-
-// Line 7: Define server port (reads PORT from .env or defaults to 5001 to avoid clash)
 const PORT = process.env.PORT || 5001;
 
-// Line 8: Enable CORS middleware so browser allows cross-origin API requests
 app.use(cors());
-
-// Line 9: Enable JSON middleware to automatically parse incoming request body data
 app.use(express.json());
-
 
 // ==============================================================================
 // SECTION 1: HEALTH CHECK ENDPOINT
-// WHY: Used to verify if our server is running and online.
 // ==============================================================================
 app.get('/health', (req, res) => {
-  // Respond with HTTP 200 (OK) status and JSON message
   res.status(200).json({
-    status: 'online', // Server state
-    service: 'WeIntern AI Chatbot Database Server', // Service name
-    db_status: getIsPgConnected() ? 'PostgreSQL' : 'In-Memory Fallback', // Active DB mode
-    timestamp: new Date().toISOString() // Current server timestamp
+    status: 'online',
+    service: 'WeIntern AI Chatbot Database Server',
+    db_status: getIsDbConnected() ? 'MongoDB' : 'In-Memory Fallback',
+    timestamp: new Date().toISOString()
   });
 });
 
-// Root route: friendly message to avoid "Cannot GET /" in browser
 app.get('/', (req, res) => {
   res.status(200).send('WeIntern Database Backend is running. Use /health for status.');
 });
 
-
 // ==============================================================================
 // SECTION 2: LEAD MANAGEMENT ENDPOINTS (PRD Section 13 & 15)
-// WHY: Captures student lead data when students fill out the chatbot lead form.
 // ==============================================================================
 
 // ENDPOINT 1: POST /api/leads -> Save a new student lead
 app.post('/api/leads', async (req, res) => {
   try {
-    // Extract input fields from request body sent by frontend
-    const { name, email, phone, preferred_domain } = req.body;
+    const { name, email, phone, preferred_domain, domain } = req.body;
+    const targetDomain = (preferred_domain || domain || '').trim();
 
-    // Line Validation: Check if any required field is missing
-    if (!name || !email || !phone || !preferred_domain) {
+    if (!name || !email || !phone || !targetDomain) {
       return res.status(400).json({
         success: false,
         error: 'Please fill in all fields: name, email, phone, and preferred_domain.'
       });
     }
 
-    // Check if connected to real PostgreSQL database
-    if (getIsPgConnected()) {
-      // SQL query to insert new lead into leads table
-      const sql = `
-        INSERT INTO leads (name, email, phone, preferred_domain)
-        VALUES ($1, $2, $3, $4)
-        RETURNING *;
-      `;
-      // Execute query with parameterized values to prevent SQL injection
-      const result = await query(sql, [name.trim(), email.trim(), phone.trim(), preferred_domain.trim()]);
-      
-      // Return HTTP 201 (Created) with inserted lead data
-      return res.status(201).json({
-        success: true,
-        message: 'Lead captured successfully in PostgreSQL!',
-        data: result.rows[0]
-      });
-    }
-
-    // FALLBACK MODE (If PostgreSQL is not running locally):
     const newLead = {
-      id: inMemoryDb.autoId.leads++, // Generate next ID
       name: name.trim(),
       email: email.trim(),
       phone: phone.trim(),
-      preferred_domain: preferred_domain.trim(),
-      created_at: new Date().toISOString()
+      preferred_domain: targetDomain,
+      created_at: new Date()
     };
-    // Push new lead into in-memory array
+
+    if (getIsDbConnected()) {
+      const collection = getCollection('leads');
+      const result = await collection.insertOne(newLead);
+      return res.status(201).json({
+        success: true,
+        message: 'Lead captured successfully in MongoDB!',
+        data: { ...newLead, _id: result.insertedId }
+      });
+    }
+
+    newLead.id = inMemoryDb.autoId.leads++;
     inMemoryDb.leads.push(newLead);
 
-    // Return response
     return res.status(201).json({
       success: true,
       message: 'Lead captured successfully!',
@@ -118,22 +87,19 @@ app.post('/api/leads', async (req, res) => {
   }
 });
 
-
 // ENDPOINT 2: GET /api/leads & GET /api/admin/leads -> Retrieve all captured leads
 app.get(['/api/leads', '/api/admin/leads'], async (req, res) => {
   try {
-    // If PostgreSQL is connected
-    if (getIsPgConnected()) {
-      // Run SQL SELECT query to get all leads ordered by newest first
-      const result = await query(`SELECT * FROM leads ORDER BY created_at DESC;`);
+    if (getIsDbConnected()) {
+      const collection = getCollection('leads');
+      const result = await collection.find({}).sort({ created_at: -1 }).toArray();
       return res.status(200).json({
         success: true,
-        count: result.rows.length,
-        data: result.rows
+        count: result.length,
+        data: result
       });
     }
 
-    // Fallback mode response
     return res.status(200).json({
       success: true,
       count: inMemoryDb.leads.length,
@@ -145,19 +111,15 @@ app.get(['/api/leads', '/api/admin/leads'], async (req, res) => {
   }
 });
 
-
 // ==============================================================================
 // SECTION 3: CONVERSATION HISTORY ENDPOINTS (PRD Section 13 & 15)
-// WHY: Stores and retrieves conversation history so user can see past messages.
 // ==============================================================================
 
 // ENDPOINT 3: GET /api/history -> Get chat history for a session_id
 app.get('/api/history', async (req, res) => {
   try {
-    // Read session_id from query parameter (e.g. /api/history?session_id=123)
     const sessionId = req.query.session_id || req.query.sessionId;
 
-    // Check if session_id parameter was provided
     if (!sessionId) {
       return res.status(400).json({
         success: false,
@@ -165,20 +127,17 @@ app.get('/api/history', async (req, res) => {
       });
     }
 
-    // If PostgreSQL connected
-    if (getIsPgConnected()) {
-      // Query messages table for matching session_id
-      const sql = `SELECT * FROM messages WHERE session_id = $1 ORDER BY timestamp ASC;`;
-      const result = await query(sql, [sessionId]);
+    if (getIsDbConnected()) {
+      const collection = getCollection('messages');
+      const result = await collection.find({ session_id: sessionId }).sort({ timestamp: 1 }).toArray();
       return res.status(200).json({
         success: true,
         session_id: sessionId,
-        count: result.rows.length,
-        data: result.rows
+        count: result.length,
+        data: result
       });
     }
 
-    // Fallback mode: Filter in-memory messages array
     const filteredMessages = inMemoryDb.messages.filter(m => m.session_id === sessionId);
     return res.status(200).json({
       success: true,
@@ -193,14 +152,11 @@ app.get('/api/history', async (req, res) => {
   }
 });
 
-
 // ENDPOINT 4: POST /api/history -> Save a single chat message (user or bot)
 app.post('/api/history', async (req, res) => {
   try {
-    // Extract session_id, sender, and message from request body
     const { session_id, sender, message } = req.body;
 
-    // Validate inputs
     if (!session_id || !sender || !message) {
       return res.status(400).json({
         success: false,
@@ -208,22 +164,32 @@ app.post('/api/history', async (req, res) => {
       });
     }
 
-    // If PostgreSQL is connected
-    if (getIsPgConnected()) {
-      // Ensure session exists in sessions table
-      await query(`INSERT INTO sessions (session_id) VALUES ($1) ON CONFLICT (session_id) DO NOTHING;`, [session_id]);
-      
-      // Insert message record into messages table
-      const sql = `INSERT INTO messages (session_id, sender, message) VALUES ($1, $2, $3) RETURNING *;`;
-      const result = await query(sql, [session_id, sender, message]);
+    if (getIsDbConnected()) {
+      const sessionCollection = getCollection('sessions');
+      const messageCollection = getCollection('messages');
+
+      if (sessionCollection) {
+        await sessionCollection.updateOne(
+          { session_id },
+          { $setOnInsert: { session_id, created_at: new Date() } },
+          { upsert: true }
+        );
+      }
+
+      const doc = {
+        session_id,
+        sender,
+        message,
+        timestamp: new Date()
+      };
+      const result = await messageCollection.insertOne(doc);
 
       return res.status(201).json({
         success: true,
-        data: result.rows[0]
+        data: { ...doc, _id: result.insertedId }
       });
     }
 
-    // Fallback mode: Save in memory
     const newMsg = {
       id: inMemoryDb.autoId.messages++,
       session_id,
@@ -244,19 +210,15 @@ app.post('/api/history', async (req, res) => {
   }
 });
 
-
 // ==============================================================================
 // SECTION 4: HUMAN ESCALATION ENDPOINTS (PRD Section 13 & 15)
-// WHY: Collects escalation requests when chatbot cannot answer student queries.
 // ==============================================================================
 
 // ENDPOINT 5: POST /api/escalate & POST /api/escalations -> Create support escalation ticket
 app.post(['/api/escalate', '/api/escalations'], async (req, res) => {
   try {
-    // Read session_id and issue description from request body
     const { session_id, issue } = req.body;
 
-    // Check required inputs
     if (!session_id || !issue) {
       return res.status(400).json({
         success: false,
@@ -264,24 +226,26 @@ app.post(['/api/escalate', '/api/escalations'], async (req, res) => {
       });
     }
 
-    // If PostgreSQL connected
-    if (getIsPgConnected()) {
-      const sql = `INSERT INTO escalations (session_id, issue, status) VALUES ($1, $2, 'pending') RETURNING *;`;
-      const result = await query(sql, [session_id, issue.trim()]);
-      return res.status(201).json({
-        success: true,
-        message: 'Escalation ticket created successfully!',
-        data: result.rows[0]
-      });
-    }
-
-    // Fallback mode: Save in memory
-    const newEscalation = {
-      id: inMemoryDb.autoId.escalations++,
+    const doc = {
       session_id,
       issue: issue.trim(),
       status: 'pending',
-      created_at: new Date().toISOString()
+      created_at: new Date()
+    };
+
+    if (getIsDbConnected()) {
+      const collection = getCollection('escalations');
+      const result = await collection.insertOne(doc);
+      return res.status(201).json({
+        success: true,
+        message: 'Escalation ticket created successfully!',
+        data: { ...doc, _id: result.insertedId }
+      });
+    }
+
+    const newEscalation = {
+      id: inMemoryDb.autoId.escalations++,
+      ...doc
     };
     inMemoryDb.escalations.push(newEscalation);
 
@@ -297,16 +261,16 @@ app.post(['/api/escalate', '/api/escalations'], async (req, res) => {
   }
 });
 
-
 // ENDPOINT 6: GET /api/escalations & GET /api/admin/escalations -> View support escalation tickets
 app.get(['/api/escalations', '/api/admin/escalations'], async (req, res) => {
   try {
-    if (getIsPgConnected()) {
-      const result = await query(`SELECT * FROM escalations ORDER BY created_at DESC;`);
+    if (getIsDbConnected()) {
+      const collection = getCollection('escalations');
+      const result = await collection.find({}).sort({ created_at: -1 }).toArray();
       return res.status(200).json({
         success: true,
-        count: result.rows.length,
-        data: result.rows
+        count: result.length,
+        data: result
       });
     }
 
@@ -321,12 +285,11 @@ app.get(['/api/escalations', '/api/admin/escalations'], async (req, res) => {
   }
 });
 
-
 // ENDPOINT 7: PATCH /api/escalations/:id & PATCH /api/admin/escalations/:id -> Update escalation status
 app.patch(['/api/escalations/:id', '/api/admin/escalations/:id'], async (req, res) => {
   try {
-    const { id } = req.params;     // Ticket ID from URL parameter
-    const { status } = req.body;  // New status string ('pending', 'in_progress', 'resolved', 'closed')
+    const { id } = req.params;
+    const { status } = req.body;
 
     const allowed = ['pending', 'in_progress', 'resolved', 'closed'];
     if (!status || !allowed.includes(status)) {
@@ -336,16 +299,27 @@ app.patch(['/api/escalations/:id', '/api/admin/escalations/:id'], async (req, re
       });
     }
 
-    if (getIsPgConnected()) {
-      const sql = `UPDATE escalations SET status = $1 WHERE id = $2 RETURNING *;`;
-      const result = await query(sql, [status, id]);
-      if (result.rows.length === 0) {
+    if (getIsDbConnected()) {
+      const collection = getCollection('escalations');
+      let filter = {};
+      try {
+        filter = { _id: new ObjectId(id) };
+      } catch (err) {
+        filter = { id: Number(id) };
+      }
+
+      const result = await collection.findOneAndUpdate(
+        filter,
+        { $set: { status } },
+        { returnDocument: 'after' }
+      );
+
+      if (!result) {
         return res.status(404).json({ success: false, error: 'Ticket not found.' });
       }
-      return res.status(200).json({ success: true, data: result.rows[0] });
+      return res.status(200).json({ success: true, data: result });
     }
 
-    // Fallback mode
     const ticket = inMemoryDb.escalations.find(e => e.id === Number(id));
     if (!ticket) {
       return res.status(404).json({ success: false, error: 'Ticket not found.' });
@@ -359,7 +333,6 @@ app.patch(['/api/escalations/:id', '/api/admin/escalations/:id'], async (req, re
   }
 });
 
-
 // ENDPOINT 8: GET /api/summary & GET /api/admin/summary -> Overview statistics
 app.get(['/api/summary', '/api/admin/summary'], async (req, res) => {
   try {
@@ -367,14 +340,17 @@ app.get(['/api/summary', '/api/admin/summary'], async (req, res) => {
     let escalationsCount = 0;
     let pendingCount = 0;
 
-    if (getIsPgConnected()) {
-      const leadsRes = await query(`SELECT COUNT(*) FROM leads;`);
-      const escRes = await query(`SELECT COUNT(*) FROM escalations;`);
-      const pendingRes = await query(`SELECT COUNT(*) FROM escalations WHERE status = 'pending';`);
+    if (getIsDbConnected()) {
+      const leadsCollection = getCollection('leads');
+      const escalationsCollection = getCollection('escalations');
 
-      leadsCount = parseInt(leadsRes.rows[0].count, 10);
-      escalationsCount = parseInt(escRes.rows[0].count, 10);
-      pendingCount = parseInt(pendingRes.rows[0].count, 10);
+      if (leadsCollection) {
+        leadsCount = await leadsCollection.countDocuments({});
+      }
+      if (escalationsCollection) {
+        escalationsCount = await escalationsCollection.countDocuments({});
+        pendingCount = await escalationsCollection.countDocuments({ status: 'pending' });
+      }
     } else {
       leadsCount = inMemoryDb.leads.length;
       escalationsCount = inMemoryDb.escalations.length;
@@ -395,16 +371,12 @@ app.get(['/api/summary', '/api/admin/summary'], async (req, res) => {
   }
 });
 
-
 // ==============================================================================
 // SECTION 5: START SERVER FUNCTION
-// WHY: Boots up database auto-creation and starts listening on the specified port.
 // ==============================================================================
 const start = async () => {
-  // Line 1: Call database auto-initialization function
   await initDatabase();
 
-  // Line 2: Start Express app server listening on PORT
   app.listen(PORT, () => {
     console.log(`====================================================`);
     console.log(`🚀 [Server] WeIntern Database Backend live on port ${PORT}`);
@@ -413,5 +385,4 @@ const start = async () => {
   });
 };
 
-// Execute start function to ignite server
 start();

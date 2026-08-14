@@ -124,10 +124,16 @@ async function generateChatResponse({ message, context }) {
 
 async function pingOllama() {
   try {
-    const res = await axios.get(`${OLLAMA_HOST}/api/models/${OLLAMA_MODEL}`, { timeout: 5000 });
-    return { ok: true, model: res.data };
+    const res = await axios.get(`${OLLAMA_HOST}/api/tags`, { timeout: 5000 });
+    const models = res.data?.models || [];
+    return { ok: true, model: OLLAMA_MODEL, models };
   } catch (err) {
-    return { ok: false, error: err.message };
+    try {
+      const versionRes = await axios.get(`${OLLAMA_HOST}/api/version`, { timeout: 5000 });
+      return { ok: true, model: OLLAMA_MODEL, version: versionRes.data?.version };
+    } catch (vErr) {
+      return { ok: false, error: err.message };
+    }
   }
 }
 

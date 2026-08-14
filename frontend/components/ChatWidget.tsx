@@ -45,18 +45,28 @@ function normalizeSpeechInput(text: string): string {
     normalized = transliterateDevanagari(text);
   }
 
-  // 1. Normalize WeIntern name variations (case-insensitive)
+  // ── 1. Normalize WeIntern name variations (comprehensive) ──────────────
   const weinternRegexes = [
+    // Multi-word variants with spacing/hyphen
     /\b(v\s*intern|v-intern)\b/gi,
-    /\b(weintrn|we\s+in\s+turn|weinturn|wintern|we-intern|we\s+intern|we\s+inter|wee\s+intern|wee\s+intrn)\b/gi,
-    /\b(be\s*intern|beintern|way\s*intern|we\s+intent|we\s+entered|vee\s+intern|vee\s+intrn|vee\s+internship|v\s+internship)\b/gi,
-    /\b(we\s+entered\s+in|we\s+internship)\b/gi,
+    /\b(w\s+intern|w-intern)\b/gi,
+    /\b(wee\s+intern|wee\s+intrn|wee\s+internship)\b/gi,
+    /\b(we\s+intern|we-intern|we\s+interne|we\s+internship)\b/gi,
+    /\b(we\s+inter\b)/gi,
+    /\b(we\s+in\s+turn|we\s+inturn)\b/gi,
+    // Single-word phonetic / speech-to-text mistakes
+    /\b(weintrn|weinturn|wintern|wenitern|weinturm|weentern|weintearn)\b/gi,
+    /\b(wigton|vinturn|winturn|weintern)\b/gi,           // also ensures casing
+    /\b(way\s+intern|vee\s+intern|be\s+intern|beintern)\b/gi,
+    /\b(we\s+entered|we\s+entered\s+in)\b/gi,
+    /\b(we\s+intent|we\s+interns)\b/gi,
+    /\b(vee\s+internship|v\s+internship|weinternship)\b/gi,
   ];
   weinternRegexes.forEach((regex) => {
     normalized = normalized.replace(regex, "WeIntern");
   });
 
-  // 2. Normalize LOR variations
+  // ── 2. Normalize LOR variations ─────────────────────────────────────────
   const lorRegexes = [
     /\b(hello\s+r|hello\s+are|yellow\s+are|el\s+o\s+are|el\s+o\s+r|ell\s+o\s+are|elora|eller|alore|l\s+o\s+r)\b/gi,
     /\b(recommendation\s+letter|letter\s+of\s+recommendation)\b/gi,
@@ -65,7 +75,7 @@ function normalizeSpeechInput(text: string): string {
     normalized = normalized.replace(regex, "LOR");
   });
 
-  // 3. Normalize EMI variations
+  // ── 3. Normalize EMI variations ──────────────────────────────────────────
   const emiRegexes = [
     /\b(e\s+m\s+i|e\.m\.i\.|ami|emi)\b/gi,
   ];
@@ -73,17 +83,42 @@ function normalizeSpeechInput(text: string): string {
     normalized = normalized.replace(regex, "EMI");
   });
 
-  // 4. Normalize other common speech-to-text mistakes contextually
+  // ── 4. Speech-to-text phonetic / mishearing corrections ─────────────────
+  // Placement
   normalized = normalized.replace(/\bplace\s+ment\b/gi, "placement");
-  normalized = normalized.replace(/\bplacment\b/gi, "placement");
-  normalized = normalized.replace(/\b(stipent|stepend|stipond)\b/gi, "stipend");
+  normalized = normalized.replace(/\b(placment|placemnt|palcement)\b/gi, "placement");
+  // Stipend
+  normalized = normalized.replace(/\b(stipent|stepend|stipond|stipnd|stpend)\b/gi, "stipend");
+  // Certificate
+  normalized = normalized.replace(/\b(certifcate|certficate|certicate|certificat|srtiphiket|sartifiket|certifiate|cerificate)\b/gi, "certificate");
+  // Registration
+  normalized = normalized.replace(/\b(regster|resgister|registrtion|registation|resigtration)\b/gi, "registration");
+  // Internship
+  normalized = normalized.replace(/\b(internsip|internshp|intrnship|interniship|intenrship)\b/gi, "internship");
+  // Fees
+  normalized = normalized.replace(/\b(phees|feez|fes\b)/gi, "fees");
+  // Duration
+  normalized = normalized.replace(/\b(duraton|duartion|duraion|durtion)\b/gi, "duration");
 
-  // 5. Map common transliterated Hindi/Marathi words to standard English keywords
-  normalized = normalized.replace(/\bsrtiphiket\b/gi, "certificate");
-  normalized = normalized.replace(/\bsartifiket\b/gi, "certificate");
-  normalized = normalized.replace(/\bintrn\b/gi, "internship");
-  normalized = normalized.replace(/\bphees\b/gi, "fees");
+  // ── 5. Hinglish keyword normalizations ──────────────────────────────────
+  // Common Hinglish words → English equivalents so backend understands
   normalized = normalized.replace(/\b(kaam|kam)\b/gi, "work");
+  normalized = normalized.replace(/\bintrn\b/gi, "internship");
+  // "kitne month" → "how many months" (duration)
+  normalized = normalized.replace(/\bkitne\s+month(s?)\b/gi, "how many months");
+  normalized = normalized.replace(/\bkitna\s+month(s?)\b/gi, "how many months");
+  // "fees kitna" / "kitna fees"
+  normalized = normalized.replace(/\b(fees?)\s+kitna\b/gi, "fees how much");
+  normalized = normalized.replace(/\bkitna\s+(fees?)\b/gi, "fees how much");
+  normalized = normalized.replace(/\bcourse\s+ki\s+fees?\b/gi, "course fees");
+  // "register karna" / "enroll karna"
+  normalized = normalized.replace(/\b(register|enroll|apply)\s+karna\b/gi, "registration");
+  // "certificate milega"
+  normalized = normalized.replace(/\bcertif[a-z]*\s+milega\b/gi, "certificate");
+  // "stipend milega"
+  normalized = normalized.replace(/\bstipend\s+milega\b/gi, "stipend");
+  // "kya h" → "what is"
+  normalized = normalized.replace(/\bkya\s+h\b/gi, "what is");
 
   return normalized;
 }
@@ -92,11 +127,12 @@ function normalizeSpeechInput(text: string): string {
 function selectAndNormalizeTranscript(alternatives: string[]): string {
   if (!alternatives || alternatives.length === 0) return "";
 
-  // Heuristic: Check each alternative. If one contains a strong WeIntern keyword, prefer it.
+  // Heuristic: Check each alternative for strong domain keywords and prefer it
   const patterns = [
-    /\b(weintern|we\s+intern|v\s*intern|be\s*intern|wintern)\b/i,
+    /\b(weintern|we\s+intern|v\s*intern|be\s*intern|wintern|wigton|weintrn)\b/i,
     /\b(lor|letter\s+of\s+recommendation|hello\s+r|hello\s+are|yellow\s+are)\b/i,
     /\b(emi|e\s+m\s+i|installment|installments)\b/i,
+    /\b(certificate|certif|placement|stipend|internship|registration|fees?|duration|mentor|domain)\b/i,
   ];
 
   for (const pattern of patterns) {
@@ -125,7 +161,7 @@ export default function ChatWidget() {
 
   const [sessionId, setSessionId] = useState<string>("");
   const [voiceMode, setVoiceMode] = useState<boolean>(false);
-  const [voiceState, setVoiceState] = useState<"IDLE" | "LISTENING" | "PROCESSING" | "SPEAKING" | "ERROR">("IDLE");
+  const [voiceState, setVoiceState] = useState<"IDLE" | "LISTENING" | "PROCESSING" | "SPEAKING" | "PAUSED" | "ERROR">("IDLE");
   const [interimTranscript, setInterimTranscript] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isSpeakerMuted, setIsSpeakerMuted] = useState<boolean>(false);
@@ -136,8 +172,11 @@ export default function ChatWidget() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const synthesisRef = useRef<any>(null);
+  const isTtsSpeakingRef = useRef<boolean>(false);
+  const activeUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const currentPausedTextRef = useRef<string>("");
   const currentSpeakCharIndexRef = useRef<number>(0);
+  const isVoicePausedRef = useRef<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -153,6 +192,42 @@ export default function ChatWidget() {
   const handleEditMessage = (text: string) => {
     setMessage(text);
     inputRef.current?.focus();
+  };
+
+  const handleRefreshHistory = async () => {
+    if (!sessionId) return;
+    setIsTyping(true);
+    try {
+      const res = await getHistory(sessionId);
+      if (res.success && res.data) {
+        if (res.data.length === 0) {
+          setMessages([
+            {
+              sender: "bot",
+              text: "👋 Hello! Welcome to WeIntern.",
+              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            },
+          ]);
+        } else {
+          setMessages(
+            res.data.map((msg: any) => ({
+              sender: msg.sender === "bot" ? "bot" : "user",
+              text: msg.message,
+              time: new Date(msg.timestamp).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            }))
+          );
+        }
+        setToastMessage("History refreshed");
+        setTimeout(() => setToastMessage(null), 2000);
+      }
+    } catch (err) {
+      console.error("Failed to refresh history:", err);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const handleClearHistory = async () => {
@@ -300,9 +375,12 @@ export default function ChatWidget() {
   };
 
   const handleResumeOrContinueMessage = () => {
+    isVoicePausedRef.current = false;
     if (!synthesisRef.current) return;
 
     if (synthesisRef.current.paused) {
+      isTtsSpeakingRef.current = true;
+      stopSpeechRecognition();
       synthesisRef.current.resume();
       setPlaybackState("PLAYING");
       setVoiceState("SPEAKING");
@@ -322,27 +400,53 @@ export default function ChatWidget() {
     }
   };
 
-  // Handles natural voice command detection and execution (supports Hindi/Hinglish variations)
+  // Handles natural voice command detection and execution (supports English, Hindi, and Marathi variations)
   const detectAndExecuteVoiceCommand = (text: string): boolean => {
     const rawLower = text.toLowerCase().trim();
+    if (!rawLower) return false;
 
-    // 1. STOP & PAUSE
-    if (/^(stop|pause|stop speaking|pause speech|wait|hold on|quiet|ruko|band karo|chup|chup ho jao|ruk|roko|hold karo|ruko thoda|thoda ruko)$/i.test(rawLower) ||
-      /\b(stop speaking|pause speech|band karo|chup ho jao|thoda ruko|hold karo)\b/i.test(rawLower)) {
+    // 1. STOP COMMAND (Completely stops reading & resets speech index)
+    const isStop =
+      /^(stop|stop reading|stop speaking|stop talking|stop it|stop now|please stop|stop please|shut up|quiet|halt|cancel reading|cancel speech|band karo|बंद करो|thambva|thaambva|थांबवा|chup|chup ho jao|bas karo|rok do|band kar do|awaaz band|aawaz band)$/i.test(rawLower) ||
+      /\b(stop reading|stop speaking|stop talking|stop it|please stop|stop please|shut up|band karo|बंद करो|thambva|thaambva|थांबवा|chup ho jao|bas karo|rok do|band kar do|awaaz band|aawaz band)\b/i.test(rawLower) ||
+      /^(stop|band karo|बंद करो|thambva|thaambva|थांबवा)$/i.test(rawLower) ||
+      (/^\b(stop|band karo|thambva|thaambva)\b/i.test(rawLower) && !/\b(non-stop|bus stop|one stop|stop by)\b/i.test(rawLower));
+
+    if (isStop) {
+      handleStopMessage();
+      return true;
+    }
+
+    // 2. PAUSE COMMAND (Pauses reading in-place)
+    const isPause =
+      /^(pause|pause reading|pause speaking|pause talking|pause it|pause now|please pause|pause please|wait|hold on|pause speech|ruko|roko|thoda ruko|ruko thoda|thamba|thaamb|रुको|थांब|hold karo|thoda wait|rokna)$/i.test(rawLower) ||
+      /\b(pause reading|pause speaking|pause talking|pause it|please pause|pause please|hold on|pause speech|ruko thoda|thoda ruko|thamba|thaamb|रुको|थांब|hold karo|thoda wait|thoda roko)\b/i.test(rawLower) ||
+      /^(pause|wait|ruko|roko|thamba|thaamb|रुको|थांब)$/i.test(rawLower) ||
+      /^\b(pause|wait|ruko|roko|thamba|thaamb|रुको|थांब)\b/i.test(rawLower);
+
+    if (isPause) {
       handlePauseMessage();
       return true;
     }
 
-    // 2. CONTINUE & RESUME
-    if (/^(continue|resume|go on|keep speaking|carry on|continue speaking|chalu karo|phir se chalu karo|continue karo|resume karo|aage bolo)$/i.test(rawLower) ||
-      /\b(continue karo|phir se chalu karo|resume karo|continue speaking|keep speaking|carry on)\b/i.test(rawLower)) {
+    // 3. CONTINUE & RESUME
+    const isResume =
+      /^(continue|resume|go on|keep speaking|carry on|continue speaking|jari rakho|जारी रखो|punha suru|punha shuru|पुन्हा सुरू|chalu karo|phir se chalu karo|continue karo|resume karo|aage bolo)$/i.test(rawLower) ||
+      /\b(continue karo|phir se chalu karo|resume karo|continue speaking|keep speaking|carry on|jari rakho|जारी रखो|punha suru|punha shuru|पुन्हा सुरू)\b/i.test(rawLower) ||
+      /^(continue|resume|जारी रखो|पुन्हा सुरू)$/i.test(rawLower);
+
+    if (isResume) {
       handleResumeOrContinueMessage();
       return true;
     }
 
-    // 3. START / REPLAY / SPEAK AGAIN / REPEAT
-    if (/^(start|begin|repeat|speak again|replay|read again|say again|tell me again|shuru karo|shuru se|play karo|shuru|pehle se|phir se bolo|phir se|dobara bolo|wapas bolo)$/i.test(rawLower) ||
-      /\b(speak again|read again|say again|tell me again|shuru karo|pehle se|phir se bolo|dobara bolo|wapas bolo)\b/i.test(rawLower)) {
+    // 4. START / REPLAY / SPEAK AGAIN / REPEAT
+    const isRepeat =
+      /^(start|begin|repeat|speak again|replay|read again|say again|tell me again|shuru karo|shuru se|play karo|shuru|pehle se|phir se bolo|phir se|dobara bolo|wapas bolo)$/i.test(rawLower) ||
+      /\b(speak again|read again|say again|tell me again|shuru karo|pehle se|phir se bolo|dobara bolo|wapas bolo)\b/i.test(rawLower) ||
+      /^(repeat|replay)$/i.test(rawLower);
+
+    if (isRepeat) {
       const lastBot = getLastBotResponse();
       if (lastBot) {
         handlePlayMessage(lastBot.index, lastBot.text, 0);
@@ -350,17 +454,25 @@ export default function ChatWidget() {
       return true;
     }
 
-    // 4. MUTE
-    if (/^(mute|mute volume|turn off voice|silent|awaaz band|mute karo|silent karo|aawaz band)$/i.test(rawLower) ||
-      /\b(mute volume|turn off voice|awaaz band|mute karo|silent karo|aawaz band)\b/i.test(rawLower)) {
+    // 5. MUTE
+    const isMute =
+      /^(mute|mute volume|turn off voice|silent|mute karo|silent karo)$/i.test(rawLower) ||
+      /\b(mute volume|turn off voice|mute karo|silent karo)\b/i.test(rawLower) ||
+      /^(mute)$/i.test(rawLower);
+
+    if (isMute) {
       setIsSpeakerMuted(true);
       handleStopMessage();
       return true;
     }
 
-    // 5. UNMUTE
-    if (/^(unmute|unmute volume|turn on voice|speak up|voice on|awaaz chalu|unmute karo|speak karo|aawaz chalu)$/i.test(rawLower) ||
-      /\b(unmute volume|turn on voice|awaaz chalu|unmute karo|speak karo|aawaz chalu)\b/i.test(rawLower)) {
+    // 6. UNMUTE
+    const isUnmute =
+      /^(unmute|unmute volume|turn on voice|speak up|voice on|awaaz chalu|unmute karo|speak karo|aawaz chalu)$/i.test(rawLower) ||
+      /\b(unmute volume|turn on voice|awaaz chalu|unmute karo|speak karo|aawaz chalu)\b/i.test(rawLower) ||
+      /^(unmute)$/i.test(rawLower);
+
+    if (isUnmute) {
       setIsSpeakerMuted(false);
       return true;
     }
@@ -370,20 +482,31 @@ export default function ChatWidget() {
 
   // Speaks response using Web Speech Synthesis (TTS)
   const speakResponse = (text: string) => {
+    if (isVoicePausedRef.current) {
+      console.log("Voice reading paused by user. Skipping TTS until user says continue or resume.");
+      return;
+    }
     handlePlayMessage(-1, text, 0);
   };
 
   const handlePlayMessage = (index: number, text: string, charOffset: number = 0) => {
+    isVoicePausedRef.current = false;
     if (!synthesisRef.current) return;
 
     const isCurrentPlaying = playingMessageIndex === index || (playingMessageIndex === -1 && index === messages.length - 1);
 
     if (isCurrentPlaying && playbackState === "PAUSED" && synthesisRef.current.paused) {
+      isTtsSpeakingRef.current = true;
+      stopSpeechRecognition();
       synthesisRef.current.resume();
       setPlaybackState("PLAYING");
       setVoiceState("SPEAKING");
       return;
     }
+
+    // CRITICAL: Immediately stop microphone before triggering TTS speech
+    isTtsSpeakingRef.current = true;
+    stopSpeechRecognition();
 
     synthesisRef.current.cancel();
 
@@ -395,25 +518,29 @@ export default function ChatWidget() {
       .trim();
 
     if (!cleanText) {
+      isTtsSpeakingRef.current = false;
       setVoiceState("IDLE");
       return;
     }
 
     const textToSpeak = charOffset > 0 ? cleanText.slice(charOffset) : cleanText;
     if (!textToSpeak.trim()) {
+      isTtsSpeakingRef.current = false;
       setPlaybackState("IDLE");
       setVoiceState("IDLE");
       return;
     }
 
     const hasDevanagari = /[\u0900-\u097F]/.test(cleanText);
-    const hasMahratti = /[\u0900-\u097F]/.test(cleanText) && /[\u0967-\u096F\u0964\u0965]/.test(cleanText);
+    const marathiWords = /(?:^|\s)(आहे|आहेत|आहेस|आहोत|मी|तुम्हाला|मला|आपल्या|करू|सांगू|शकेन|शकतो|शकते|काही|बद्दल|आणि|बरं|कशी|कसे|कसा|पण|तर|काय)(?:\s|$|[.,?!;])/i;
+    const hasMahratti = /[\u0900-\u097F]/.test(cleanText) && (marathiWords.test(cleanText) || /[\u0967-\u096F]/.test(cleanText));
     const hindiWords = /\b(kya|hai|hain|mein|ko|se|karne|karta|karte|milta|milega|milegi|hoga|hogi|kiya|gaya|rha|raha|rahe|he|tha|thi|the|hu|hoon|aur|ya|par)\b/i;
     const isHinglish = hindiWords.test(cleanText);
     const speakLang = hasMahratti ? "mr-IN" : (hasDevanagari || isHinglish || detectedLang === "hi-IN" ? "hi-IN" : "en-IN");
 
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
     utterance.lang = speakLang;
+    activeUtteranceRef.current = utterance;
 
     const allVoices = synthesisRef.current.getVoices();
     const preferredVoice = (() => {
@@ -445,6 +572,9 @@ export default function ChatWidget() {
     };
 
     utterance.onstart = () => {
+      if (activeUtteranceRef.current !== utterance) return;
+      isTtsSpeakingRef.current = true;
+      stopSpeechRecognition();
       setPlayingMessageIndex(index);
       setPlaybackState("PLAYING");
       setVoiceState("SPEAKING");
@@ -454,7 +584,25 @@ export default function ChatWidget() {
       }
     };
 
+    utterance.onpause = () => {
+      if (activeUtteranceRef.current !== utterance) return;
+      isTtsSpeakingRef.current = false;
+      setPlaybackState("PAUSED");
+      setVoiceState("PAUSED");
+    };
+
+    utterance.onresume = () => {
+      if (activeUtteranceRef.current !== utterance) return;
+      isTtsSpeakingRef.current = true;
+      stopSpeechRecognition();
+      setPlaybackState("PLAYING");
+      setVoiceState("SPEAKING");
+    };
+
     utterance.onend = () => {
+      if (activeUtteranceRef.current !== utterance && activeUtteranceRef.current !== null) return;
+      isTtsSpeakingRef.current = false;
+      activeUtteranceRef.current = null;
       setPlayingMessageIndex(null);
       setPlaybackState("IDLE");
       setVoiceState("IDLE");
@@ -464,37 +612,55 @@ export default function ChatWidget() {
 
     utterance.onerror = (e) => {
       console.error("TTS Error:", e);
+      if (activeUtteranceRef.current !== utterance && activeUtteranceRef.current !== null) return;
+      isTtsSpeakingRef.current = false;
+      activeUtteranceRef.current = null;
       setPlayingMessageIndex(null);
       setPlaybackState("IDLE");
       setVoiceState("IDLE");
+      currentPausedTextRef.current = "";
+      currentSpeakCharIndexRef.current = 0;
     };
 
     synthesisRef.current.speak(utterance);
   };
 
   const handlePauseMessage = () => {
-    if (synthesisRef.current) {
-      if (synthesisRef.current.speaking) {
-        synthesisRef.current.pause();
-      }
-      setPlaybackState("PAUSED");
-      setVoiceState("IDLE");
+    isVoicePausedRef.current = true;
+    isTtsSpeakingRef.current = false;
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      try {
+        window.speechSynthesis.pause();
+      } catch (e) {}
     }
+    setPlaybackState("PAUSED");
+    setVoiceState("PAUSED");
   };
 
   const handleStopMessage = () => {
-    if (synthesisRef.current) {
-      synthesisRef.current.cancel();
-      setPlayingMessageIndex(null);
-      setPlaybackState("IDLE");
-      setVoiceState("IDLE");
-      currentPausedTextRef.current = "";
-      currentSpeakCharIndexRef.current = 0;
+    isVoicePausedRef.current = false;
+    isTtsSpeakingRef.current = false;
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch (e) {}
     }
+    activeUtteranceRef.current = null;
+    setPlayingMessageIndex(null);
+    setPlaybackState("IDLE");
+    setVoiceState("IDLE");
+    currentPausedTextRef.current = "";
+    currentSpeakCharIndexRef.current = 0;
   };
 
   // Start Speech-to-Text (STT) Recognition
   const startSpeechRecognition = () => {
+    // REQUIREMENT 2: NEVER record user voice while BOT is speaking!
+    if (isTtsSpeakingRef.current || (synthesisRef.current && synthesisRef.current.speaking && !synthesisRef.current.paused)) {
+      console.warn("Speech recognition blocked because TTS is speaking.");
+      return;
+    }
+
     const rec = recognitionRef.current;
     if (!rec) {
       setVoiceState("ERROR");
@@ -502,8 +668,10 @@ export default function ChatWidget() {
       return;
     }
 
-    if (synthesisRef.current) {
+    // Cancel any active TTS if user explicitly starts microphone to speak a new query
+    if (synthesisRef.current && synthesisRef.current.speaking) {
       synthesisRef.current.cancel();
+      isTtsSpeakingRef.current = false;
     }
 
     setVoiceState("LISTENING");
@@ -515,6 +683,15 @@ export default function ChatWidget() {
     };
 
     rec.onresult = (event: any) => {
+      // Discard any results if TTS started speaking during recording
+      if (isTtsSpeakingRef.current) {
+        try {
+          rec.stop();
+        } catch (e) {}
+        setInterimTranscript("");
+        return;
+      }
+
       let interim = "";
       let final = "";
       let alternatives: string[] = [];
@@ -534,20 +711,33 @@ export default function ChatWidget() {
       }
       if (interim) {
         setInterimTranscript(interim);
+        const interimClean = interim.toLowerCase().trim();
+        if (detectAndExecuteVoiceCommand(interimClean)) {
+          try {
+            rec.stop();
+          } catch (e) {}
+          setInterimTranscript("");
+          return;
+        }
       }
       if (final) {
         setInterimTranscript("");
-        rec.stop();
+        try {
+          rec.stop();
+        } catch (e) {}
 
         // ── Language detection heuristic from raw final text ─────────────────
         const devanagariRatio = (final.match(/[\u0900-\u097F]/g) || []).length / Math.max(final.length, 1);
-        const marathiMarkers = /[\u0963\u094D\u0902\u0919\u091C\u091E]/.test(final);
+        const marathiWords = /(?:^|\s)(आहे|आहेत|आहेस|आहोत|मी|तुम्हाला|मला|आपल्या|करू|सांगू|शकेन|शकतो|शकते|काही|बद्दल|आणि|बरं|कशी|कसे|कसा|पण|तर|काय)(?:\s|$|[.,?!;])/i;
+        const marathiMarkers = marathiWords.test(final) || /[\u0963\u094D\u0902\u0919\u091C\u091E\u0967-\u096F]/.test(final);
         let lang = "en-IN";
         if (devanagariRatio > 0.3) {
           lang = marathiMarkers ? "mr-IN" : "hi-IN";
         }
         setDetectedLang(lang);
-        recognitionRef.current.lang = lang === "mr-IN" ? "mr-IN" : lang === "hi-IN" ? "hi-IN" : "en-IN";
+        if (recognitionRef.current) {
+          recognitionRef.current.lang = lang === "mr-IN" ? "mr-IN" : lang === "hi-IN" ? "hi-IN" : "en-IN";
+        }
         // ────────────────────────────────────────────────────────────────────
 
         // Select the best alternative (in case of homophone spelling errors) and normalize
@@ -556,7 +746,6 @@ export default function ChatWidget() {
         // Voice-command controls intercept
         const isVoiceControlCommand = detectAndExecuteVoiceCommand(normalizedMsg);
         if (isVoiceControlCommand) {
-          setVoiceState("IDLE");
           return;
         }
 
@@ -566,16 +755,18 @@ export default function ChatWidget() {
 
     rec.onerror = (event: any) => {
       console.error("STT Error:", event.error);
-      setVoiceState("ERROR");
       if (event.error === "no-speech") {
-        setErrorMessage("No speech detected. Please speak clearly.");
-      } else if (event.error === "not-allowed") {
+        setVoiceState("IDLE");
+        return;
+      }
+      setVoiceState("ERROR");
+      if (event.error === "not-allowed") {
         setErrorMessage("Mic permission denied. Please allow mic access.");
       } else {
         setErrorMessage(`Microphone error: ${event.error}`);
       }
       setTimeout(() => {
-        setVoiceState("IDLE");
+        setVoiceState((prev) => (prev === "ERROR" ? "IDLE" : prev));
       }, 4000);
     };
 
@@ -594,19 +785,20 @@ export default function ChatWidget() {
 
   const stopSpeechRecognition = () => {
     if (recognitionRef.current) {
-      recognitionRef.current.stop();
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {}
     }
-    setVoiceState("IDLE");
+    setVoiceState((prev) => (prev === "LISTENING" ? "IDLE" : prev));
   };
 
   const handleMicClick = () => {
     if (voiceState === "LISTENING") {
       stopSpeechRecognition();
     } else if (voiceState === "SPEAKING") {
-      if (synthesisRef.current) {
-        synthesisRef.current.cancel();
-      }
-      setVoiceState("IDLE");
+      handlePauseMessage();
+    } else if (voiceState === "PAUSED") {
+      handleResumeOrContinueMessage();
     } else {
       startSpeechRecognition();
     }
@@ -614,6 +806,21 @@ export default function ChatWidget() {
 
   // Main message processing function (shared by Text and Voice)
   const processMessage = async (userMessage: string, source: "text" | "voice" = "text") => {
+    // Immediate voice control intercept (Stop / Pause speaking out loud)
+    if (detectAndExecuteVoiceCommand(userMessage)) {
+      setVoiceState("IDLE");
+      return;
+    }
+
+    if (!showLeadForm) {
+      const lowerMsg = userMessage.toLowerCase().trim();
+      const explicitRegisterRegex = /^(apply|register|enroll|signup|apply\s+now|register\s+now|enroll\s+now|i\s+want\s+to\s+apply|i\s+want\s+to\s+register|i\s+want\s+to\s+enroll|enroll\s+me|register\s+me|start\s+registration|start\s+my\s+registration)$/i;
+      if (explicitRegisterRegex.test(lowerMsg)) {
+        startLeadForm();
+        return;
+      }
+    }
+
     if (showLeadForm) {
       // STEP 1 - Name
       if (leadStep === 1) {
@@ -1189,7 +1396,7 @@ export default function ChatWidget() {
               {voiceState === "SPEAKING" && (
                 <div className="flex justify-between items-center text-xs text-blue-600 bg-blue-50 p-2 rounded-lg border border-blue-100">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">Bot is speaking</span>
+                    <span className="font-medium">Bot is speaking...</span>
                     <div className="voice-wave-container">
                       <div className="voice-wave-bar"></div>
                       <div className="voice-wave-bar"></div>
@@ -1198,15 +1405,43 @@ export default function ChatWidget() {
                       <div className="voice-wave-bar"></div>
                     </div>
                   </div>
-                  <button
-                    onClick={() => {
-                      if (synthesisRef.current) synthesisRef.current.cancel();
-                      setVoiceState("IDLE");
-                    }}
-                    className="text-[10px] text-red-500 hover:text-red-700 font-semibold underline"
-                  >
-                    Stop
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handlePauseMessage}
+                      className="px-2 py-1 text-[10px] bg-blue-600 text-white rounded hover:bg-blue-700 font-semibold transition"
+                    >
+                      Pause
+                    </button>
+                    <button
+                      onClick={handleStopMessage}
+                      className="px-2 py-1 text-[10px] bg-red-500 text-white rounded hover:bg-red-600 font-semibold transition"
+                    >
+                      Stop
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Paused panel */}
+              {voiceState === "PAUSED" && (
+                <div className="flex justify-between items-center text-xs text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200">
+                  <span className="font-medium flex items-center gap-1">
+                    ⏸️ Speech Paused
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleResumeOrContinueMessage}
+                      className="px-2 py-1 text-[10px] bg-amber-600 text-white rounded hover:bg-amber-700 font-semibold transition"
+                    >
+                      Continue
+                    </button>
+                    <button
+                      onClick={handleStopMessage}
+                      className="px-2 py-1 text-[10px] bg-red-500 text-white rounded hover:bg-red-600 font-semibold transition"
+                    >
+                      Stop
+                    </button>
+                  </div>
                 </div>
               )}
 
