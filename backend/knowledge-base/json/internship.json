@@ -380,7 +380,7 @@
   },
   {
     "question": "How long does the internship usually last?",
-    "answer": "The duration depends on the specific program and may vary based on the internship offer or the domain selected."
+    "answer": "WeIntern offers two main internship programs: the 6-Month Internship Program (which includes 2 months of training + 4 months of internship on live projects) and the 3-Month Internship Program."
   },
   {
     "question": "What should I do if I miss a deadline?",
@@ -471,17 +471,17 @@
   {
     "category": "internship",
     "question": "How long is the internship?",
-    "answer": "WeIntern internship programs are available in 1-month, 2-month, and 3-month durations depending on the chosen domain and program type. The specific duration is confirmed during onboarding."
+    "answer": "WeIntern offers two main internship programs: the 6-Month Internship Program (which includes 2 months of training + 4 months of internship on live projects) and the 3-Month Internship Program."
   },
   {
     "category": "internship",
     "question": "What is the duration of the internship program?",
-    "answer": "The internship duration ranges from 1 to 3 months depending on the domain and program selected. Check the official program details or ask support for the exact duration of your chosen course."
+    "answer": "WeIntern offers two main internship programs: the 6-Month Internship Program (which includes 2 months of training + 4 months of internship on live projects) and the 3-Month Internship Program."
   },
   {
     "category": "internship",
     "question": "How many months is the internship?",
-    "answer": "Internship durations at WeIntern are typically 1 month, 2 months, or 3 months. The exact duration depends on the program type and domain. It is confirmed at the time of enrollment."
+    "answer": "WeIntern offers two main internship programs: the 6-Month Internship Program (which includes 2 months of training + 4 months of internship on live projects) and the 3-Month Internship Program."
   },
   {
     "category": "internship",
@@ -541,7 +541,7 @@
   {
     "category": "internship",
     "question": "Internship kitne mahine ki hoti hai?",
-    "answer": "Duration domain ke hisaab se vary karta hai: Full Stack Web Development (12 weeks), Mobile App Development (10 weeks), AI & Automation (8 weeks), Cloud Solutions & DevOps (10 weeks), Data Science & Analytics (12 weeks), Cloud Computing (12 weeks), DevOps Engineering (10 weeks), Python Programming (10 weeks), Java Programming (12 weeks), aur C/C++ Programming (10 weeks)."
+    "answer": "Duration domain ke hisaab se vary karta hai: Full Stack Web Development (12 weeks), Mobile App Development (10 weeks), AI & Automation (8 weeks), Data Science & Analytics (12 weeks), Python Programming (10 weeks), Java Programming (12 weeks), C/C++ Programming (10 weeks), UI/UX Design (8 weeks), Cloud Computing (12 weeks), aur Digital Marketing (8 weeks)."
   },
   {
     "category": "internship",

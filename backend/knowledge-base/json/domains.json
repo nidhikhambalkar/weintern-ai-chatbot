@@ -7,7 +7,7 @@
   {
     "category": "domains",
     "question": "What internship domains does WeIntern offer?",
-    "answer": "WeIntern offers the following internship programs: Full Stack Web Development (12 weeks), Mobile App Development (10 weeks), AI & Automation (8 weeks), Cloud Solutions & DevOps (10 weeks), Data Science & Analytics (12 weeks), Cloud Computing (12 weeks), DevOps Engineering (10 weeks), Python Programming (10 weeks), Java Programming (12 weeks), and C/C++ Programming (10 weeks)."
+    "answer": "WeIntern offers the following internship programs: Full Stack Web Development (12 weeks), Mobile App Development (10 weeks), AI & Automation (8 weeks), Data Science & Analytics (12 weeks), Python Programming (10 weeks), Java Programming (12 weeks), C/C++ Programming (10 weeks), UI/UX Design (8 weeks), Cloud Computing (12 weeks), and Digital Marketing (8 weeks)."
   },
   {
     "category": "domains",
@@ -17,12 +17,12 @@
   {
     "category": "domains",
     "question": "What is the duration of the internship?",
-    "answer": "Program durations vary by domain: Full Stack Web Development — 12 weeks, Mobile App Development — 10 weeks, AI & Automation — 8 weeks, Cloud Solutions & DevOps — 10 weeks, Data Science & Analytics — 12 weeks, Cloud Computing — 12 weeks, DevOps Engineering — 10 weeks, Python Programming — 10 weeks, Java Programming — 12 weeks, C/C++ Programming — 10 weeks."
+    "answer": "Program durations vary by domain: Full Stack Web Development — 12 weeks, Mobile App Development — 10 weeks, AI & Automation — 8 weeks, Data Science & Analytics — 12 weeks, Python Programming — 10 weeks, Java Programming — 12 weeks, C/C++ Programming — 10 weeks, UI/UX Design — 8 weeks, Cloud Computing — 12 weeks, and Digital Marketing — 8 weeks."
   },
   {
     "category": "domains",
     "question": "How long is the internship program?",
-    "answer": "WeIntern internship durations range from 8 weeks to 12 weeks depending on the chosen domain. AI & Automation is 8 weeks; Mobile App Development, Cloud Solutions & DevOps, DevOps Engineering, Python Programming, and C/C++ Programming are 10 weeks; Full Stack Web Development, Data Science & Analytics, Cloud Computing, and Java Programming are 12 weeks."
+    "answer": "WeIntern internship durations range from 8 weeks to 12 weeks depending on the chosen domain. AI & Automation, UI/UX Design, and Digital Marketing are 8 weeks; Mobile App Development, Python Programming, and C/C++ Programming are 10 weeks; Full Stack Web Development, Data Science & Analytics, Cloud Computing, and Java Programming are 12 weeks."
   },
   {
     "category": "domains",
@@ -47,7 +47,7 @@
   {
     "category": "domains",
     "question": "What is the Cloud Computing and DevOps course?",
-    "answer": "Cloud Solutions & DevOps is a 10-week program priced at ₹5,399. It covers AWS, Docker, Kubernetes, GitHub Actions, Jenkins, Linux, Terraform, and Nginx. Real client infrastructure projects included. Certificate and stipend available."
+    "answer": "Cloud Computing is a 12-week program priced at ₹5,399. It covers AWS cloud services, EC2, S3, IAM, VPC, cloud storage, security, and cloud infrastructure management. Real client cloud project work is included. WeIntern completion certificate and performance-based stipend are included."
   },
   {
     "category": "domains",
@@ -87,7 +87,7 @@
   {
     "category": "domains",
     "question": "Internship kitne weeks ki hoti hai?",
-    "answer": "Duration domain ke hisaab se vary karta hai: Full Stack Web Development (12 weeks), Mobile App Development (10 weeks), AI & Automation (8 weeks), Cloud Solutions & DevOps (10 weeks), Data Science & Analytics (12 weeks), Cloud Computing (12 weeks), DevOps Engineering (10 weeks), Python Programming (10 weeks), Java Programming (12 weeks), aur C/C++ Programming (10 weeks)."
+    "answer": "Duration domain ke hisaab se vary karta hai: Full Stack Web Development (12 weeks), Mobile App Development (10 weeks), AI & Automation (8 weeks), Data Science & Analytics (12 weeks), Python Programming (10 weeks), Java Programming (12 weeks), C/C++ Programming (10 weeks), UI/UX Design (8 weeks), Cloud Computing (12 weeks), aur Digital Marketing (8 weeks)."
   },
   {
     "category": "domains",
@@ -122,6 +122,6 @@
   {
     "category": "domains",
     "question": "What is the DevOps Engineering course?",
-    "answer": "DevOps Engineering is a 10-week program covering Git, Docker, Kubernetes, Jenkins, Terraform, Ansible, AWS, and CI/CD automation pipelines."
+    "answer": "WeIntern covers DevOps Engineering tools under our Cloud Computing (12 weeks) domain. It includes hands-on training on Git, Docker, Kubernetes, Jenkins, Terraform, Ansible, AWS, and CI/CD pipelines."
   }
 ]

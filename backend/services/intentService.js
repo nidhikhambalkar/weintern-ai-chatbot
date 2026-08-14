@@ -45,7 +45,9 @@ function detectIntent(message = "") {
     "fee", "fees", "price", "cost", "duration", "weeks", "months", "apply", "register",
     "registration", "enroll", "placement", "stipend", "certificate", "certification",
     "lor", "syllabus", "project", "projects", "contact", "phone", "email", "refund", "emi",
-    "fullstack", "full stack", "python", "java", "devops", "cloud", "ai", "datascience"
+    "fullstack", "full stack", "python", "java", "devops", "cloud", "ai", "datascience",
+    "domain", "domains", "course", "courses", "internship", "internships", "help", "support",
+    "mentor", "mentorship", "about", "ceo", "founder", "location", "address", "office", "orientation"
   ];
   const hasQuestionKeyword = questionKeywords.some(kw => lower.includes(kw));
 

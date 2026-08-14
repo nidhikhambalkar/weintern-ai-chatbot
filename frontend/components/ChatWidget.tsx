@@ -465,7 +465,8 @@ export default function ChatWidget() {
     }
 
     const hasDevanagari = /[\u0900-\u097F]/.test(cleanText);
-    const hasMahratti = /[\u0900-\u097F]/.test(cleanText) && /[\u0967-\u096F\u0964\u0965]/.test(cleanText);
+    const marathiWords = /(?:^|\s)(आहे|आहेत|आहेस|आहोत|मी|तुम्हाला|मला|आपल्या|करू|सांगू|शकेन|शकतो|शकते|काही|बद्दल|आणि|बरं|कशी|कसे|कसा|पण|तर|काय)(?:\s|$|[.,?!;])/i;
+    const hasMahratti = /[\u0900-\u097F]/.test(cleanText) && (marathiWords.test(cleanText) || /[\u0967-\u096F]/.test(cleanText));
     const hindiWords = /\b(kya|hai|hain|mein|ko|se|karne|karta|karte|milta|milega|milegi|hoga|hogi|kiya|gaya|rha|raha|rahe|he|tha|thi|the|hu|hoon|aur|ya|par)\b/i;
     const isHinglish = hindiWords.test(cleanText);
     const speakLang = hasMahratti ? "mr-IN" : (hasDevanagari || isHinglish || detectedLang === "hi-IN" ? "hi-IN" : "en-IN");
@@ -599,7 +600,8 @@ export default function ChatWidget() {
 
         // ── Language detection heuristic from raw final text ─────────────────
         const devanagariRatio = (final.match(/[\u0900-\u097F]/g) || []).length / Math.max(final.length, 1);
-        const marathiMarkers = /[\u0963\u094D\u0902\u0919\u091C\u091E]/.test(final);
+        const marathiWords = /(?:^|\s)(आहे|आहेत|आहेस|आहोत|मी|तुम्हाला|मला|आपल्या|करू|सांगू|शकेन|शकतो|शकते|काही|बद्दल|आणि|बरं|कशी|कसे|कसा|पण|तर|काय)(?:\s|$|[.,?!;])/i;
+        const marathiMarkers = marathiWords.test(final) || /[\u0963\u094D\u0902\u0919\u091C\u091E\u0967-\u096F]/.test(final);
         let lang = "en-IN";
         if (devanagariRatio > 0.3) {
           lang = marathiMarkers ? "mr-IN" : "hi-IN";
@@ -672,6 +674,15 @@ export default function ChatWidget() {
 
   // Main message processing function (shared by Text and Voice)
   const processMessage = async (userMessage: string, source: "text" | "voice" = "text") => {
+    if (!showLeadForm) {
+      const lowerMsg = userMessage.toLowerCase().trim();
+      const explicitRegisterRegex = /^(apply|register|enroll|signup|apply\s+now|register\s+now|enroll\s+now|i\s+want\s+to\s+apply|i\s+want\s+to\s+register|i\s+want\s+to\s+enroll|enroll\s+me|register\s+me|start\s+registration|start\s+my\s+registration)$/i;
+      if (explicitRegisterRegex.test(lowerMsg)) {
+        startLeadForm();
+        return;
+      }
+    }
+
     if (showLeadForm) {
       // STEP 1 - Name
       if (leadStep === 1) {
