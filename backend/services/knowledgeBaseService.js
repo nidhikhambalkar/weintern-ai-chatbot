@@ -85,6 +85,7 @@ const TOKEN_MAP = {
   founded: "company",
   started: "company",
   location: "company",
+  located: "location",
   address: "company",
   headquarter: "company",
   headquarters: "company",
@@ -101,6 +102,7 @@ const TOKEN_MAP = {
   pune: "company",
   cofounder: "company",
   "co-founder": "company",
+  mission: "mission",
   cert: "certificate",
   lor: "certificate",              // Letter of Recommendation → certificates
   recommendation: "certificate",  // "letter of recommendation" → certificates
@@ -646,7 +648,7 @@ function detectStrongCategory(queryTokens) {
     return "certificates";
   }
 
-  // CEO / Founder / Owner / Location / Named person → always company
+  // CEO / Founder / Owner / Location / Mission / Named person → always company
   if (
     queryTokens.includes("ceo") ||
     queryTokens.includes("founder") ||
@@ -661,7 +663,9 @@ function detectStrongCategory(queryTokens) {
     queryTokens.includes("kharadi") ||
     queryTokens.includes("pune") ||
     queryTokens.includes("cofounder") ||
-    (queryTokens.includes("location") && queryTokens.includes("weintern")) ||
+    queryTokens.includes("location") ||
+    queryTokens.includes("located") ||
+    queryTokens.includes("mission") ||
     (queryTokens.includes("address") && queryTokens.includes("weintern")) ||
     (queryTokens.includes("introduce") && queryTokens.includes("weintern")) ||
     (queryTokens.includes("overview") && queryTokens.includes("weintern")) ||
@@ -786,6 +790,29 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory) {
   // Strong boost for CEO/founder/owner/location queries → company entries
   if (hasCompanyIdentityIntent && entry.category === "company") {
     score += 45;
+  }
+
+  // ── Specific company question boosters ──────────────────────────────────
+  // Boost the specific "where is ... located" entry over the generic intro
+  const isLocationQuery = queryTokens.includes("location") || queryTokens.includes("located");
+  if (isLocationQuery && entry.category === "company") {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("located") || normQ.includes("location") || normQ.includes("address")) {
+      score += 70; // strong preference for the location-specific entry
+    } else if (normQ.includes("what is weintern") || normQ.includes("introduce")) {
+      score -= 40; // penalise generic intro for location queries
+    }
+  }
+
+  // Boost the specific "mission" entry over the generic intro
+  const isMissionQuery = queryTokens.includes("mission");
+  if (isMissionQuery && entry.category === "company") {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("mission")) {
+      score += 70; // strong preference for the mission-specific entry
+    } else if (normQ.includes("what is weintern") || normQ.includes("introduce")) {
+      score -= 40; // penalise generic intro for mission queries
+    }
   }
 
   if (
