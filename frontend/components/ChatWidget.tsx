@@ -123,6 +123,79 @@ function normalizeSpeechInput(text: string): string {
   return normalized;
 }
 
+// ── Dedicated Text Sanitization Helper for TTS Engine ───────────────────
+export function cleanTextForSpeech(rawText: string): string {
+  if (!rawText) return "";
+
+  let cleaned = String(rawText);
+
+  // 1. Remove Code blocks (```code```) and Inline Code (`code`)
+  cleaned = cleaned.replace(/```[\s\S]*?```/g, "");
+  cleaned = cleaned.replace(/`([^`]+)`/g, "$1");
+
+  // 2. Remove HTML tags (<tag>...</tag> or <tag/>)
+  cleaned = cleaned.replace(/<[^>]*>/g, "");
+
+  // 3. Remove JSON syntax artifacts (e.g. {"key": "val"})
+  cleaned = cleaned.replace(/\{[^{}]*\}/g, "");
+
+  // 4. Remove URLs (http, https, www)
+  cleaned = cleaned.replace(/https?:\/\/[^\s]+/gi, "");
+  cleaned = cleaned.replace(/www\.[^\s]+/gi, "");
+
+  // 5. Remove Email addresses (e.g. contact@we-intern.in)
+  cleaned = cleaned.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/gi, "");
+
+  // 6. Remove standalone domain names (e.g. we-intern.in)
+  cleaned = cleaned.replace(/\bwe-intern\.in\b/gi, "");
+
+  // 7. Remove Markdown headings (#, ##, ### at start of line)
+  cleaned = cleaned.replace(/^#{1,6}\s+/gm, "");
+
+  // 8. Remove Markdown formatting (bold, italics, strikethrough: **, *, __, _, ~~)
+  cleaned = cleaned.replace(/(\*\*|__)(.*?)\1/g, "$2");
+  cleaned = cleaned.replace(/(\*|_)(.*?)\1/g, "$2");
+  cleaned = cleaned.replace(/~~(.*?)~~/g, "$1");
+
+  // 9. Remove Markdown horizontal rules (---, ***, ___)
+  cleaned = cleaned.replace(/^[\-\*_]{3,}\s*$/gm, "");
+
+  // 10. Remove list/bullet prefix symbols at start of line (e.g. "1. ", "• ", "- ", "* ", "+ ")
+  cleaned = cleaned.replace(/^[\s]*[•\-\*\+\d+\.]+\s+/gm, "");
+
+  // 11. Remove Emojis & Pictographic Unicode ranges comprehensively
+  cleaned = cleaned.replace(
+    /[\u{1F300}-\u{1F9FF}]|[\u{1FA00}-\u{1FAFF}]|[\u{2600}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E6}-\u{1F1FF}]|[\u{2B00}-\u{2BFF}]|[\u{2300}-\u{23FF}]|[\u{200D}]|[\u{FE00}-\u{FE0F}]|[\u{20E3}]/gu,
+    ""
+  );
+
+  // 12. Remove leftover decorative symbols
+  cleaned = cleaned.replace(/[📌📜✨🟢🚀📍📱📧⏰💳👤✍️💡🎓💼💰🏆👨‍🏫🎯⚡]/g, "");
+
+  // 13. Remove brackets around tags [Tag] -> Tag
+  cleaned = cleaned.replace(/\[([^\]]+)\]/g, "$1");
+
+  // 14. Clean up dangling label artifacts (e.g. "Website:", "Email:" if URL/Email was stripped)
+  cleaned = cleaned.replace(/\b(Website|Email|Link):\s*(?=[.!?]|$|\n)/gi, "");
+
+  // 15. Normalize multi-line breaks into clean sentences
+  cleaned = cleaned
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join(". ");
+
+  // 16. Clean up punctuation artifacts (e.g. ":." -> ":", ". ." -> ".")
+  cleaned = cleaned
+    .replace(/:\s*\./g, ":")
+    .replace(/\s+([.,?!;])/g, "$1")
+    .replace(/([.,?!;])\1+/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return cleaned;
+}
+
 // ── Alternatives Picker Helper ──────────────────────────────────────────
 function selectAndNormalizeTranscript(alternatives: string[]): string {
   if (!alternatives || alternatives.length === 0) return "";
@@ -654,12 +727,7 @@ export default function ChatWidget() {
 
     synthesisRef.current.cancel();
 
-    const cleanText = text
-      .replace(/👋|🤖|📝|🎉|✨|🟢|🚀|#\d+/g, "")
-      .replace(/\*\*|__/g, "")
-      .replace(/\*|_/g, "")
-      .replace(/`([^`]+)`/g, "$1")
-      .trim();
+    const cleanText = cleanTextForSpeech(text);
 
     if (!cleanText) {
       isTtsSpeakingRef.current = false;
