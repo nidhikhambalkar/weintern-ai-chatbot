@@ -303,6 +303,7 @@ export default function ChatWidget() {
   // Dedicated interrupt-only recognition that runs concurrently with TTS
   const interruptRecRef = useRef<any>(null);
   const synthesisRef = useRef<any>(null);
+  const selectedVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
   const isTtsSpeakingRef = useRef<boolean>(false);
   const activeUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const sentenceQueueRef = useRef<string[]>([]);
@@ -415,6 +416,33 @@ export default function ChatWidget() {
     },
   ]);
 
+  // Deterministic single voice loader & locking strategy
+  const initSpeechVoices = (): SpeechSynthesisVoice | null => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return null;
+    const synth = window.speechSynthesis;
+    synthesisRef.current = synth;
+
+    const voices = synth.getVoices();
+    if (!voices || voices.length === 0) return null;
+
+    if (!selectedVoiceRef.current) {
+      const preferred =
+        voices.find((v) => (v.lang.startsWith("en") || v.lang.startsWith("en-IN") || v.lang.startsWith("en-US")) && /google/i.test(v.name) && /female|woman/i.test(v.name)) ||
+        voices.find((v) => (v.lang.startsWith("en") || v.lang.startsWith("en-US")) && /zira|jenny|natural|samantha|aria/i.test(v.name)) ||
+        voices.find((v) => v.lang.startsWith("en") && /google/i.test(v.name)) ||
+        voices.find((v) => v.lang.startsWith("en") || v.lang.startsWith("en-US") || v.lang.startsWith("en-IN") || v.lang.startsWith("en-GB")) ||
+        voices.find((v) => v.default) ||
+        voices[0];
+
+      if (preferred) {
+        selectedVoiceRef.current = preferred;
+        console.log("🔒 Selected Voice Locked for Session:", preferred.name, preferred.lang);
+      }
+    }
+
+    return selectedVoiceRef.current;
+  };
+
   // Generate or load session ID & Initialize Web Speech API
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -444,6 +472,14 @@ export default function ChatWidget() {
         interruptRecRef.current = intRec;
       }
       synthesisRef.current = window.speechSynthesis;
+      if (synthesisRef.current) {
+        initSpeechVoices();
+        if (synthesisRef.current.onvoiceschanged !== undefined) {
+          synthesisRef.current.onvoiceschanged = () => {
+            initSpeechVoices();
+          };
+        }
+      }
     }
   }, []);
 
@@ -819,26 +855,15 @@ export default function ChatWidget() {
     const speakLang = hasMahratti ? "mr-IN" : (hasDevanagari || isHinglish || detectedLang === "hi-IN" ? "hi-IN" : "en-IN");
 
     const utterance = new SpeechSynthesisUtterance(sentenceToSpeak);
-    utterance.lang = speakLang;
 
-    const allVoices = synthesisRef.current.getVoices();
-    const preferredVoice = (() => {
-      const patterns = [
-        (v: SpeechSynthesisVoice) => v.lang === speakLang && /google/i.test(v.name) && /female|woman/i.test(v.name),
-        (v: SpeechSynthesisVoice) => v.lang === speakLang && /google/i.test(v.name),
-        (v: SpeechSynthesisVoice) => v.lang === speakLang && /neerja|heera|ravi|kalpana|hemant/i.test(v.name),
-        (v: SpeechSynthesisVoice) => v.lang === speakLang,
-        (v: SpeechSynthesisVoice) => v.lang === "en-IN" && /google/i.test(v.name),
-        (v: SpeechSynthesisVoice) => v.lang === "en-IN",
-      ];
-      for (const pattern of patterns) {
-        const match = allVoices.find(pattern);
-        if (match) return match;
-      }
-      return null;
-    })();
-
-    if (preferredVoice) utterance.voice = preferredVoice;
+    // Enforce locked single voice across every response & chunk
+    const activeVoice = selectedVoiceRef.current || initSpeechVoices();
+    if (activeVoice) {
+      utterance.voice = activeVoice;
+      utterance.lang = activeVoice.lang;
+    } else {
+      utterance.lang = speakLang;
+    }
 
     utterance.rate = speakLang === "en-IN" ? 1.0 : 0.95;
     utterance.pitch = 1.05;
