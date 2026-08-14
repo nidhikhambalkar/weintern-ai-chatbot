@@ -178,14 +178,24 @@ export function cleanTextForSpeech(rawText: string): string {
   // 14. Clean up dangling label artifacts (e.g. "Website:", "Email:" if URL/Email was stripped)
   cleaned = cleaned.replace(/\b(Website|Email|Link):\s*(?=[.!?]|$|\n)/gi, "");
 
-  // 15. Normalize multi-line breaks into clean sentences
+  // 15. Brand & Technical Phonetic Pronunciation Normalization Layer (TTS only)
+  // Normalizes "WeIntern", "weintern", "WEINTERN", "we-intern" → "We Intern" for natural speech
+  cleaned = cleaned.replace(/\bwe[\-_]?intern's\b/gi, "We Intern's");
+  cleaned = cleaned.replace(/\bwe[\-_]?interns\b/gi, "We Intern's");
+  cleaned = cleaned.replace(/\bwe[\-_]?intern\b/gi, "We Intern");
+  cleaned = cleaned.replace(/\bedtech\b/gi, "Ed Tech");
+  cleaned = cleaned.replace(/\bui\/ux\b/gi, "UI UX");
+  cleaned = cleaned.replace(/\bai\/ml\b/gi, "AI ML");
+  cleaned = cleaned.replace(/\bci\/cd\b/gi, "CI CD");
+
+  // 16. Normalize multi-line breaks into clean sentences
   cleaned = cleaned
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean)
     .join(". ");
 
-  // 16. Clean up punctuation artifacts (e.g. ":." -> ":", ". ." -> ".")
+  // 17. Clean up punctuation artifacts (e.g. ":." -> ":", ". ." -> ".")
   cleaned = cleaned
     .replace(/:\s*\./g, ":")
     .replace(/\s+([.,?!;])/g, "$1")
