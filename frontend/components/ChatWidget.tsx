@@ -171,9 +171,15 @@ export default function ChatWidget() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+  // Dedicated interrupt-only recognition that runs concurrently with TTS
+  const interruptRecRef = useRef<any>(null);
   const synthesisRef = useRef<any>(null);
   const currentPausedTextRef = useRef<string>("");
   const currentSpeakCharIndexRef = useRef<number>(0);
+  // Tracks whether TTS was stopped by a voice command (vs finished naturally)
+  const isCancelledByCommandRef = useRef<boolean>(false);
+  // Tracks the message index that is currently saved for resume
+  const pausedMessageIndexRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -277,10 +283,16 @@ export default function ChatWidget() {
         rec.continuous = false;
         rec.interimResults = true;
         rec.maxAlternatives = 5;
-        // Multi-language: accepts English, Hindi and Marathi; browser picks the best match
-        // Chrome supports comma-separated langs via grammars; fallback is en-IN for Hinglish
         rec.lang = "en-IN";
         recognitionRef.current = rec;
+
+        // Separate instance for interrupt commands — runs concurrently with TTS
+        const intRec = new SpeechRecognition();
+        intRec.continuous = true;       // keep listening while TTS plays
+        intRec.interimResults = true;   // fire on partial results for instant reaction
+        intRec.maxAlternatives = 3;
+        intRec.lang = "en-IN";
+        interruptRecRef.current = intRec;
       }
       synthesisRef.current = window.speechSynthesis;
     }
@@ -360,6 +372,16 @@ export default function ChatWidget() {
   const handleResumeOrContinueMessage = () => {
     if (!synthesisRef.current) return;
 
+    // If we have a saved position from a commanded stop, resume from there
+    if (currentPausedTextRef.current && currentSpeakCharIndexRef.current > 0) {
+      const fullText = currentPausedTextRef.current;
+      const offset = currentSpeakCharIndexRef.current;
+      const msgIdx = pausedMessageIndexRef.current ?? playingMessageIndex ?? -1;
+      handlePlayMessage(msgIdx, fullText, offset);
+      return;
+    }
+
+    // Fall back: try browser resume (works on Firefox)
     if (synthesisRef.current.paused) {
       synthesisRef.current.resume();
       setPlaybackState("PLAYING");
@@ -367,33 +389,31 @@ export default function ChatWidget() {
       return;
     }
 
-    if (currentPausedTextRef.current && currentSpeakCharIndexRef.current > 0) {
-      const fullText = currentPausedTextRef.current;
-      const offset = currentSpeakCharIndexRef.current;
-      handlePlayMessage(playingMessageIndex ?? -1, fullText, offset);
-      return;
-    }
-
+    // Last resort: replay last bot message from the beginning
     const lastBot = getLastBotResponse();
     if (lastBot) {
       handlePlayMessage(lastBot.index, lastBot.text, 0);
     }
   };
 
+  // ── STOP/CONTINUE REGEX helpers (used both by interrupt listener & command detector) ──
+  const STOP_REGEX = /^(stop|stop it|stop speaking|pause|pause speech|wait|hold on|quiet|bas|bas karo|bas|bas karo|ruko|band karo|chup|chup ho jao|ruk|roko|hold karo|ruko thoda|thoda ruko|\u0930\u0941\u0915\u094B|\u0930\u0941\u0915\u094B|\u0925\u093E\u0902\u092C\u093E|\u0925\u093E\u0902\u092C)$/i;
+  const STOP_PARTIAL_REGEX = /\b(stop|stop it|bas karo|bas karo|band karo|chup ho jao|thoda ruko|hold karo|\u0930\u0941\u0915\u094B|\u0925\u093E\u0902\u092C\u093E)\b/i;
+  const CONTINUE_REGEX = /^(continue|resume|go on|keep speaking|carry on|continue speaking|chalu karo|phir se chalu karo|continue karo|resume karo|aage bolo)$/i;
+  const CONTINUE_PARTIAL_REGEX = /\b(continue karo|phir se chalu karo|resume karo|continue speaking|keep speaking|carry on|aage bolo)\b/i;
+
   // Handles natural voice command detection and execution (supports Hindi/Hinglish variations)
   const detectAndExecuteVoiceCommand = (text: string): boolean => {
     const rawLower = text.toLowerCase().trim();
 
     // 1. STOP & PAUSE
-    if (/^(stop|pause|stop speaking|pause speech|wait|hold on|quiet|ruko|band karo|chup|chup ho jao|ruk|roko|hold karo|ruko thoda|thoda ruko)$/i.test(rawLower) ||
-      /\b(stop speaking|pause speech|band karo|chup ho jao|thoda ruko|hold karo)\b/i.test(rawLower)) {
-      handlePauseMessage();
+    if (STOP_REGEX.test(rawLower) || STOP_PARTIAL_REGEX.test(rawLower)) {
+      handleStopAtPosition();
       return true;
     }
 
     // 2. CONTINUE & RESUME
-    if (/^(continue|resume|go on|keep speaking|carry on|continue speaking|chalu karo|phir se chalu karo|continue karo|resume karo|aage bolo)$/i.test(rawLower) ||
-      /\b(continue karo|phir se chalu karo|resume karo|continue speaking|keep speaking|carry on)\b/i.test(rawLower)) {
+    if (CONTINUE_REGEX.test(rawLower) || CONTINUE_PARTIAL_REGEX.test(rawLower)) {
       handleResumeOrContinueMessage();
       return true;
     }
@@ -508,17 +528,28 @@ export default function ChatWidget() {
       setPlaybackState("PLAYING");
       setVoiceState("SPEAKING");
       currentPausedTextRef.current = cleanText;
+      pausedMessageIndexRef.current = index;
+      isCancelledByCommandRef.current = false;
       if (charOffset === 0) {
         currentSpeakCharIndexRef.current = 0;
       }
+      // Start the concurrent interrupt listener when TTS begins
+      startInterruptListener();
     };
 
     utterance.onend = () => {
+      // Stop the interrupt listener
+      stopInterruptListener();
       setPlayingMessageIndex(null);
       setPlaybackState("IDLE");
       setVoiceState("IDLE");
-      currentPausedTextRef.current = "";
-      currentSpeakCharIndexRef.current = 0;
+      // Only clear saved position if speech ended NATURALLY (not stopped by command)
+      if (!isCancelledByCommandRef.current) {
+        currentPausedTextRef.current = "";
+        currentSpeakCharIndexRef.current = 0;
+        pausedMessageIndexRef.current = null;
+      }
+      isCancelledByCommandRef.current = false;
     };
 
     utterance.onerror = (e) => {
@@ -531,28 +562,93 @@ export default function ChatWidget() {
     synthesisRef.current.speak(utterance);
   };
 
+  // ── handleStopAtPosition: stop TTS but PRESERVE position for resume ────
+  // This is what voice "Stop" commands call.
+  const handleStopAtPosition = () => {
+    if (!synthesisRef.current) return;
+    isCancelledByCommandRef.current = true; // guard onend from wiping saved position
+    synthesisRef.current.cancel();
+    setPlaybackState("PAUSED");
+    setVoiceState("IDLE");
+    stopInterruptListener();
+  };
+
+  // handlePauseMessage: try browser pause first, fall back to stop-at-position
   const handlePauseMessage = () => {
     if (synthesisRef.current) {
       if (synthesisRef.current.speaking) {
-        synthesisRef.current.pause();
+        // Chrome's pause() is often broken — use stop-at-position instead
+        handleStopAtPosition();
+      } else {
+        setPlaybackState("PAUSED");
+        setVoiceState("IDLE");
       }
-      setPlaybackState("PAUSED");
-      setVoiceState("IDLE");
     }
   };
 
   const handleStopMessage = () => {
     if (synthesisRef.current) {
+      isCancelledByCommandRef.current = false; // full stop — clear everything
       synthesisRef.current.cancel();
       setPlayingMessageIndex(null);
       setPlaybackState("IDLE");
       setVoiceState("IDLE");
       currentPausedTextRef.current = "";
       currentSpeakCharIndexRef.current = 0;
+      pausedMessageIndexRef.current = null;
+      stopInterruptListener();
     }
   };
 
-  // Start Speech-to-Text (STT) Recognition
+  // ── Concurrent interrupt listener: starts when TTS plays, listens for stop/continue ──
+  const startInterruptListener = () => {
+    const intRec = interruptRecRef.current;
+    if (!intRec) return;
+    // Tear down any previous session first
+    try { intRec.stop(); } catch (_) {}
+
+    intRec.onresult = (event: any) => {
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const transcript = (event.results[i][0]?.transcript || "").toLowerCase().trim();
+        // Act on INTERIM results for instant reaction (don't wait for isFinal)
+        if (STOP_REGEX.test(transcript) || STOP_PARTIAL_REGEX.test(transcript)) {
+          handleStopAtPosition();
+          return;
+        }
+        if (CONTINUE_REGEX.test(transcript) || CONTINUE_PARTIAL_REGEX.test(transcript)) {
+          handleResumeOrContinueMessage();
+          return;
+        }
+      }
+    };
+
+    intRec.onerror = () => {
+      // Silently restart on errors so it keeps listening
+      try {
+        intRec.stop();
+        setTimeout(() => {
+          if (synthesisRef.current?.speaking) startInterruptListener();
+        }, 300);
+      } catch (_) {}
+    };
+
+    intRec.onend = () => {
+      // Auto-restart so it keeps listening while TTS is still playing
+      if (synthesisRef.current?.speaking) {
+        setTimeout(() => startInterruptListener(), 100);
+      }
+    };
+
+    try {
+      intRec.start();
+    } catch (_) {}
+  };
+
+  const stopInterruptListener = () => {
+    try { interruptRecRef.current?.stop(); } catch (_) {}
+  };
+
+  // Start Speech-to-Text (STT) Recognition (main mic — does NOT cancel TTS)
   const startSpeechRecognition = () => {
     const rec = recognitionRef.current;
     if (!rec) {
@@ -561,7 +657,9 @@ export default function ChatWidget() {
       return;
     }
 
-    if (synthesisRef.current) {
+    // Do NOT cancel TTS here — the interrupt listener handles concurrent stop commands
+    // If TTS is NOT playing (IDLE), cancel any residual synthesis
+    if (synthesisRef.current && !synthesisRef.current.speaking) {
       synthesisRef.current.cancel();
     }
 
@@ -580,7 +678,6 @@ export default function ChatWidget() {
 
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
-          // Gather all alternative transcripts for the final result block
           for (let j = 0; j < event.results[i].length; j++) {
             if (event.results[i][j]?.transcript) {
               alternatives.push(event.results[i][j].transcript);
@@ -589,6 +686,22 @@ export default function ChatWidget() {
           final += event.results[i][0].transcript;
         } else {
           interim += event.results[i][0].transcript;
+          // ── Intercept stop/continue commands from INTERIM results ───────
+          const interimLower = interim.toLowerCase().trim();
+          if (STOP_REGEX.test(interimLower) || STOP_PARTIAL_REGEX.test(interimLower)) {
+            handleStopAtPosition();
+            rec.stop();
+            setInterimTranscript("");
+            setVoiceState("IDLE");
+            return;
+          }
+          if (CONTINUE_REGEX.test(interimLower) || CONTINUE_PARTIAL_REGEX.test(interimLower)) {
+            handleResumeOrContinueMessage();
+            rec.stop();
+            setInterimTranscript("");
+            setVoiceState("IDLE");
+            return;
+          }
         }
       }
       if (interim) {
