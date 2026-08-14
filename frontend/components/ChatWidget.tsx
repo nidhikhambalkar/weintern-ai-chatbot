@@ -215,14 +215,40 @@ export function splitTextIntoSentenceQueue(cleanText: string): string[] {
     .replace(/\b(Mr|Mrs|Ms|Dr|Prof|Sr|Jr|vs|etc|e\.g|i\.e)\./gi, "$1___DOT___")
     .replace(/\b(st|nd|rd|th)\./gi, "$1___DOT___");
 
-  // Split on sentence-ending punctuation followed by space or end of string
-  const rawSentences = protectedText.split(/(?<=[.?!:])\s+/);
+  // Split on primary sentence-ending punctuation (. ! ? \n :)
+  const rawSentences = protectedText.split(/(?<=[.?!:\n])\s+/);
 
-  const sentences = rawSentences
-    .map((s) => s.replace(/___DOT___/g, ".").trim())
-    .filter((s) => s.length > 0);
+  const finalSentences: string[] = [];
 
-  return sentences.length > 0 ? sentences : [cleanText];
+  for (const raw of rawSentences) {
+    const sClean = raw.replace(/___DOT___/g, ".").trim();
+    if (!sClean) continue;
+
+    const words = sClean.split(/\s+/);
+    if (words.length > 15 && sClean.includes(",")) {
+      // Split long sentences on comma boundaries while keeping chunks naturally sized (6-14 words)
+      const rawClauses = sClean.split(/(?<=,)\s+/);
+      let currentBuffer = "";
+
+      for (const clause of rawClauses) {
+        if (!currentBuffer) {
+          currentBuffer = clause;
+        } else if ((currentBuffer.split(/\s+/).length + clause.split(/\s+/).length) <= 14) {
+          currentBuffer += " " + clause;
+        } else {
+          finalSentences.push(currentBuffer.trim());
+          currentBuffer = clause;
+        }
+      }
+      if (currentBuffer.trim()) {
+        finalSentences.push(currentBuffer.trim());
+      }
+    } else {
+      finalSentences.push(sClean);
+    }
+  }
+
+  return finalSentences.length > 0 ? finalSentences : [cleanText];
 }
 
 // ── Alternatives Picker Helper ──────────────────────────────────────────
