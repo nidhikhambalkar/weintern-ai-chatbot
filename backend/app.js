@@ -116,8 +116,9 @@ app.get("/health", async (req, res) => {
       dbStatus = "IN_MEMORY_FALLBACK";
     }
   } catch (err) {
+    const { getLastPgError } = require("./database/db");
     dbStatus = "IN_MEMORY_FALLBACK";
-    dbError = err.message;
+    dbError = getLastPgError() || err.message;
   }
 
   let ollamaStatus = "UNKNOWN";

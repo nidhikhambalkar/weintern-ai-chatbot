@@ -38,6 +38,7 @@ const pool = Pool ? new Pool({
 
 // Variable to track whether PostgreSQL connection is active (true/false)
 let isPgConnected = false;
+let lastPgError = null;
 
 // Fallback in-memory database arrays (used if PostgreSQL is offline)
 const inMemoryDb = {
@@ -119,10 +120,12 @@ const initDatabase = async () => {
     client.release();
     // Mark PostgreSQL connection as active
     isPgConnected = true;
+    lastPgError = null;
     console.log('✅ [Database] PostgreSQL connected & tables verified successfully.');
   } catch (error) {
     // If connection fails, mark connection as inactive
     isPgConnected = false;
+    lastPgError = error.message;
     console.warn('⚠️ [Database] Could not connect to PostgreSQL:', error.message);
     console.warn('ℹ️ [Fallback] Running in-memory mode for easy testing without PostgreSQL setup.');
   }
@@ -146,5 +149,6 @@ module.exports = {
   query,
   initDatabase,
   getIsPgConnected: () => isPgConnected,
+  getLastPgError: () => lastPgError,
   inMemoryDb
 };
