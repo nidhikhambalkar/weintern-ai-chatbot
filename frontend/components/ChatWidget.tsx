@@ -359,7 +359,7 @@ export default function ChatWidget() {
     await processMessage(question, "text");
   };
 
-  // Helper to fetch the last response spoken by WeIntern AI
+  // ── Helper to fetch the last response spoken by WeIntern AI ─────────────
   const getLastBotResponse = () => {
     for (let i = messages.length - 1; i >= 0; i--) {
       if (messages[i].sender === "bot") {
@@ -369,11 +369,102 @@ export default function ChatWidget() {
     return null;
   };
 
+  // ── Helper to clean and normalize input for command detection ───────────
+  const cleanCommandText = (rawText: string): string => {
+    if (!rawText) return "";
+    let text = String(rawText).trim();
+    text = text.replace(/^[\s.,!?;:।'"\-_()]+|[\s.,!?;:।'"\-_()]+$/g, "").trim();
+    return text;
+  };
+
+  const normalizeCommandInput = (text: string): { raw: string; transliterated: string } => {
+    const cleaned = cleanCommandText(text).toLowerCase();
+    if (/[\u0900-\u097F]/.test(cleaned)) {
+      const transliterated = transliterateDevanagari(cleaned).toLowerCase();
+      return { raw: cleaned, transliterated };
+    }
+    return { raw: cleaned, transliterated: cleaned };
+  };
+
+  const QUESTION_KEYWORDS_REGEX = /\b(course|courses|internship|internships|certificate|certificates|certification|lor|fee|fees|price|cost|domain|domains|placement|stipend|eligibility|eligible|duration|month|months|week|weeks|syllabus|project|projects|register|registration|apply|admission|refund|emi|contact|email|phone|whatsapp|who|what|when|where|why|how|kya|kaise|kitna|kitne|kab|kaha|kahan|kaun)\b/i;
+
+  const COMMAND_PATTERNS = {
+    STOP: [
+      /^(please\s+)?(stop|stop it|stop speaking|stop audio|stop voice|quiet|shut up)(\s+please)?$/i,
+      /^(please\s+)?(ruko|ruk|roko|band karo|band karo ab|chup|chup ho jao|chup raho|bas|bas karo|bas karo ab|thamba|thamb|band kara)(\s+please)?$/i,
+      /^(रुको|रुक|रोको|बंद करो|चुप|चुप हो जाओ|चुप रहो|बस|बस करो|थांबा|थांब)$/i
+    ],
+    PAUSE: [
+      /^(please\s+)?(pause|pause it|pause speaking|pause audio|pause speech|pause please|wait|wait please|wait a minute|hold on|hold)(\s+please)?$/i,
+      /^(please\s+)?(ruko thoda|thoda ruko|ek minute ruko|ek minute|hold karo|pause karo|jara thamba|thoda thamba)(\s+please)?$/i,
+      /^(पॉज|पॉज़|रुको थोड़ा|थोड़ा रुको|एक मिनट|जरा थांबा)$/i
+    ],
+    RESUME: [
+      /^(please\s+)?(continue|resume|continue please|resume please|go on|keep speaking|carry on|continue speaking|resume speaking|play|play speech|unpause)(\s+please)?$/i,
+      /^(please\s+)?(chalu karo|chalu kijiye|phir se chalu karo|continue karo|resume karo|aage bolo|aage batao|bolo|aage badho|boliye|pudhe sanga|pudhe bola|chalu kara)(\s+please)?$/i,
+      /^(कंटिन्यू|चालू करा|चालू करो|आगे बोलो|आगे बताओ|फिर से चालू करो|पुढे बोला)$/i
+    ],
+    REPEAT: [
+      /^(please\s+)?(repeat|repeat it|repeat please|speak again|say again|tell me again|read again|read it again|replay|replay please)(\s+please)?$/i,
+      /^(please\s+)?(dobara bolo|phir se bolo|wapas bolo|ek baar aur bolo|dobara batao|phir se batao|wapas batao|repeat karo|replay karo|punha sanga|parat sanga|punha bola)(\s+please)?$/i,
+      /^(दोबारा बोलो|फिर से बोलो|वापस बोलो|एक बार और बोलो|पुन्हा बोला|परत सांगा)$/i
+    ],
+    START: [
+      /^(please\s+)?(start|start again|start from beginning|start from the beginning|begin|start over)(\s+please)?$/i,
+      /^(please\s+)?(shuru se|pehle se|shuru karo|shuru se bolo|shuru se batao|suru karo|suru se|starting se|starting se bolo|surwat pasun|suru pasun)(\s+please)?$/i,
+      /^(शुरू से|शुरू करो|पहले से|सुरुवात करा|सुरुवातीपासून)$/i
+    ],
+    MUTE: [
+      /^(please\s+)?(mute|mute it|mute voice|mute audio|turn off voice|turn off speech|turn off audio|silent|go silent|be silent)(\s+please)?$/i,
+      /^(please\s+)?((awaaz|aawaz|awaz)\s+band(\s+(karo|kara|kijiye))?|mute karo|silent karo)(\s+please)?$/i,
+      /^(आवाज बंद|आवाज बंद करा|म्यूट)$/i
+    ],
+    UNMUTE: [
+      /^(please\s+)?(unmute|unmute it|unmute voice|unmute audio|turn on voice|turn on speech|turn on audio|speak up|voice on)(\s+please)?$/i,
+      /^(please\s+)?((awaaz|aawaz|awaz)\s+(chalu|shuru|open)(\s+(karo|kara|kijiye))?|unmute karo|speak karo|voice on karo)(\s+please)?$/i,
+      /^(आवाज चालू|आवाज चालू करा|अनम्यूट)$/i
+    ]
+  };
+
+  const detectVoiceCommandType = (inputText: string): string | null => {
+    const { raw, transliterated } = normalizeCommandInput(inputText);
+    if (!raw) return null;
+
+    const wordCount = raw.split(/\s+/).length;
+    // Guard against normal questions containing keywords
+    if (wordCount > 4 && QUESTION_KEYWORDS_REGEX.test(raw)) {
+      return null;
+    }
+
+    for (const [cmdType, patterns] of Object.entries(COMMAND_PATTERNS)) {
+      for (const pattern of patterns) {
+        if (pattern.test(raw) || pattern.test(transliterated)) {
+          return cmdType;
+        }
+      }
+    }
+    return null;
+  };
+
+  // ── Voice playback action handlers ──────────────────────────────────────
+  const handleStopAtPosition = () => {
+    if (!synthesisRef.current) return;
+    isCancelledByCommandRef.current = true; // guard onend from wiping saved position
+    synthesisRef.current.cancel();
+    setPlaybackState("PAUSED");
+    setVoiceState("IDLE");
+    stopInterruptListener();
+  };
+
+  const handlePauseMessage = () => {
+    handleStopAtPosition();
+  };
+
   const handleResumeOrContinueMessage = () => {
     if (!synthesisRef.current) return;
 
-    // If we have a saved position from a commanded stop, resume from there
-    if (currentPausedTextRef.current && currentSpeakCharIndexRef.current > 0) {
+    // If we have a saved position from a commanded stop/pause, resume from exact position
+    if (currentPausedTextRef.current && currentSpeakCharIndexRef.current >= 0) {
       const fullText = currentPausedTextRef.current;
       const offset = currentSpeakCharIndexRef.current;
       const msgIdx = pausedMessageIndexRef.current ?? playingMessageIndex ?? -1;
@@ -381,7 +472,7 @@ export default function ChatWidget() {
       return;
     }
 
-    // Fall back: try browser resume (works on Firefox)
+    // Fall back: browser resume
     if (synthesisRef.current.paused) {
       synthesisRef.current.resume();
       setPlaybackState("PLAYING");
@@ -389,61 +480,82 @@ export default function ChatWidget() {
       return;
     }
 
-    // Last resort: replay last bot message from the beginning
+    // Fall back: replay last bot message from start
     const lastBot = getLastBotResponse();
     if (lastBot) {
       handlePlayMessage(lastBot.index, lastBot.text, 0);
     }
   };
 
-  // ── STOP/CONTINUE REGEX helpers (used both by interrupt listener & command detector) ──
-  const STOP_REGEX = /^(stop|stop it|stop speaking|pause|pause speech|wait|hold on|quiet|bas|bas karo|bas|bas karo|ruko|band karo|chup|chup ho jao|ruk|roko|hold karo|ruko thoda|thoda ruko|\u0930\u0941\u0915\u094B|\u0930\u0941\u0915\u094B|\u0925\u093E\u0902\u092C\u093E|\u0925\u093E\u0902\u092C)$/i;
-  const STOP_PARTIAL_REGEX = /\b(stop|stop it|bas karo|bas karo|band karo|chup ho jao|thoda ruko|hold karo|\u0930\u0941\u0915\u094B|\u0925\u093E\u0902\u092C\u093E)\b/i;
-  const CONTINUE_REGEX = /^(continue|resume|go on|keep speaking|carry on|continue speaking|chalu karo|phir se chalu karo|continue karo|resume karo|aage bolo)$/i;
-  const CONTINUE_PARTIAL_REGEX = /\b(continue karo|phir se chalu karo|resume karo|continue speaking|keep speaking|carry on|aage bolo)\b/i;
+  const handleRepeatMessage = () => {
+    if (!synthesisRef.current) return;
+    const lastBot = getLastBotResponse();
+    if (lastBot) {
+      handlePlayMessage(lastBot.index, lastBot.text, 0);
+    }
+  };
 
-  // Handles natural voice command detection and execution (supports Hindi/Hinglish variations)
+  const handleStartMessage = () => {
+    if (!synthesisRef.current) return;
+    const lastBot = getLastBotResponse();
+    if (lastBot) {
+      handlePlayMessage(lastBot.index, lastBot.text, 0);
+    }
+  };
+
+  const handleMuteMessage = () => {
+    setIsSpeakerMuted(true);
+    handleStopMessage();
+  };
+
+  const handleUnmuteMessage = () => {
+    setIsSpeakerMuted(false);
+  };
+
+  const handleStopMessage = () => {
+    if (synthesisRef.current) {
+      isCancelledByCommandRef.current = false;
+      synthesisRef.current.cancel();
+      setPlayingMessageIndex(null);
+      setPlaybackState("IDLE");
+      setVoiceState("IDLE");
+      currentPausedTextRef.current = "";
+      currentSpeakCharIndexRef.current = 0;
+      pausedMessageIndexRef.current = null;
+      stopInterruptListener();
+    }
+  };
+
+  // ── Unified command executor ────────────────────────────────────────────
   const detectAndExecuteVoiceCommand = (text: string): boolean => {
-    const rawLower = text.toLowerCase().trim();
+    const cmd = detectVoiceCommandType(text);
+    if (!cmd) return false;
 
-    // 1. STOP & PAUSE
-    if (STOP_REGEX.test(rawLower) || STOP_PARTIAL_REGEX.test(rawLower)) {
-      handleStopAtPosition();
-      return true;
+    switch (cmd) {
+      case "STOP":
+        handleStopAtPosition();
+        return true;
+      case "PAUSE":
+        handlePauseMessage();
+        return true;
+      case "RESUME":
+        handleResumeOrContinueMessage();
+        return true;
+      case "REPEAT":
+        handleRepeatMessage();
+        return true;
+      case "START":
+        handleStartMessage();
+        return true;
+      case "MUTE":
+        handleMuteMessage();
+        return true;
+      case "UNMUTE":
+        handleUnmuteMessage();
+        return true;
+      default:
+        return false;
     }
-
-    // 2. CONTINUE & RESUME
-    if (CONTINUE_REGEX.test(rawLower) || CONTINUE_PARTIAL_REGEX.test(rawLower)) {
-      handleResumeOrContinueMessage();
-      return true;
-    }
-
-    // 3. START / REPLAY / SPEAK AGAIN / REPEAT
-    if (/^(start|begin|repeat|speak again|replay|read again|say again|tell me again|shuru karo|shuru se|play karo|shuru|pehle se|phir se bolo|phir se|dobara bolo|wapas bolo)$/i.test(rawLower) ||
-      /\b(speak again|read again|say again|tell me again|shuru karo|pehle se|phir se bolo|dobara bolo|wapas bolo)\b/i.test(rawLower)) {
-      const lastBot = getLastBotResponse();
-      if (lastBot) {
-        handlePlayMessage(lastBot.index, lastBot.text, 0);
-      }
-      return true;
-    }
-
-    // 4. MUTE
-    if (/^(mute|mute volume|turn off voice|silent|awaaz band|mute karo|silent karo|aawaz band)$/i.test(rawLower) ||
-      /\b(mute volume|turn off voice|awaaz band|mute karo|silent karo|aawaz band)\b/i.test(rawLower)) {
-      setIsSpeakerMuted(true);
-      handleStopMessage();
-      return true;
-    }
-
-    // 5. UNMUTE
-    if (/^(unmute|unmute volume|turn on voice|speak up|voice on|awaaz chalu|unmute karo|speak karo|aawaz chalu)$/i.test(rawLower) ||
-      /\b(unmute volume|turn on voice|awaaz chalu|unmute karo|speak karo|aawaz chalu)\b/i.test(rawLower)) {
-      setIsSpeakerMuted(false);
-      return true;
-    }
-
-    return false;
   };
 
   // Speaks response using Web Speech Synthesis (TTS)
@@ -538,12 +650,11 @@ export default function ChatWidget() {
     };
 
     utterance.onend = () => {
-      // Stop the interrupt listener
       stopInterruptListener();
       setPlayingMessageIndex(null);
       setPlaybackState("IDLE");
       setVoiceState("IDLE");
-      // Only clear saved position if speech ended NATURALLY (not stopped by command)
+      // Only clear saved position if speech ended naturally
       if (!isCancelledByCommandRef.current) {
         currentPausedTextRef.current = "";
         currentSpeakCharIndexRef.current = 0;
@@ -562,68 +673,25 @@ export default function ChatWidget() {
     synthesisRef.current.speak(utterance);
   };
 
-  // ── handleStopAtPosition: stop TTS but PRESERVE position for resume ────
-  // This is what voice "Stop" commands call.
-  const handleStopAtPosition = () => {
-    if (!synthesisRef.current) return;
-    isCancelledByCommandRef.current = true; // guard onend from wiping saved position
-    synthesisRef.current.cancel();
-    setPlaybackState("PAUSED");
-    setVoiceState("IDLE");
-    stopInterruptListener();
-  };
-
-  // handlePauseMessage: try browser pause first, fall back to stop-at-position
-  const handlePauseMessage = () => {
-    if (synthesisRef.current) {
-      if (synthesisRef.current.speaking) {
-        // Chrome's pause() is often broken — use stop-at-position instead
-        handleStopAtPosition();
-      } else {
-        setPlaybackState("PAUSED");
-        setVoiceState("IDLE");
-      }
-    }
-  };
-
-  const handleStopMessage = () => {
-    if (synthesisRef.current) {
-      isCancelledByCommandRef.current = false; // full stop — clear everything
-      synthesisRef.current.cancel();
-      setPlayingMessageIndex(null);
-      setPlaybackState("IDLE");
-      setVoiceState("IDLE");
-      currentPausedTextRef.current = "";
-      currentSpeakCharIndexRef.current = 0;
-      pausedMessageIndexRef.current = null;
-      stopInterruptListener();
-    }
-  };
-
-  // ── Concurrent interrupt listener: starts when TTS plays, listens for stop/continue ──
+  // ── Concurrent interrupt listener: starts when TTS plays, listens for voice commands ──
   const startInterruptListener = () => {
     const intRec = interruptRecRef.current;
     if (!intRec) return;
-    // Tear down any previous session first
     try { intRec.stop(); } catch (_) {}
 
     intRec.onresult = (event: any) => {
       for (let i = event.resultIndex; i < event.results.length; ++i) {
-        const transcript = (event.results[i][0]?.transcript || "").toLowerCase().trim();
-        // Act on INTERIM results for instant reaction (don't wait for isFinal)
-        if (STOP_REGEX.test(transcript) || STOP_PARTIAL_REGEX.test(transcript)) {
-          handleStopAtPosition();
-          return;
-        }
-        if (CONTINUE_REGEX.test(transcript) || CONTINUE_PARTIAL_REGEX.test(transcript)) {
-          handleResumeOrContinueMessage();
+        const transcript = (event.results[i][0]?.transcript || "").trim();
+        // Execute voice command directly on interim/final results
+        const isExecuted = detectAndExecuteVoiceCommand(transcript);
+        if (isExecuted) {
+          try { intRec.stop(); } catch (_) {}
           return;
         }
       }
     };
 
     intRec.onerror = () => {
-      // Silently restart on errors so it keeps listening
       try {
         intRec.stop();
         setTimeout(() => {
@@ -633,7 +701,6 @@ export default function ChatWidget() {
     };
 
     intRec.onend = () => {
-      // Auto-restart so it keeps listening while TTS is still playing
       if (synthesisRef.current?.speaking) {
         setTimeout(() => startInterruptListener(), 100);
       }
@@ -687,17 +754,10 @@ export default function ChatWidget() {
         } else {
           interim += event.results[i][0].transcript;
           // ── Intercept stop/continue commands from INTERIM results ───────
-          const interimLower = interim.toLowerCase().trim();
-          if (STOP_REGEX.test(interimLower) || STOP_PARTIAL_REGEX.test(interimLower)) {
-            handleStopAtPosition();
-            rec.stop();
-            setInterimTranscript("");
-            setVoiceState("IDLE");
-            return;
-          }
-          if (CONTINUE_REGEX.test(interimLower) || CONTINUE_PARTIAL_REGEX.test(interimLower)) {
-            handleResumeOrContinueMessage();
-            rec.stop();
+          // ── Intercept voice commands from INTERIM results for instant responsiveness ───────
+          const isExecuted = detectAndExecuteVoiceCommand(interim);
+          if (isExecuted) {
+            try { rec.stop(); } catch (_) {}
             setInterimTranscript("");
             setVoiceState("IDLE");
             return;
