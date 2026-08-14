@@ -595,6 +595,20 @@ export default function ChatWidget() {
     return null;
   };
 
+  const executeVoiceControlCommand = (command: "pause" | "continue" | "stop") => {
+    if (command === "stop") {
+      handleStopMessage();
+      return;
+    }
+
+    if (command === "pause") {
+      handlePauseMessage();
+      return;
+    }
+
+    handleResumeOrContinueMessage();
+  };
+
   // ── Voice playback action handlers ──────────────────────────────────────
   const handleResumeOrContinueMessage = () => {
     // 1. Guard: If already playing, do nothing to avoid duplicate audio instances
@@ -642,7 +656,7 @@ export default function ChatWidget() {
       (/^\b(stop|band karo|thambva|thaambva)\b/i.test(rawLower) && !/\b(non-stop|bus stop|one stop|stop by)\b/i.test(rawLower));
 
     if (isStop) {
-      handleStopMessage();
+      executeVoiceControlCommand("stop");
       return true;
     }
 
@@ -654,7 +668,7 @@ export default function ChatWidget() {
       /^\b(pause|wait|ruko|roko|thamba|thaamb|रुको|थांब)\b/i.test(rawLower);
 
     if (isPause) {
-      handlePauseMessage();
+      executeVoiceControlCommand("pause");
       return true;
     }
 
@@ -665,7 +679,7 @@ export default function ChatWidget() {
       /^(continue|resume|जारी रखो|पुन्हा सुरू)$/i.test(rawLower);
 
     if (isResume) {
-      handleResumeOrContinueMessage();
+      executeVoiceControlCommand("continue");
       return true;
     }
 
@@ -935,7 +949,6 @@ export default function ChatWidget() {
   };
 
   const handlePauseMessage = () => {
-    if (playbackState === "PAUSED") return;
 
     isVoicePausedRef.current = true;
     isTtsSpeakingRef.current = false;
@@ -948,6 +961,28 @@ export default function ChatWidget() {
         window.speechSynthesis.pause();
       } catch (e) {}
     }
+=======
+    if (!synthesisRef.current) return;
+    if (playbackState === "PAUSED" && synthesisRef.current.paused) return;
+
+    const activeMessageIndex = playingMessageIndex ?? pausedMessageIndexRef.current ?? getLastBotResponse()?.index ?? null;
+    if (activeMessageIndex !== null) {
+      pausedMessageIndexRef.current = activeMessageIndex;
+    }
+
+    if (!currentPausedTextRef.current) {
+      const lastBot = getLastBotResponse();
+      if (lastBot) {
+        currentPausedTextRef.current = lastBot.text;
+      }
+    }
+
+    isVoicePausedRef.current = true;
+    isTtsSpeakingRef.current = false;
+    try {
+      synthesisRef.current.pause();
+    } catch (e) {}
+>>>>>>> origin/fix/faq-api-resilience
     startInterruptListener();
     setPlaybackState("PAUSED");
     setVoiceState("PAUSED");
@@ -957,6 +992,7 @@ export default function ChatWidget() {
     isVoicePausedRef.current = false;
     isTtsSpeakingRef.current = false;
     stopInterruptListener();
+<<<<<<< HEAD
 
     // Abort active LLM HTTP generation immediately
     if (abortControllerRef.current) {
@@ -967,10 +1003,16 @@ export default function ChatWidget() {
     }
 
     if (typeof window !== "undefined" && window.speechSynthesis) {
+=======
+    stopSpeechRecognition();
+
+    if (synthesisRef.current) {
+>>>>>>> origin/fix/faq-api-resilience
       try {
-        window.speechSynthesis.cancel();
+        synthesisRef.current.cancel();
       } catch (e) {}
     }
+
     activeUtteranceRef.current = null;
     sentenceQueueRef.current = [];
     currentSentenceIndexRef.current = 0;
