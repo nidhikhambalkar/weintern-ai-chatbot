@@ -1,5 +1,16 @@
 [
   {
+    "category": "courses",
+    "question": "What are the courses?",
+    "answer": "WeIntern offers the following industry-oriented training courses:\n\n1. Full Stack Web Development (12 weeks)\n2. Mobile App Development with Flutter (10 weeks)\n3. AI & Automation (8 weeks)\n4. Data Science & Analytics (12 weeks)\n5. Python Programming (10 weeks)\n6. Java Programming (12 weeks)\n7. C/C++ Programming (10 weeks)\n8. Cloud Computing & DevOps (12 weeks)\n9. UI/UX Design (8 weeks)\n10. Digital Marketing & SEO (8 weeks)"
+  },
+  {
+    "category": "courses",
+    "question": "What courses are available?",
+    "answer": "WeIntern offers the following industry-oriented training courses:\n\n1. Full Stack Web Development (12 weeks)\n2. Mobile App Development with Flutter (10 weeks)\n3. AI & Automation (8 weeks)\n4. Data Science & Analytics (12 weeks)\n5. Python Programming (10 weeks)\n6. Java Programming (12 weeks)\n7. C/C++ Programming (10 weeks)\n8. Cloud Computing & DevOps (12 weeks)\n9. UI/UX Design (8 weeks)\n10. Digital Marketing & SEO (8 weeks)"
+  },
+  {
+    "category": "courses",
     "question": "Which courses are available?",
     "answer": "WeIntern offers internship-focused courses in Full Stack Web Development, Mobile App Development, AI & Automation, Data Science & Analytics, Python Programming, Java Programming, C/C++ Programming, UI/UX Design, Cloud Computing, and Digital Marketing."
   },
