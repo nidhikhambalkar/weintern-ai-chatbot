@@ -983,9 +983,15 @@ export default function ChatWidget() {
 
   // Start Speech-to-Text (STT) Recognition
   const startSpeechRecognition = () => {
-    // ── REQUIREMENT 6: MIC PRIORITY ──────────────────────────────────────────
-    // The moment microphone recording starts, immediately stop any active or paused TTS completely!
-    handleStopMessage();
+    // When starting STT, pause active TTS so microphone input is clean, but preserve activeUtteranceRef for voice commands
+    const synth = synthesisRef.current || (typeof window !== "undefined" ? window.speechSynthesis : null);
+    if (synth && synth.speaking && !synth.paused) {
+      try {
+        synth.pause();
+        setPlaybackState("PAUSED");
+        setVoiceState("PAUSED");
+      } catch (e) {}
+    }
 
     // Guard 2: Avoid duplicate calls if already listening
     if (isListeningRef.current) {
