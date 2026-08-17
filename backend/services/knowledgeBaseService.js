@@ -971,6 +971,43 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory) {
     if (isJavaQuery && normQ.includes("java")) score += 250;
   }
 
+  // ── IT Services & WeNexa PDF Q1-Q160 Boosters ──
+  const isWeNexaQuery = queryTokens.includes("wenexa");
+  if (isWeNexaQuery) {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("wenexa")) score += 300;
+  }
+
+  const isWebsiteServiceQuery = queryTokens.includes("website") || queryTokens.includes("websites") || queryTokens.includes("domain") || queryTokens.includes("hosting");
+  if (isWebsiteServiceQuery && !isCourseQuery) {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("website") || normQ.includes("domain") || normQ.includes("hosting")) score += 180;
+  }
+
+  const isMobileAppServiceQuery = queryTokens.includes("flutter") || (queryTokens.includes("mobile") && queryTokens.includes("app")) || queryTokens.includes("playstore") || queryTokens.includes("play store") || queryTokens.includes("app store");
+  if (isMobileAppServiceQuery && !isCourseQuery) {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("mobile app") || normQ.includes("flutter") || normQ.includes("play store") || normQ.includes("app store")) score += 180;
+  }
+
+  const isAiServiceQuery = queryTokens.includes("chatbot") || queryTokens.includes("chatbots") || (queryTokens.includes("ai") && queryTokens.includes("agent")) || queryTokens.includes("agents") || queryTokens.includes("rag");
+  if (isAiServiceQuery && !isCourseQuery) {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("chatbot") || normQ.includes("agent") || normQ.includes("ai")) score += 180;
+  }
+
+  const isCustomSoftwareQuery = queryTokens.includes("crm") || queryTokens.includes("erp") || queryTokens.includes("hrms") || queryTokens.includes("inventory") || (queryTokens.includes("custom") && queryTokens.includes("software"));
+  if (isCustomSoftwareQuery && !isCourseQuery) {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("software") || normQ.includes("crm") || normQ.includes("erp") || normQ.includes("hrms") || normQ.includes("custom")) score += 180;
+  }
+
+  const isNdaOrConsultationQuery = queryTokens.includes("nda") || queryTokens.includes("consultation") || queryTokens.includes("quote") || queryTokens.includes("quotation");
+  if (isNdaOrConsultationQuery) {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("nda") || normQ.includes("consultation") || normQ.includes("quote")) score += 250;
+  }
+
   queryTokens.forEach((token) => {
     if (!token) return;
     if (entryText.includes(token)) {
