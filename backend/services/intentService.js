@@ -29,9 +29,9 @@ function detectIntent(message = "") {
   const rawText = String(message).trim();
 
   // ── Normalize WeIntern name variants before any keyword matching ─────────
-  // This ensures "we intern", "weintrn", "wigton", "v intern" etc. all hit the
+  // This ensures "we intern", "weinterm", "weintrn", "vington", "v intern" etc. all hit the
   // correct intent branch instead of falling to out-of-domain.
-  const WEINTERN_VARIANT_RE = /\b(v\s+intern|w\s+intern|wee\s+intern|we\s+intern|we-intern|we\s+interne|weintrn|wintern|wenitern|wigton|vinturn|winturn|weinturm|weinturn|weentern|way\s+intern|vee\s+intern|be\s+intern|beintern|weinternship)\b/gi;
+  const WEINTERN_VARIANT_RE = /\b(v\s*intern|v-intern|w\s+intern|w-intern|wee\s+intern|wee\s+intrn|we\s+intern|we-intern|we\s+interne|we\s+interm|we\s+intrn|we\s+intrm|we\s+intent|we\s+entered|we\s+entered\s+in|way\s+intern|vee\s+intern|vee\s+intrn|vee\s+internship|v\s+internship|be\s+intern|beintern|weinternship|weinterm|weintern|weintrn|weintarn|weinternn|weimterm|weintrm|vington|vingten|vinturn|winturn|wintern|wenitern|weinturm|weinturn|weentern|weentrn|weintearn|wigton|vinemtn|vinton)\b/gi;
   const normalizedRaw = rawText.replace(WEINTERN_VARIANT_RE, "WeIntern");
   const lower = normalizedRaw.toLowerCase();
 
@@ -61,6 +61,14 @@ function detectIntent(message = "") {
   // WeIntern-related keywords
   const weinternKeywords = [
     "weintern",
+    "weinterm",
+    "weintrn",
+    "weimterm",
+    "weintarn",
+    "weinternn",
+    "vington",
+    "vingten",
+    "vinturn",
     "wenexa",
     "internship",
     "internsip",

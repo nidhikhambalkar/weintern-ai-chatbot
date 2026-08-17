@@ -20,6 +20,24 @@ function transliterateDevanagari(text) {
   return result;
 }
 
+function levenshteinDistance(a, b) {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  const matrix = [];
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
+      }
+    }
+  }
+  return matrix[b.length][a.length];
+}
+
 function normalizeSpokenText(text) {
   if (!text) return "";
   let normalized = text;
@@ -30,15 +48,26 @@ function normalizeSpokenText(text) {
     normalized = transliterateDevanagari(text);
   }
 
-  // 1. Normalize WeIntern name variations (case-insensitive)
+  // 1. Normalize WeIntern name variations (case-insensitive comprehensive master regex)
   const weinternRegexes = [
-    /\b(v\s*intern|v-intern|vinemtn|vinton|weimterm|weintarn|weintrn|weinternn|wee\s+intern|wee\s+intrn)\b/gi,
-    /\b(be\s*intern|beintern|way\s*intern|we\s+intent|we\s+entered|vee\s+intern|vee\s+intrn|vee\s+internship|v\s+internship)\b/gi,
-    /\b(we\s+entered\s+in|we\s+internship)\b/gi,
+    /\b(v\s*intern|v-intern|w\s+intern|w-intern|wee\s+intern|wee\s+intrn|we\s+intern|we-intern|we\s+interne|we\s+interm|we\s+intrn|we\s+intrm|we\s+intent|we\s+entered|we\s+entered\s+in|way\s+intern|vee\s+intern|vee\s+intrn|vee\s+internship|v\s+internship|be\s+intern|beintern|weinternship|weinterm|weintern|weintrn|weintarn|weinternn|weimterm|weintrm|vington|vingten|vinturn|winturn|wintern|wenitern|weinturm|weinturn|weentern|weentrn|weintearn|wigton|vinemtn|vinton)\b/gi,
   ];
   weinternRegexes.forEach((regex) => {
     normalized = normalized.replace(regex, "WeIntern");
   });
+
+  // Fuzzy Levenshtein correction for 1 or 2 character typos/mishearings of WeIntern
+  const words = normalized.split(/\s+/);
+  const correctedWords = words.map((word) => {
+    const cleanWord = word.toLowerCase().replace(/[^a-z]/g, "");
+    if (cleanWord.length >= 6 && cleanWord.length <= 11 && (cleanWord.startsWith("w") || cleanWord.startsWith("v"))) {
+      if (levenshteinDistance(cleanWord, "weintern") <= 2) {
+        return "WeIntern";
+      }
+    }
+    return word;
+  });
+  normalized = correctedWords.join(" ");
 
   // 2. Normalize LOR variations
   const lorRegexes = [

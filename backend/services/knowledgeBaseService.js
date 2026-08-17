@@ -198,17 +198,24 @@ const TOKEN_MAP = {
   codeblocks: "code blocks",
 
   // ── WeIntern single-token misspellings / speech variants ──────────────
+  weinterm:   "weintern",
+  weimterm:   "weintern",
+  weintarn:   "weintern",
+  weinternn:  "weintern",
+  weintrm:    "weintern",
   weintrn:    "weintern",
   wintern:    "weintern",
   wenitern:   "weintern",
   wigton:     "weintern",
   vinturn:    "weintern",
+  vington:    "weintern",
+  vingten:    "weintern",
   winturn:    "weintern",
   weinturm:   "weintern",
   weinturn:   "weintern",
   weentern:   "weintern",
+  weentrn:    "weintern",
   weintearn:  "weintern",
-  wenitern:   "weintern",
   wee:        "we",          // "wee intern" → will then match "we" + "intern"
 
   // ── Certificate typos ─────────────────────────────────────────────────
@@ -381,7 +388,7 @@ function preNormalize(text = "") {
   // 1. WeIntern multi-word and phonetic name variants → "weintern"
   //    Must run before special-char stripping so spaces/hyphens are still present
   t = t.replace(
-    /\b(v\s+intern|w\s+intern|wee\s+intern|we\s+intern|we-intern|we\s+interne|weintrern|weintrn|wintern|wenitern|wigton|vinturn|winturn|weinturm|weinturn|weentern|wenitern|we\s+inter\b|way\s+intern|vee\s+intern|be\s+intern|beintern|weinternship)\b/gi,
+    /\b(v\s*intern|v-intern|w\s+intern|w-intern|wee\s+intern|wee\s+intrn|we\s+intern|we-intern|we\s+interne|we\s+interm|we\s+intrn|we\s+intrm|we\s+intent|we\s+entered|we\s+entered\s+in|way\s+intern|vee\s+intern|vee\s+intrn|vee\s+internship|v\s+internship|be\s+intern|beintern|weinternship|weinterm|weintern|weintrn|weintarn|weinternn|weimterm|weintrm|vington|vingten|vinturn|winturn|wintern|wenitern|weinturm|weinturn|weentern|weentrn|weintearn|wigton|vinemtn|vinton)\b/gi,
     "weintern"
   );
 

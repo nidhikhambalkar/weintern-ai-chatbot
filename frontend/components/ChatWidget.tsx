@@ -47,20 +47,7 @@ function normalizeSpeechInput(text: string): string {
 
   // ── 1. Normalize WeIntern name variations (comprehensive) ──────────────
   const weinternRegexes = [
-    // Multi-word variants with spacing/hyphen
-    /\b(v\s*intern|v-intern)\b/gi,
-    /\b(w\s+intern|w-intern)\b/gi,
-    /\b(wee\s+intern|wee\s+intrn|wee\s+internship)\b/gi,
-    /\b(we\s+intern|we-intern|we\s+interne|we\s+internship)\b/gi,
-    /\b(we\s+inter\b)/gi,
-    /\b(we\s+in\s+turn|we\s+inturn)\b/gi,
-    // Single-word phonetic / speech-to-text mistakes
-    /\b(weintrn|weinturn|wintern|wenitern|weinturm|weentern|weintearn)\b/gi,
-    /\b(wigton|vinturn|winturn|weintern)\b/gi,           // also ensures casing
-    /\b(way\s+intern|vee\s+intern|be\s+intern|beintern)\b/gi,
-    /\b(we\s+entered|we\s+entered\s+in)\b/gi,
-    /\b(we\s+intent|we\s+interns)\b/gi,
-    /\b(vee\s+internship|v\s+internship|weinternship)\b/gi,
+    /\b(v\s*intern|v-intern|w\s+intern|w-intern|wee\s+intern|wee\s+intrn|we\s+intern|we-intern|we\s+interne|we\s+interm|we\s+intrn|we\s+intrm|we\s+intent|we\s+entered|we\s+entered\s+in|way\s+intern|vee\s+intern|vee\s+intrn|vee\s+internship|v\s+internship|be\s+intern|beintern|weinternship|weinterm|weintern|weintrn|weintarn|weinternn|weimterm|weintrm|vington|vingten|vinturn|winturn|wintern|wenitern|weinturm|weinturn|weentern|weentrn|weintearn|wigton|vinemtn|vinton)\b/gi,
   ];
   weinternRegexes.forEach((regex) => {
     normalized = normalized.replace(regex, "WeIntern");
