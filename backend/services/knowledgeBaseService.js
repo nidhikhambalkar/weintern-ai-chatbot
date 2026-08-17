@@ -148,18 +148,20 @@ const TOKEN_MAP = {
   application: "registration",
   signup: "registration",
   sign: "registration",
-  // Domains
-  domain: "domains",
-  domains: "domains",
-  fullstack: "domains",
-  aiml: "domains",
-  datascience: "domains",
-  python: "domains",
-  java: "domains",
-  uiux: "domains",
-  marketing: "domains",
-  cybersecurity: "domains",
-  cloud: "domains",
+  // Domains (keep domain-specific tokens intact!)
+  domain: "domain",
+  domains: "domain",
+  fullstack: "full_stack",
+  aiml: "ai_automation",
+  datascience: "data_science",
+  python: "python",
+  java: "java",
+  uiux: "ui_ux",
+  ui: "ui",
+  ux: "ux",
+  marketing: "digital_marketing",
+  cybersecurity: "cyber_security",
+  cloud: "cloud_devops",
   // Stipend / EMI / Guarantee / LinkedIn
 
   emi: "fees",
@@ -709,12 +711,171 @@ function detectStrongCategory(queryTokens) {
   return strongestScore > 0 ? strongestCategory : null;
 }
 
-function scoreMatch(entry, queryTokens, categoryHints, strongCategory) {
+// ── Course Domain & Aspect Intent Detection Engine ─────────────────────────────
+function detectCourseDomain(rawQuery = "", queryTokens = []) {
+  const lower = String(rawQuery).toLowerCase();
+  const qStr = queryTokens.join(" ");
+
+  if (/\b(ui\/ux|ui\s*ux|uiux|ui_ux|figma|adobe\s*xd|wirefram|prototyp)\b/i.test(lower) || qStr.includes("ui_ux") || (qStr.includes("ui") && qStr.includes("ux"))) {
+    return "UI_UX";
+  }
+  if (/\b(data\s*science|datascience|data_science|data\s*analytics|pandas|tableau|power\s*bi|seaborn)\b/i.test(lower) || qStr.includes("data_science")) {
+    return "DATA_SCIENCE";
+  }
+  if (/\b(full\s*stack|fullstack|full_stack|web\s*dev|web\s*development|react|node|express|mongodb|frontend|backend)\b/i.test(lower) || qStr.includes("full_stack")) {
+    return "FULL_STACK";
+  }
+  if (/\b(mobile\s*app|mobile_app|flutter|dart|app\s*dev|app\s*development)\b/i.test(lower) || qStr.includes("mobile_app")) {
+    return "MOBILE_APP";
+  }
+  if (/\b(ai\s*&\s*automation|ai\/ml|ai\s*ml|ai_automation|prompt\s*engineering|langchain|n8n|make\.com|llm|artificial\s*intelligence)\b/i.test(lower) || qStr.includes("ai_automation") || (qStr.includes("ai") && !lower.includes("detail") && !lower.includes("email"))) {
+    return "AI_AUTOMATION";
+  }
+  if (/\b(python)\b/i.test(lower) && !/\b(data|ai|ml)\b/i.test(lower)) {
+    return "PYTHON";
+  }
+  if (/\b(java)\b/i.test(lower) && !/\b(script|js)\b/i.test(lower)) {
+    return "JAVA";
+  }
+  if (/\b(c\+\+|cpp|c\/c\+\+|c_cpp|cplusplus|c\s+programming|dsa|codeblocks)\b/i.test(lower) || qStr.includes("c_cpp")) {
+    return "C_CPP";
+  }
+  if (/\b(cloud|cloud_devops|devops|aws|docker|kubernetes|terraform|ansible)\b/i.test(lower) || qStr.includes("cloud_devops")) {
+    return "CLOUD_DEVOPS";
+  }
+  if (/\b(digital\s*marketing|digital_marketing|seo|google\s*ads|meta\s*ads|social\s*media\s*marketing)\b/i.test(lower) || qStr.includes("digital_marketing")) {
+    return "DIGITAL_MARKETING";
+  }
+
+  return null;
+}
+
+function detectQueryAspect(rawQuery = "", queryTokens = []) {
+  const lower = String(rawQuery).toLowerCase();
+  const qStr = queryTokens.join(" ");
+
+  // 1. Content / Include / Syllabus / Learn / Sikhate
+  if (/\b(include|includes|included|including|syllabus|learn|sikhate|sikhte|sikhoge|cover|covered|content|curriculum|what\s+is\s+in|detail|details)\b/i.test(lower) || qStr.includes("include") || qStr.includes("syllabus")) {
+    return "COURSE_CONTENT";
+  }
+  // 2. Benefits / Perks / Outcomes / Gain
+  if (/\b(benefit|benefits|perk|perks|gain|advantage|advantages|outcome|outcomes|what\s+do\s+i\s+get|what\s+will\s+i\s+get)\b/i.test(lower) || qStr.includes("benefit") || qStr.includes("perk")) {
+    return "COURSE_BENEFITS";
+  }
+  // 3. Duration / Time / Months / Weeks
+  if (/\b(duration|how\s+long|month|months|week|weeks|mahine|mahina|time)\b/i.test(lower) || qStr.includes("duration")) {
+    return "COURSE_DURATION";
+  }
+  // 4. Fees / Cost / Price / EMI
+  if (/\b(fee|fees|price|cost|charge|charges|emi|installment|paisa|paise)\b/i.test(lower) || qStr.includes("fee") || qStr.includes("fees")) {
+    return "COURSE_FEES";
+  }
+  // 5. Certificate / Certification / LOR
+  if (/\b(certificate|certification|lor|recommendation\s+letter|letter\s+of\s+recommendation)\b/i.test(lower) || qStr.includes("certificate") || qStr.includes("lor")) {
+    return "COURSE_CERTIFICATE";
+  }
+  // 6. Stipend
+  if (/\b(stipend|earning|stipend\s+amount)\b/i.test(lower) || qStr.includes("stipend")) {
+    return "INTERNSHIP_STIPEND";
+  }
+  // 7. Eligibility / Criteria / Stream
+  if (/\b(eligible|eligibility|criteria|qualification|fresher|beginner|who\s+can\s+apply|stream)\b/i.test(lower) || qStr.includes("eligibility")) {
+    return "INTERNSHIP_ELIGIBILITY";
+  }
+
+  return null;
+}
+
+function getEntryDomain(entry) {
+  const normText = normalize(`${entry.question || ""} ${entry.answer || ""} ${entry.category || ""}`);
+
+  if (normText.includes("ui ux") || normText.includes("ui/ux") || normText.includes("ui_ux") || normText.includes("figma")) {
+    return "UI_UX";
+  }
+  if (normText.includes("data science") || normText.includes("data_science") || normText.includes("pandas")) {
+    return "DATA_SCIENCE";
+  }
+  if (normText.includes("full stack") || normText.includes("full_stack")) {
+    return "FULL_STACK";
+  }
+  if (normText.includes("mobile app") || normText.includes("mobile_app") || normText.includes("flutter")) {
+    return "MOBILE_APP";
+  }
+  if (normText.includes("ai & automation") || normText.includes("ai automation") || normText.includes("ai_automation") || normText.includes("ai ml") || normText.includes("langchain") || normText.includes("prompt engineering")) {
+    return "AI_AUTOMATION";
+  }
+  if (normText.includes("python programming") || normText.includes("python course") || normText.includes("learn python")) {
+    return "PYTHON";
+  }
+  if (normText.includes("java programming") || normText.includes("java course") || normText.includes("learn java")) {
+    return "JAVA";
+  }
+  if (normText.includes("c/c++") || normText.includes("c++") || normText.includes("c_cpp")) {
+    return "C_CPP";
+  }
+  if (normText.includes("cloud computing") || normText.includes("cloud_devops") || normText.includes("devops")) {
+    return "CLOUD_DEVOPS";
+  }
+  if (normText.includes("digital marketing") || normText.includes("digital_marketing") || normText.includes("seo")) {
+    return "DIGITAL_MARKETING";
+  }
+
+  return null;
+}
+
+function scoreMatch(entry, queryTokens, categoryHints, strongCategory, rawQuery = "") {
   const entryText = normalize(`${entry.question || ""} ${entry.answer || ""} ${entry.category || ""}`);
   const entryTokens = entryText.split(" ").filter(Boolean);
   const querySet = new Set(queryTokens);
 
   let score = 0;
+
+  // ── DOMAIN & ASPECT ROUTER SCORING ──────────────────────────────────────────
+  const targetDomain = detectCourseDomain(rawQuery || queryTokens.join(" "), queryTokens);
+  const targetAspect = detectQueryAspect(rawQuery || queryTokens.join(" "), queryTokens);
+  const entryDomain = getEntryDomain(entry);
+
+  if (targetDomain) {
+    if (entryDomain === targetDomain) {
+      score += 450; // Massive boost for matching the target domain!
+    } else if (entryDomain && entryDomain !== targetDomain) {
+      score -= 450; // Heavy penalty if entry belongs to a different domain!
+    }
+
+    // Heavy penalty for generic company/overview entries when asking about a specific domain
+    if (entry.category === "company") {
+      score -= 450;
+    }
+  }
+
+  if (targetAspect) {
+    const entryTextNorm = normalize(`${entry.question || ""} ${entry.answer || ""}`);
+
+    if (targetAspect === "COURSE_CONTENT") {
+      if (entryTextNorm.includes("include") || entryTextNorm.includes("syllabus") || entryTextNorm.includes("learn") || entryTextNorm.includes("covers") || entryTextNorm.includes("content") || entryTextNorm.includes("program priced") || entryTextNorm.includes("weeks") || entryTextNorm.includes("topics")) {
+        score += 250;
+      }
+      if (entryTextNorm.includes("fee is") || entryTextNorm.includes("price is")) {
+        score -= 100;
+      }
+    } else if (targetAspect === "COURSE_BENEFITS") {
+      if (entry.category === "benefits" || entryTextNorm.includes("benefit") || entryTextNorm.includes("gain") || entryTextNorm.includes("perk") || entryTextNorm.includes("outcomes")) {
+        score += 250;
+      }
+    } else if (targetAspect === "COURSE_FEES") {
+      if (entry.category === "fees" || entryTextNorm.includes("fee") || entryTextNorm.includes("price") || entryTextNorm.includes("cost") || entryTextNorm.includes("₹")) {
+        score += 250;
+      }
+    } else if (targetAspect === "COURSE_DURATION") {
+      if (entry.category === "duration" || entryTextNorm.includes("duration") || entryTextNorm.includes("weeks") || entryTextNorm.includes("months")) {
+        score += 250;
+      }
+    } else if (targetAspect === "COURSE_CERTIFICATE") {
+      if (entry.category === "certificates" || entryTextNorm.includes("certificate") || entryTextNorm.includes("lor")) {
+        score += 250;
+      }
+    }
+  }
 
   const isSixMonthQuery = (
     queryTokens.includes("6") ||
@@ -1242,7 +1403,7 @@ function searchKnowledgeBase(message = "") {
 
   Object.entries(knowledgeIndex).forEach(([category, entries]) => {
     entries.forEach((entry) => {
-      let score = scoreMatch(entry, queryTokens, categoryHints, strongCategory);
+      let score = scoreMatch(entry, queryTokens, categoryHints, strongCategory, message);
       // Extra boost: "what's in 6599/999 plan" → heavily favour certificate entries
       if (isPlanCertQuery && (category === "certificates" || category === "certification")) {
         score += 50;
