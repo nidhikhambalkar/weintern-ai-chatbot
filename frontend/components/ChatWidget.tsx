@@ -327,6 +327,7 @@ export default function ChatWidget() {
   const interruptListenerActiveRef = useRef<boolean>(false); // is interrupt listener running
   const speechAccumulatorRef = useRef<string>("");          // accumulates speech segments across continuous listening/pauses
   const isVoiceSessionActiveRef = useRef<boolean>(false);    // tracks if user is in an active recording session
+  const lastExecutedCommandTimeRef = useRef<number>(0);     // debounce timestamp to prevent duplicate voice command triggers
 
   useEffect(() => {
     isSpeakerMutedRef.current = isSpeakerMuted;
@@ -673,11 +674,12 @@ export default function ChatWidget() {
     if (!raw) return null;
 
     const wordCount = raw.split(/\s+/).length;
-    // Guard against normal questions containing keywords
-    if (wordCount > 4 && QUESTION_KEYWORDS_REGEX.test(raw)) {
+    // Guard against long normal questions containing keywords
+    if (wordCount > 5 && QUESTION_KEYWORDS_REGEX.test(raw)) {
       return null;
     }
 
+    // 1. Direct regex pattern matching from COMMAND_PATTERNS
     for (const [cmdType, patterns] of Object.entries(COMMAND_PATTERNS)) {
       for (const pattern of patterns) {
         if (pattern.test(raw) || pattern.test(transliterated)) {
@@ -685,6 +687,17 @@ export default function ChatWidget() {
         }
       }
     }
+
+    // 2. Fast word-boundary fallback for short interim phrases (<= 4 words)
+    const isStop = /\b(stop|stop speaking|stop reading|stop talking|shut up|quiet|halt|band karo|chup|chup ho jao|bas karo|awaaz band)\b/i.test(raw);
+    if (isStop) return "STOP";
+
+    const isPause = /\b(pause|pause speaking|pause reading|please pause|pause please|wait|hold on|ruko thoda|thoda ruko|hold karo)\b/i.test(raw);
+    if (isPause) return "PAUSE";
+
+    const isResume = /\b(continue|resume|continue speaking|resume speaking|go on|keep speaking|carry on|chalu karo|phir se chalu|continue karo|resume karo)\b/i.test(raw);
+    if (isResume) return "RESUME";
+
     return null;
   };
 
@@ -722,13 +735,31 @@ export default function ChatWidget() {
     isSpeakerMutedRef.current = false;
   };
 
-  // Handles natural voice command detection and execution (supports English, Hindi, and Marathi variations)
+  // Handles natural voice command detection and immediate execution from interim or final speech
   const detectAndExecuteVoiceCommand = (text: string): boolean => {
     if (!text) return false;
 
-    // 1. First check dedicated COMMAND_PATTERNS (handles Devanagari & transliteration)
+    const now = Date.now();
+    // Prevent duplicate command triggers within 600ms
+    if (now - lastExecutedCommandTimeRef.current < 600) {
+      return true;
+    }
+
     const cmdType = detectVoiceCommandType(text);
     if (cmdType) {
+      lastExecutedCommandTimeRef.current = now;
+
+      // Clear all transcript buffers immediately so control commands are never sent to AI
+      setInterimTranscript("");
+      latestInterimTranscriptRef.current = "";
+      speechAccumulatorRef.current = "";
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
+
+      console.log(`⚡ Instant Voice Command Executed: [${cmdType}] from input: "${text}"`);
+
       if (cmdType === "STOP") {
         executeVoiceControlCommand("stop");
         return true;
@@ -756,39 +787,6 @@ export default function ChatWidget() {
         handleUnmute();
         return true;
       }
-    }
-
-    // 2. Secondary fallback matching for raw lower text
-    const rawLower = text.toLowerCase().trim();
-
-    const isStop =
-      /^(stop|stop reading|stop speaking|stop talking|stop it|stop now|please stop|stop please|shut up|quiet|halt|cancel reading|cancel speech|band karo|बंद करो|thambva|thaambva|थांबवा|chup|chup ho jao|bas karo|rok do|band kar do|awaaz band|aawaz band)$/i.test(rawLower) ||
-      /\b(stop reading|stop speaking|stop talking|stop it|please stop|stop please|shut up|band karo|बंद करो|thambva|thaambva|थांबवा|chup ho jao|bas karo|rok do|band kar do|awaaz band|aawaz band)\b/i.test(rawLower) ||
-      /^(stop|band karo|बंद करो|thambva|thaambva|थांबवा)$/i.test(rawLower);
-
-    if (isStop) {
-      executeVoiceControlCommand("stop");
-      return true;
-    }
-
-    const isPause =
-      /^(pause|pause reading|pause speaking|pause talking|pause it|pause now|please pause|pause please|wait|hold on|pause speech|ruko|roko|thoda ruko|ruko thoda|thamba|thaamb|रुको|थांब|hold karo|thoda wait|rokna)$/i.test(rawLower) ||
-      /\b(pause reading|pause speaking|pause talking|pause it|please pause|pause please|hold on|pause speech|ruko thoda|thoda ruko|thamba|thaamb|रुको|थांब|hold karo|thoda wait|thoda roko)\b/i.test(rawLower) ||
-      /^(pause|wait|ruko|roko|thamba|thaamb|रुको|थांब)$/i.test(rawLower);
-
-    if (isPause) {
-      executeVoiceControlCommand("pause");
-      return true;
-    }
-
-    const isResume =
-      /^(continue|resume|go on|keep speaking|carry on|continue speaking|jari rakho|जारी रखो|punha suru|punha shuru|पुन्हा सुरू|chalu karo|phir se chalu karo|continue karo|resume karo|aage bolo)$/i.test(rawLower) ||
-      /\b(continue karo|phir se chalu karo|resume karo|continue speaking|keep speaking|carry on|jari rakho|जारी रखो|punha suru|punha shuru|पुन्हा सुरू)\b/i.test(rawLower) ||
-      /^(continue|resume|जारी रखो|पुन्हा सुरू)$/i.test(rawLower);
-
-    if (isResume) {
-      executeVoiceControlCommand("continue");
-      return true;
     }
 
     return false;
@@ -1221,17 +1219,8 @@ export default function ChatWidget() {
         }
       }
 
-      if (newFinal) {
-        speechAccumulatorRef.current = (speechAccumulatorRef.current + " " + newFinal).replace(/\s+/g, " ").trim();
-      }
-
-      const currentDisplay = (speechAccumulatorRef.current + " " + interim).replace(/\s+/g, " ").trim();
-      latestInterimTranscriptRef.current = interim;
-      setInterimTranscript(currentDisplay);
-
-      // Check for instant voice control commands (e.g. Stop, Pause, Resume)
-      const isExecuted = detectAndExecuteVoiceCommand(currentDisplay);
-      if (isExecuted) {
+      // Priority 1: Instant Voice Command Intercept on Interim / Partial result
+      if (interim && detectAndExecuteVoiceCommand(interim)) {
         isVoiceSessionActiveRef.current = false;
         if (silenceTimerRef.current) {
           clearTimeout(silenceTimerRef.current);
@@ -1243,6 +1232,43 @@ export default function ChatWidget() {
         speechAccumulatorRef.current = "";
         return;
       }
+
+      // Priority 1: Instant Voice Command Intercept on Final result chunk
+      if (newFinal && detectAndExecuteVoiceCommand(newFinal)) {
+        isVoiceSessionActiveRef.current = false;
+        if (silenceTimerRef.current) {
+          clearTimeout(silenceTimerRef.current);
+          silenceTimerRef.current = null;
+        }
+        try { rec.stop(); } catch (_) {}
+        setInterimTranscript("");
+        latestInterimTranscriptRef.current = "";
+        speechAccumulatorRef.current = "";
+        return;
+      }
+
+      if (newFinal) {
+        speechAccumulatorRef.current = (speechAccumulatorRef.current + " " + newFinal).replace(/\s+/g, " ").trim();
+      }
+
+      const currentDisplay = (speechAccumulatorRef.current + " " + interim).replace(/\s+/g, " ").trim();
+      latestInterimTranscriptRef.current = interim;
+
+      // Priority 1: Instant Voice Command Intercept on Combined current display
+      if (currentDisplay && detectAndExecuteVoiceCommand(currentDisplay)) {
+        isVoiceSessionActiveRef.current = false;
+        if (silenceTimerRef.current) {
+          clearTimeout(silenceTimerRef.current);
+          silenceTimerRef.current = null;
+        }
+        try { rec.stop(); } catch (_) {}
+        setInterimTranscript("");
+        latestInterimTranscriptRef.current = "";
+        speechAccumulatorRef.current = "";
+        return;
+      }
+
+      setInterimTranscript(currentDisplay);
 
       // Reset silence auto-finalizer timer on any speech activity.
       // Uses 2.2s of total continuous silence after user finishes speaking to allow natural pauses.
