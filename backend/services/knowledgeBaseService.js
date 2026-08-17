@@ -728,7 +728,7 @@ function detectCourseDomain(rawQuery = "", queryTokens = []) {
   if (/\b(mobile\s*app|mobile_app|flutter|dart|app\s*dev|app\s*development)\b/i.test(lower) || qStr.includes("mobile_app")) {
     return "MOBILE_APP";
   }
-  if (/\b(ai\s*&\s*automation|ai\/ml|ai\s*ml|ai_automation|prompt\s*engineering|langchain|n8n|make\.com|llm|artificial\s*intelligence)\b/i.test(lower) || qStr.includes("ai_automation") || (qStr.includes("ai") && !lower.includes("detail") && !lower.includes("email"))) {
+  if (/\b(ai\s*&\s*automation|ai\/ml|ai\s*ml|ai_automation|prompt\s*engineering|langchain|n8n|make\.com|llm|artificial\s*intelligence)\b/i.test(lower) || queryTokens.includes("ai_automation") || (queryTokens.includes("ai") && !lower.includes("detail") && !lower.includes("email"))) {
     return "AI_AUTOMATION";
   }
   if (/\b(python)\b/i.test(lower) && !/\b(data|ai|ml)\b/i.test(lower)) {
@@ -823,12 +823,62 @@ function getEntryDomain(entry) {
   return null;
 }
 
+function isCoursesListQuery(rawQuery = "", queryTokens = []) {
+  const lower = String(rawQuery).toLowerCase().trim();
+
+  // Explicit phrase and regex matching for course list intents
+  const hasCourseListKeywords =
+    /\b(courses|programs|trainings|domains)\s+(available|provided|offered|list|details)\b/i.test(lower) ||
+    /\b(available|provided|offered)\s+(courses|programs|trainings|domains)\b/i.test(lower) ||
+    /\b(what|which|list|all|tell|show|available|provided|offered|have)\b.*\b(courses|programs|trainings|domains)\b/i.test(lower) ||
+    /\b(courses|programs|trainings|domains)\b.*\b(available|provided|offered|provide|offer|have|list|exist)\b/i.test(lower) ||
+    /\b(what\s+can\s+i\s+learn|which\s+courses\s+can\s+i\s+join|what\s+are\s+the\s+courses|courses\s+provided\s+by\s+weintern|list\s+of\s+courses|list\s+all\s+courses|what\s+are\s+all\s+available)\b/i.test(lower) ||
+    /^(courses|all courses|course list|list courses|available courses|what courses|courses available|courses provided|courses offered)$/i.test(lower);
+
+  // Check if a specific course domain is present in the query
+  const hasSpecificCourse = /\b(ui|ux|ui\/ux|data\s*science|full\s*stack|mobile\s*app|flutter|python|java|c\+\+|cpp|cloud|devops|digital\s*marketing|ai|ml|automation)\b/i.test(lower);
+
+  return hasCourseListKeywords && !hasSpecificCourse;
+}
+
 function scoreMatch(entry, queryTokens, categoryHints, strongCategory, rawQuery = "") {
   const entryText = normalize(`${entry.question || ""} ${entry.answer || ""} ${entry.category || ""}`);
   const entryTokens = entryText.split(" ").filter(Boolean);
   const querySet = new Set(queryTokens);
 
   let score = 0;
+
+  // ── COURSES_LIST HIGH-PRIORITY SCORING ──────────────────────────────────────
+  const isListQuery = isCoursesListQuery(rawQuery || queryTokens.join(" "), queryTokens);
+
+  if (isListQuery) {
+    const rawQText = String(entry.question || "").toLowerCase();
+    const rawAText = String(entry.answer || "").toLowerCase();
+
+    const isMasterCourseListEntry =
+      rawQText.includes("what are the courses") ||
+      rawQText.includes("what courses are available") ||
+      rawQText.includes("which courses are available") ||
+      rawQText.includes("all available internship domains") ||
+      rawQText.includes("courses does weintern offer") ||
+      rawQText.includes("what courses does weintern offer") ||
+      (rawAText.includes("1. full stack") && rawAText.includes("2. mobile app") && rawAText.includes("3. ai"));
+
+    if (isMasterCourseListEntry) {
+      score += 650; // Massive high-priority booster for master course list!
+    } else {
+      // Heavy penalty for individual course entries, single course benefits, fees, CEO, company info
+      if (entry.category === "courses" || entry.category === "domains" || entry.category === "fees" || entry.category === "benefits") {
+        score -= 450;
+      }
+      if (entry.category === "company" && !rawQText.includes("what can i learn")) {
+        score -= 450;
+      }
+      if (entry.category === "internship") {
+        score -= 300;
+      }
+    }
+  }
 
   // ── DOMAIN & ASPECT ROUTER SCORING ──────────────────────────────────────────
   const targetDomain = detectCourseDomain(rawQuery || queryTokens.join(" "), queryTokens);
