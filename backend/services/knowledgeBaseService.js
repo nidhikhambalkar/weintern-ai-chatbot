@@ -120,6 +120,18 @@ const TOKEN_MAP = {
   zoom: "orientation",
   joining: "orientation",
   session: "orientation",
+  // Events / Webinars / Workshops / Seminars / Community
+  webinar: "webinar",
+  webinars: "webinar",
+  event: "event",
+  events: "event",
+  workshop: "workshop",
+  workshops: "workshop",
+  seminar: "seminar",
+  seminars: "seminar",
+  hackathon: "hackathon",
+  hackathons: "hackathon",
+  community: "community",
   // Duration
   duration: "duration",
   kitne: "duration",
@@ -355,9 +367,16 @@ const CATEGORY_HINTS = {
   eligibility: ["eligible", "eligibility", "criteria", "qualification", "fresher", "beginner", "who can join", "can i join", "minimum", "stream"],
   duration: ["duration", "how long", "how many months", "months", "weeks", "long is", "mahine"],
   registration: ["register", "registration", "enroll", "enrollment", "apply", "sign up", "how to join", "steps to apply"],
+  events: ["webinar", "webinars", "workshop", "workshops", "seminar", "seminars", "event", "events", "hackathon", "hackathons", "community", "conduct webinars", "organize webinars", "host events"],
 };
 
 const CATEGORY_KEYWORD_MAP = {
+  events: [
+    "webinar", "webinars", "workshop", "workshops", "seminar", "seminars",
+    "event", "events", "hackathon", "hackathons", "community", "community group",
+    "conduct webinars", "organize webinars", "host events", "attend webinars",
+    "upcoming webinars", "live webinars"
+  ],
   company: [
     "weintern", "company", "about weintern", "tell me about weintern",
     "info about weintern", "information about weintern",
@@ -598,6 +617,7 @@ function inferCategoryHints(queryTokens) {
 function detectStrongCategory(queryTokens) {
   // Direct priority mapping for exact categories
   const directCategories = [
+    "events",
     "employment",
     "placement",
     "fees",
@@ -611,6 +631,23 @@ function detectStrongCategory(queryTokens) {
     "company",
     "internship"
   ];
+
+  const isEventsOrWebinarsQuery =
+    queryTokens.includes("webinar") ||
+    queryTokens.includes("webinars") ||
+    queryTokens.includes("workshop") ||
+    queryTokens.includes("workshops") ||
+    queryTokens.includes("seminar") ||
+    queryTokens.includes("seminars") ||
+    queryTokens.includes("event") ||
+    queryTokens.includes("events") ||
+    queryTokens.includes("hackathon") ||
+    queryTokens.includes("hackathons") ||
+    (queryTokens.includes("community") && !queryTokens.includes("doubt"));
+
+  if (isEventsOrWebinarsQuery) {
+    return "events";
+  }
 
   const isEmploymentQuery =
     queryTokens.includes("employee") ||
@@ -880,6 +917,51 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory, rawQuery 
   const querySet = new Set(queryTokens);
 
   let score = 0;
+
+  // ── WEBINARS / EVENTS / WORKSHOPS / SEMINARS / COMMUNITY INTENT SCORING ─────
+  const isEventsOrWebinarsQuery =
+    queryTokens.includes("webinar") ||
+    queryTokens.includes("webinars") ||
+    queryTokens.includes("workshop") ||
+    queryTokens.includes("workshops") ||
+    queryTokens.includes("seminar") ||
+    queryTokens.includes("seminars") ||
+    queryTokens.includes("event") ||
+    queryTokens.includes("events") ||
+    queryTokens.includes("hackathon") ||
+    queryTokens.includes("hackathons") ||
+    (queryTokens.includes("community") && !queryTokens.includes("doubt"));
+
+  if (isEventsOrWebinarsQuery) {
+    const normQ = normalize(entry.question || "");
+    const normA = normalize(entry.answer || "");
+    const isEventEntry =
+      entry.category === "events" ||
+      normQ.includes("webinar") ||
+      normQ.includes("workshop") ||
+      normQ.includes("event") ||
+      normQ.includes("seminar") ||
+      normQ.includes("hackathon") ||
+      normQ.includes("community") ||
+      normA.includes("webinar") ||
+      normA.includes("workshop") ||
+      normA.includes("event") ||
+      normA.includes("seminar") ||
+      normA.includes("hackathon") ||
+      normA.includes("community");
+
+    if (isEventEntry) {
+      score += 650; // Massive high-priority boost for matching event entries!
+    } else {
+      score -= 500; // Heavy penalty for unrelated address, contact, CEO, course, or fee entries!
+    }
+  } else {
+    // Conversely, penalize event entries if the user is NOT asking about events/webinars
+    const normQ = normalize(entry.question || "");
+    if (entry.category === "events" || normQ.includes("webinar") || normQ.includes("workshop") || normQ.includes("seminar")) {
+      score -= 200;
+    }
+  }
 
   // ── EMPLOYMENT INTENT HIGH-PRIORITY SCORING ─────────────────────────────────
   const isEmploymentQuery =
