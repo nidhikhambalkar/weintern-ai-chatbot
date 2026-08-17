@@ -2,8 +2,14 @@
 
 import { useState } from "react";
 import { saveLead } from "@/services/chatApi";
+import { BsX } from "react-icons/bs";
 
-export default function LeadForm() {
+interface LeadFormProps {
+  onClose?: () => void;
+  onSuccess?: (name: string) => void;
+}
+
+export default function LeadForm({ onClose, onSuccess }: LeadFormProps) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -41,10 +47,14 @@ export default function LeadForm() {
     try {
       const res = await saveLead(formData);
       if (res.success) {
+        const submittedName = formData.name;
         setStatusMessage({
           type: "success",
-          text: `🎉 Thank you, ${formData.name}! Your application has been saved successfully in our database.`,
+          text: `🎉 Thank you, ${submittedName}! Your application has been saved successfully in our database.`,
         });
+        if (onSuccess) {
+          onSuccess(submittedName);
+        }
         setFormData({
           name: "",
           email: "",
@@ -66,8 +76,20 @@ export default function LeadForm() {
   };
 
   return (
-    <div className="max-w-md w-full mx-auto bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">
+    <div className="relative max-w-md w-full mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-100">
+      {onClose && (
+        <button
+          type="button"
+          onClick={onClose}
+          title="Close form"
+          aria-label="Close form"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 hover:bg-gray-100 p-1.5 rounded-full transition cursor-pointer z-10"
+        >
+          <BsX size={24} />
+        </button>
+      )}
+
+      <h2 className="text-2xl font-bold text-gray-900 mb-2 pr-8">
         Apply for WeIntern Internship 🚀
       </h2>
       <p className="text-gray-600 text-sm mb-6">
@@ -156,7 +178,7 @@ export default function LeadForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition shadow-md disabled:opacity-50"
+          className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition shadow-md disabled:opacity-50 cursor-pointer"
         >
           {loading ? "Submitting..." : "Submit Application"}
         </button>

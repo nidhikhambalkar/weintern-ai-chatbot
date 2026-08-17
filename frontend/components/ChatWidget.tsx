@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { BsChatDotsFill, BsX, BsMicFill, BsMicMuteFill, BsVolumeUpFill, BsVolumeMuteFill, BsPlayFill, BsPauseFill, BsStopFill, BsCopy, BsPencilSquare, BsArrowClockwise, BsTrash, BsCheck2 } from "react-icons/bs";
 import { IoSend } from "react-icons/io5";
 import { sendChat, saveLead, getHistory, clearHistory, createEscalation } from "@/services/chatApi";
+import LeadForm from "@/components/LeadForm";
 
 type ChatMessage = {
   sender: "user" | "bot";
@@ -545,23 +546,15 @@ export default function ChatWidget() {
     });
   }, [messages, isTyping, interimTranscript]);
 
+  const handleCloseLeadForm = () => {
+    setShowLeadForm(false);
+    setLeadStep(0);
+    setLeadData({ name: "", email: "", phone: "", domain: "" });
+  };
+
   const startLeadForm = () => {
     setShowLeadForm(true);
-    setLeadStep(1);
-    const text = "📝 Great! Let's get you registered for the WeIntern Internship.\n\nPlease enter your Full Name:";
-    setMessages((prev) => [
-      ...prev,
-      {
-        sender: "bot",
-        text,
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
-    ]);
-
-    // Bot MUST NOT AUTO-SPEAK on new answers. Remain silent until user clicks Play.
+    setLeadStep(0);
     setVoiceState("IDLE");
   };
 
@@ -1649,6 +1642,28 @@ export default function ChatWidget() {
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Apply / Register Lead Form Modal Overlay */}
+          {showLeadForm && (
+            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-40 p-4 overflow-y-auto flex items-center justify-center animate-in fade-in duration-200">
+              <LeadForm
+                onClose={handleCloseLeadForm}
+                onSuccess={(applicantName) => {
+                  setMessages((prev) => [
+                    ...prev,
+                    {
+                      sender: "bot",
+                      text: `🎉 Thank you for registering, ${applicantName}! Your details have been submitted successfully. Our team will contact you soon.`,
+                      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+                    },
+                  ]);
+                  setTimeout(() => {
+                    handleCloseLeadForm();
+                  }, 2000);
+                }}
+              />
             </div>
           )}
 
