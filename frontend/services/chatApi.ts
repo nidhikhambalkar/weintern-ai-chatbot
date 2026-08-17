@@ -169,11 +169,11 @@ function getOfflineFallbackResponse(message: string) {
 		};
 	}
 
-	// 15. Fees & EMI
-	if (/\b(fee|fees|cost|price|emi|installment|payment|discount)\b/i.test(lower)) {
+	// 15. Fees, Free or Paid & EMI
+	if (/\b(free|paid|free\s+or\s+paid|fee|fees|cost|price|emi|installment|payment|discount)\b/i.test(lower)) {
 		return {
 			success: true,
-			reply: "WeIntern course fees range from ₹2,499 to ₹10,699 depending on the domain. Flexible EMI options (30:40:30 ratio) and a 10% discount on one-time full payments are available.",
+			reply: "WeIntern offers flexible internship programs. Some short domain tracks are certificate/training-based, while specialized 6-month programs include performance-based stipend opportunities up to ₹10,000. Program fees range from ₹2,499 to ₹6,599 depending on the domain track selected. Flexible EMI options (30:40:30 ratio) are available.",
 			source: "offline_faq"
 		};
 	}

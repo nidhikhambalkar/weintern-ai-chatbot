@@ -23,6 +23,8 @@ const TOKEN_MAP = {
   support: "support",
   fees: "fees",
   fee: "fees",
+  free: "fees",
+  paid: "fees",
   internship: "internship",
   intership: "internship",
   course: "course",
@@ -676,7 +678,7 @@ function detectStrongCategory(queryTokens) {
   if (queryTokens.includes("registration") || queryTokens.includes("register") || queryTokens.includes("apply") || queryTokens.includes("enroll")) {
     return "internship";
   }
-  if (queryTokens.includes("payment") || queryTokens.includes("pay") || queryTokens.includes("upi") || queryTokens.includes("razorpay")) {
+  if (queryTokens.includes("payment") || queryTokens.includes("pay") || queryTokens.includes("upi") || queryTokens.includes("razorpay") || queryTokens.includes("fee") || queryTokens.includes("fees") || queryTokens.includes("free") || queryTokens.includes("paid")) {
     return "fees";
   }
 
