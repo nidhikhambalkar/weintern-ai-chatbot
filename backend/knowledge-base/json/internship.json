@@ -450,6 +450,11 @@
   },
   {
     "category": "internship",
+    "question": "Who can apply?",
+    "answer": "WeIntern internships are open to students, graduates, and freshers from any educational background (Engineering, Science, Commerce, Arts). No prior experience is required, and most programs are beginner-friendly."
+  },
+  {
+    "category": "internship",
     "question": "Who is eligible for the internship?",
     "answer": "WeIntern internships are open to students, graduates, and freshers who want to build practical skills. Most programs are beginner-friendly and do not require prior work experience. Basic computer literacy and a willingness to learn are the primary requirements."
   },
