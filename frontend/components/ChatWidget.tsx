@@ -715,14 +715,14 @@ export default function ChatWidget() {
       return;
     }
 
-    // 2. Guard: Resume must NOT continue something that was completely stopped or never started!
-    if (playbackState === "IDLE" && !isVoicePausedRef.current && pausedMessageIndexRef.current === null && !currentPausedTextRef.current) {
-      console.log("No active paused speech to continue.");
-      return;
-    }
-
-    if (!currentPausedTextRef.current) {
-      console.log("No paused speech available to continue.");
+    // If no paused text/queue exists, check if there's a last bot message to speak from start
+    if (!currentPausedTextRef.current && sentenceQueueRef.current.length === 0) {
+      const lastBot = getLastBotResponse();
+      if (lastBot) {
+        handlePlayMessage(lastBot.index, lastBot.text, 0);
+        return;
+      }
+      console.log("No active speech to continue.");
       return;
     }
 
@@ -731,10 +731,11 @@ export default function ChatWidget() {
 
     const msgIdx = pausedMessageIndexRef.current ?? playingMessageIndex ?? -1;
 
-    // Cross-browser reliable resume: cancel native synthesis if paused/stuck and restart sentence queue at stored index & offset
+    // Cross-browser reliable resume: unfreeze & cancel native synthesis, then restart sentence queue at stored index & offset
     try {
-      if (synthesisRef.current.paused || synthesisRef.current.speaking) {
-        synthesisRef.current.cancel();
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.resume();
+        window.speechSynthesis.cancel();
       }
     } catch (e) {}
 
@@ -1057,7 +1058,8 @@ export default function ChatWidget() {
 
     if (typeof window !== "undefined" && window.speechSynthesis) {
       try {
-        window.speechSynthesis.pause();
+        window.speechSynthesis.resume();
+        window.speechSynthesis.cancel();
       } catch (e) {}
     }
     startInterruptListener();
@@ -1080,6 +1082,7 @@ export default function ChatWidget() {
 
     if (typeof window !== "undefined" && window.speechSynthesis) {
       try {
+        window.speechSynthesis.resume();
         window.speechSynthesis.cancel();
       } catch (e) {}
     }
@@ -1910,7 +1913,7 @@ export default function ChatWidget() {
                     <div className="flex items-center gap-2">
                       {msg.sender === "bot" && (
                         <div className="flex items-center gap-1.5">
-                          {((playingMessageIndex === index) || (playingMessageIndex === -1 && index === messages.length - 1)) ? (
+                          {((playingMessageIndex === index || pausedMessageIndexRef.current === index) || ((playingMessageIndex === -1 || pausedMessageIndexRef.current === -1) && index === messages.length - 1)) ? (
                             <>
                               {playbackState === "PLAYING" ? (
                                 <button
