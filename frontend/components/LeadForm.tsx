@@ -85,29 +85,29 @@ export default function LeadForm({ onClose, onSuccess, onSkip }: LeadFormProps) 
   };
 
   return (
-    <div className="relative max-w-md w-full mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-100">
-      {onClose && (
-        <button
-          type="button"
-          onClick={onClose}
-          title="Close form"
-          aria-label="Close form"
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 hover:bg-gray-100 p-1.5 rounded-full transition cursor-pointer z-10"
-        >
-          <BsX size={24} />
-        </button>
-      )}
+    <div className="relative max-w-md w-full mx-auto bg-white p-5 sm:p-7 rounded-2xl shadow-2xl border border-gray-100">
+      {/* Top-Right X / Close Button */}
+      <button
+        type="button"
+        onClick={handleSkipClick}
+        title="Close registration form"
+        aria-label="Close registration form"
+        className="absolute top-3.5 right-3.5 text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1 transition cursor-pointer z-10 shadow-sm border border-gray-200"
+      >
+        <BsX size={18} />
+        <span>Close</span>
+      </button>
 
-      <h2 className="text-2xl font-bold text-gray-900 mb-2 pr-8">
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 pr-16">
         Apply for WeIntern Internship 🚀
       </h2>
-      <p className="text-gray-600 text-sm mb-6">
+      <p className="text-gray-600 text-xs sm:text-sm mb-5">
         Fill in your details below to register for our internship programs.
       </p>
 
       {statusMessage && (
         <div
-          className={`p-4 rounded-xl mb-6 text-sm ${
+          className={`p-3.5 rounded-xl mb-4 text-xs sm:text-sm ${
             statusMessage.type === "success"
               ? "bg-green-50 text-green-800 border border-green-200"
               : "bg-red-50 text-red-800 border border-red-200"
@@ -117,9 +117,9 @@ export default function LeadForm({ onClose, onSuccess, onSkip }: LeadFormProps) 
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-semibold text-gray-700 mb-1">
             Full Name <span className="text-red-500">*</span>
           </label>
           <input
@@ -129,12 +129,12 @@ export default function LeadForm({ onClose, onSuccess, onSkip }: LeadFormProps) 
             value={formData.name}
             onChange={handleChange}
             required
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 outline-none transition"
+            className="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 outline-none transition"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-semibold text-gray-700 mb-1">
             Email Address <span className="text-red-500">*</span>
           </label>
           <input
@@ -144,12 +144,12 @@ export default function LeadForm({ onClose, onSuccess, onSkip }: LeadFormProps) 
             value={formData.email}
             onChange={handleChange}
             required
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 outline-none transition"
+            className="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 outline-none transition"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-semibold text-gray-700 mb-1">
             Phone Number <span className="text-red-500">*</span>
           </label>
           <input
@@ -159,12 +159,12 @@ export default function LeadForm({ onClose, onSuccess, onSkip }: LeadFormProps) 
             value={formData.phone}
             onChange={handleChange}
             required
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 outline-none transition"
+            className="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 outline-none transition"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-semibold text-gray-700 mb-1">
             Preferred Domain <span className="text-red-500">*</span>
           </label>
           <select
@@ -172,7 +172,7 @@ export default function LeadForm({ onClose, onSuccess, onSkip }: LeadFormProps) 
             value={formData.preferred_domain}
             onChange={handleChange}
             required
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 outline-none transition"
+            className="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 outline-none transition"
           >
             <option value="">Select a domain...</option>
             <option value="Full Stack Development">Full Stack Development</option>
@@ -184,26 +184,24 @@ export default function LeadForm({ onClose, onSuccess, onSkip }: LeadFormProps) 
           </select>
         </div>
 
-        <div className="space-y-2.5 pt-2">
+        <div className="space-y-2 pt-1">
           {/* Option 1: Submit Application / Register */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition shadow-md disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 sm:py-3 px-4 rounded-xl transition shadow-md disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2 text-sm"
           >
             {loading ? "Submitting..." : "🚀 Submit Application"}
           </button>
 
           {/* Option 2: Skip Registration / Continue Without Registration */}
-          {(onSkip || onClose) && (
-            <button
-              type="button"
-              onClick={handleSkipClick}
-              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 px-4 rounded-xl transition border border-slate-200 text-sm cursor-pointer flex items-center justify-center gap-1.5"
-            >
-              ⏩ Skip & Continue Without Registration
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={handleSkipClick}
+            className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 px-4 rounded-xl transition border border-slate-300 text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+          >
+            ⏩ Skip Registration / Continue without Registration
+          </button>
         </div>
       </form>
     </div>
