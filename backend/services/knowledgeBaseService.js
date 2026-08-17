@@ -1471,30 +1471,6 @@ function searchKnowledgeBase(message = "") {
   // ── EXACT QUESTION MATCH SHORTCUT ────────────────────────────────────────
   const normalizedQuery = query.trim();
 
-  // First priority: check exact match within the detected strong category
-  if (strongCategory && knowledgeIndex[strongCategory]) {
-    for (const entry of knowledgeIndex[strongCategory]) {
-      const normEntryQ = normalize(entry.question || "").trim();
-      if (normEntryQ === normalizedQuery) {
-        const exactMatch = {
-          category: strongCategory,
-          question: entry.question || "",
-          answer: entry.answer || "",
-          score: 9999,
-        };
-        const contextText = `Category: ${strongCategory}. Question: ${entry.question}. Answer: ${entry.answer}`;
-        console.log("EXACT MATCH SHORTCUT (Strong Category):", entry.question);
-        return {
-          query: normalizedQuery,
-          matches: [exactMatch],
-          topMatch: exactMatch,
-          contextText,
-          hasMatch: true,
-        };
-      }
-    }
-  }
-
   for (const [cat, entries] of Object.entries(knowledgeIndex)) {
     for (const entry of entries) {
       const normEntryQ = normalize(entry.question || "").trim();
