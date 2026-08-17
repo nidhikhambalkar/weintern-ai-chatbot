@@ -320,6 +320,11 @@ export default function ChatWidget() {
   const latestInterimTranscriptRef = useRef<string>("");
   const abortControllerRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  // ── Pause/Resume position tracking (Chrome workaround) ──────────────────
+  const boundaryCharIndexRef = useRef<number>(0);          // charIndex from last onboundary event
+  const pausedTextRemainderRef = useRef<string>("");        // text substring saved on pause
+  const pausedMessageIndexForResumeRef = useRef<number | null>(null); // msg index for resume
+  const interruptListenerActiveRef = useRef<boolean>(false); // is interrupt listener running
 
   useEffect(() => {
     isSpeakerMutedRef.current = isSpeakerMuted;
@@ -791,52 +796,96 @@ export default function ChatWidget() {
 
   const handleResumeOrContinueMessage = () => {
     const synth = synthesisRef.current || (typeof window !== "undefined" ? window.speechSynthesis : null);
-    
-    console.log("[TTS RESUME DEBUG - BEFORE]", {
-      activeUtteranceExists: !!activeUtteranceRef.current,
-      speaking: synth?.speaking,
-      paused: synth?.paused,
-      playbackState,
-      voiceState,
-      utteranceTextPreview: activeUtteranceRef.current?.text?.substring(0, 30),
-    });
+    if (!synth) return;
 
-    // Rule: CONTINUE must verify active utterance exists and state is paused
-    if (!synth || !activeUtteranceRef.current) {
-      console.warn("[TTS CONTINUE ABORT] No active utterance exists.");
-      return;
-    }
-
-    if (playbackState !== "PAUSED" && !synth.paused) {
-      console.warn("[TTS CONTINUE ABORT] Speech is not in paused state.");
+    if (playbackState !== "PAUSED") {
+      console.warn("[TTS RESUME ABORT] Not in PAUSED state.");
       return;
     }
 
     isVoicePausedRef.current = false;
 
-    // Rule: Call ONLY speechSynthesis.resume() on the existing utterance without recreating or calling speak()
-    try {
-      console.log("[TTS RESUME] Calling window.speechSynthesis.resume()...");
-      if (typeof window !== "undefined" && window.speechSynthesis) {
-        window.speechSynthesis.resume();
-      } else if (synth) {
-        synth.resume();
-      }
-    } catch (e) {
-      console.error("[TTS CONTINUE ERROR]", e);
+    // ── Chrome Pause/Resume Workaround ──────────────────────────────────────
+    // Chrome's speechSynthesis.pause()/resume() is unreliable (especially mobile).
+    // handlePauseMessage cancels TTS and saves remaining text in pausedTextRemainderRef.
+    // Here we re-create the utterance from that saved position and speak it fresh.
+    const textToResume = pausedTextRemainderRef.current || activeTextRef.current;
+    const resumeIndex = pausedMessageIndexForResumeRef.current ?? pausedMessageIndexRef.current;
+
+    if (!textToResume) {
+      console.warn("[TTS RESUME] No saved text remainder. Cannot resume.");
+      setPlaybackState("IDLE");
+      setVoiceState("IDLE");
+      return;
     }
 
-    isTtsSpeakingRef.current = true;
-    setPlaybackState("PLAYING");
-    setVoiceState("SPEAKING");
+    console.log("[TTS RESUME] Re-speaking from saved position:", textToResume.substring(0, 40));
 
-    console.log("[TTS RESUME DEBUG - AFTER]", {
-      activeUtteranceExists: !!activeUtteranceRef.current,
-      speaking: synth?.speaking,
-      paused: synth?.paused,
-      playbackState: "PLAYING",
-      voiceState: "SPEAKING",
-    });
+    const utterance = new SpeechSynthesisUtterance(textToResume);
+    const activeVoice = selectedVoiceRef.current || initSpeechVoices();
+    if (activeVoice) {
+      utterance.voice = activeVoice;
+      utterance.lang = activeVoice.lang;
+    } else {
+      utterance.lang = "en-IN";
+    }
+    utterance.rate = 1.0;
+    utterance.pitch = 1.05;
+    utterance.volume = 1.0;
+
+    activeUtteranceRef.current = utterance;
+    activeTextRef.current = textToResume;
+    if (resumeIndex !== null) pausedMessageIndexRef.current = resumeIndex;
+    boundaryCharIndexRef.current = 0;
+
+    utterance.onboundary = (e: any) => {
+      if (activeUtteranceRef.current !== utterance) return;
+      if (e.name === "word" || e.name === "sentence") {
+        boundaryCharIndexRef.current = e.charIndex;
+      }
+    };
+
+    utterance.onstart = () => {
+      if (activeUtteranceRef.current !== utterance) return;
+      isTtsSpeakingRef.current = true;
+      setPlayingMessageIndex(resumeIndex);
+      setPlaybackState("PLAYING");
+      setVoiceState("SPEAKING");
+    };
+
+    utterance.onend = () => {
+      if (activeUtteranceRef.current !== utterance) return;
+      isTtsSpeakingRef.current = false;
+      activeUtteranceRef.current = null;
+      activeTextRef.current = "";
+      pausedTextRemainderRef.current = "";
+      pausedMessageIndexRef.current = null;
+      pausedMessageIndexForResumeRef.current = null;
+      setPlayingMessageIndex(null);
+      setPlaybackState("IDLE");
+      setVoiceState("IDLE");
+      stopInterruptListener();
+      if (voiceModeRef.current && !isSpeakerMutedRef.current) {
+        setTimeout(() => { if (!isListeningRef.current) startSpeechRecognition(); }, 400);
+      }
+    };
+
+    utterance.onerror = (e: any) => {
+      if (e.error === "interrupted" || e.error === "canceled") return;
+      isTtsSpeakingRef.current = false;
+      activeUtteranceRef.current = null;
+      setPlayingMessageIndex(null);
+      setPlaybackState("IDLE");
+      setVoiceState("IDLE");
+      stopInterruptListener();
+    };
+
+    if (typeof window !== "undefined") {
+      (window as any).__activeTtsUtterance = utterance;
+    }
+
+    synth.speak(utterance);
+    setTimeout(() => startInterruptListener(), 50);
   };
 
   // Speaks response using Web Speech Synthesis (TTS)
@@ -857,13 +906,18 @@ export default function ChatWidget() {
     if (!synth) return;
 
     isVoicePausedRef.current = false;
+    stopInterruptListener();
 
-    // Rule: Cancel any prior speech before starting a NEW message
-    try {
-      synth.cancel();
-    } catch (e) {}
+    // Cancel any prior speech before starting a NEW message
+    try { synth.cancel(); } catch (e) {}
 
     const cleanText = cleanTextForSpeech(text);
+    // Save full text for pause/resume position tracking
+    activeTextRef.current = cleanText;
+    boundaryCharIndexRef.current = 0;
+    pausedTextRemainderRef.current = "";
+    pausedMessageIndexForResumeRef.current = index;
+
     console.log("[TTS PLAY]", { index, textPreview: cleanText.substring(0, 35) });
 
     if (!cleanText) {
@@ -881,30 +935,30 @@ export default function ChatWidget() {
       return;
     }
 
-    const hasDevanagari = /[\u0900-\u097F]/.test(cleanText);
-    const marathiWords = /(?:^|\s)(आहे|आहेत|आहेस|आहोत|मी|तुम्हाला|मला|आपल्या|करू|सांगू|शकेन|शकतो|शकते|काही|बद्दल|आणि|बरं|कशी|कसे|कसा|पण|तर|काय)(?:\s|$|[.,?!;])/i;
-    const hasMahratti = /[\u0900-\u097F]/.test(cleanText) && (marathiWords.test(cleanText) || /[\u0967-\u096F]/.test(cleanText));
-    const hindiWords = /\b(kya|hai|hain|mein|ko|se|karne|karta|karte|milta|milega|milegi|hoga|hogi|kiya|gaya|rha|raha|rahe|he|tha|thi|the|hu|hoon|aur|ya|par)\b/i;
-    const isHinglish = hindiWords.test(cleanText);
-    const speakLang = hasMahratti ? "mr-IN" : (hasDevanagari || isHinglish || detectedLang === "hi-IN" ? "hi-IN" : "en-IN");
-
-    // Rule: Create ONE SpeechSynthesisUtterance for the message when Play is clicked
+    const activeVoice = selectedVoiceRef.current || initSpeechVoices();
+    // ONE consistent voice — always English (en-IN) via the locked voice
     const utterance = new SpeechSynthesisUtterance(cleanText);
 
-    const activeVoice = selectedVoiceRef.current || initSpeechVoices();
     if (activeVoice) {
       utterance.voice = activeVoice;
       utterance.lang = activeVoice.lang;
     } else {
-      utterance.lang = speakLang;
+      utterance.lang = "en-IN";
     }
-
-    utterance.rate = speakLang === "en-IN" ? 1.0 : 0.95;
+    utterance.rate = 1.0;
     utterance.pitch = 1.05;
     utterance.volume = 1.0;
 
     activeUtteranceRef.current = utterance;
     pausedMessageIndexRef.current = index;
+
+    // Track word boundaries for accurate pause/resume position
+    utterance.onboundary = (e: any) => {
+      if (activeUtteranceRef.current !== utterance) return;
+      if (e.name === "word" || e.name === "sentence") {
+        boundaryCharIndexRef.current = e.charIndex;
+      }
+    };
 
     utterance.onstart = () => {
       console.log("[TTS ONSTART]");
@@ -913,6 +967,8 @@ export default function ChatWidget() {
       setPlayingMessageIndex(index);
       setPlaybackState("PLAYING");
       setVoiceState("SPEAKING");
+      // Start concurrent interrupt listener so user can say "stop"/"pause" while TTS plays
+      setTimeout(() => startInterruptListener(), 100);
     };
 
     utterance.onpause = () => {
@@ -936,26 +992,37 @@ export default function ChatWidget() {
       if (activeUtteranceRef.current !== utterance) return;
       isTtsSpeakingRef.current = false;
       activeUtteranceRef.current = null;
+      activeTextRef.current = "";
+      pausedTextRemainderRef.current = "";
       pausedMessageIndexRef.current = null;
+      pausedMessageIndexForResumeRef.current = null;
       setPlayingMessageIndex(null);
       setPlaybackState("IDLE");
       setVoiceState("IDLE");
+      stopInterruptListener();
+      // Auto-restart mic listening after bot finishes speaking (natural conversation loop)
+      if (voiceModeRef.current && !isSpeakerMutedRef.current) {
+        setTimeout(() => { if (!isListeningRef.current) startSpeechRecognition(); }, 400);
+      }
     };
 
     utterance.onerror = (e: any) => {
       console.log("[TTS ONERROR]", e);
       if (e.error === "interrupted" || e.error === "canceled") return;
+      isTtsSpeakingRef.current = false;
+      activeUtteranceRef.current = null;
       setPlayingMessageIndex(null);
       setPlaybackState("IDLE");
       setVoiceState("IDLE");
+      stopInterruptListener();
     };
 
-    // Attach utterance globally on window object to prevent Chrome garbage collection bug in production
+    // Attach utterance globally on window object to prevent Chrome GC bug in production
     if (typeof window !== "undefined") {
       (window as any).__activeTtsUtterance = utterance;
     }
 
-    synthesisRef.current.speak(utterance);
+    synth.speak(utterance);
   };
 
   const handlePauseMessage = () => {
@@ -963,24 +1030,29 @@ export default function ChatWidget() {
     console.log("[TTS PAUSE]", {
       pausedStateBefore: playbackState,
       activeUtteranceExists: !!activeUtteranceRef.current,
-      synthPaused: synth?.paused,
+      boundaryCharIndex: boundaryCharIndexRef.current,
     });
 
     if (playbackState === "PAUSED") return;
     if (!synth || !activeUtteranceRef.current) return;
 
+    // ── Chrome Pause Workaround ──────────────────────────────────────────────
+    // Chrome's speechSynthesis.pause() is unreliable (often ignored on Android).
+    // Instead: save the remaining text from the last word boundary, then cancel.
+    // handleResumeOrContinueMessage will re-speak from the saved position.
+    const fullText = activeTextRef.current;
+    const charOffset = boundaryCharIndexRef.current;
+    pausedTextRemainderRef.current = (charOffset > 0 && charOffset < fullText.length)
+      ? fullText.substring(charOffset).trim()
+      : fullText;
+    pausedMessageIndexForResumeRef.current = pausedMessageIndexRef.current;
+
     isVoicePausedRef.current = true;
     isTtsSpeakingRef.current = false;
 
-    if (playingMessageIndex !== null) {
-      pausedMessageIndexRef.current = playingMessageIndex;
-    }
-
-    try {
-      synth.pause();
-    } catch (e) {
-      console.error("[TTS PAUSE ERROR]", e);
-    }
+    // Cancel (not pause) — more reliable across Chrome, Firefox, Safari
+    try { synth.cancel(); } catch (e) {}
+    stopInterruptListener();
 
     setPlaybackState("PAUSED");
     setVoiceState("PAUSED");
@@ -991,18 +1063,16 @@ export default function ChatWidget() {
     isVoicePausedRef.current = false;
     isTtsSpeakingRef.current = false;
 
+    stopInterruptListener();
+
     if (abortControllerRef.current) {
-      try {
-        abortControllerRef.current.abort();
-      } catch (e) {}
+      try { abortControllerRef.current.abort(); } catch (e) {}
       abortControllerRef.current = null;
     }
 
     const synth = synthesisRef.current || (typeof window !== "undefined" ? window.speechSynthesis : null);
     if (synth) {
-      try {
-        synth.cancel();
-      } catch (e) {}
+      try { synth.cancel(); } catch (e) {}
       if (typeof window !== "undefined") {
         delete (window as any).__activeUtterance;
         delete (window as any).__activeTtsUtterance;
@@ -1010,11 +1080,60 @@ export default function ChatWidget() {
     }
 
     activeUtteranceRef.current = null;
+    activeTextRef.current = "";
+    pausedTextRemainderRef.current = "";
     pausedMessageIndexRef.current = null;
+    pausedMessageIndexForResumeRef.current = null;
     setPlayingMessageIndex(null);
     setPlaybackState("IDLE");
     setVoiceState("IDLE");
     setIsTyping(false);
+  };
+
+  // ── Interrupt Listener — listens concurrently while TTS speaks ─────────────
+  // Detects voice commands (stop/pause/continue) even while the bot is talking.
+  const stopInterruptListener = () => {
+    interruptListenerActiveRef.current = false;
+    const intRec = interruptRecRef.current;
+    if (!intRec) return;
+    try { intRec.stop(); } catch (_) {}
+  };
+
+  const startInterruptListener = () => {
+    if (interruptListenerActiveRef.current) return; // already running
+    if (isListeningRef.current) return;            // main mic is active — no overlap
+    const intRec = interruptRecRef.current;
+    if (!intRec) return;
+
+    intRec.onresult = (event: any) => {
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const transcript = event.results[i][0]?.transcript || "";
+        const { raw } = normalizeCommandInput(transcript);
+        if (detectAndExecuteVoiceCommand(raw)) {
+          stopInterruptListener();
+          return;
+        }
+      }
+    };
+
+    intRec.onerror = () => {
+      interruptListenerActiveRef.current = false;
+    };
+
+    intRec.onend = () => {
+      interruptListenerActiveRef.current = false;
+      // Auto-restart while TTS is still speaking (keep listening continuously)
+      if (isTtsSpeakingRef.current) {
+        setTimeout(() => startInterruptListener(), 150);
+      }
+    };
+
+    try {
+      intRec.start();
+      interruptListenerActiveRef.current = true;
+    } catch (_) {
+      interruptListenerActiveRef.current = false;
+    }
   };
 
   // Start Speech-to-Text (STT) Recognition
@@ -1210,7 +1329,14 @@ export default function ChatWidget() {
     if (voiceState === "LISTENING") {
       stopSpeechRecognition();
     } else {
+      // Stop any active TTS immediately so mic can listen cleanly
       handleStopMessage();
+      // Implicitly enable voice mode when user clicks mic
+      // (so bot auto-speaks its response back)
+      if (!voiceModeRef.current) {
+        setVoiceMode(true);
+        voiceModeRef.current = true;
+      }
       startSpeechRecognition();
     }
   };
@@ -1459,8 +1585,12 @@ export default function ChatWidget() {
           },
         ]);
 
-        // Bot MUST NOT AUTO-SPEAK on new answers. Remain silent until user clicks Play.
-        setVoiceState("IDLE");
+        // Auto-speak in voice mode; otherwise silent until user clicks Play
+        if (source === "voice" && !isSpeakerMutedRef.current) {
+          speakResponse(escalationMessage);
+        } else {
+          setVoiceState("IDLE");
+        }
       } else {
         setMessages((prev) => [
           ...prev,
@@ -1471,8 +1601,12 @@ export default function ChatWidget() {
           },
         ]);
 
-        // Bot MUST NOT AUTO-SPEAK on new answers. Remain silent until user clicks Play.
-        setVoiceState("IDLE");
+        // Auto-speak in voice mode; otherwise silent until user clicks Play
+        if (source === "voice" && !isSpeakerMutedRef.current) {
+          speakResponse(botReply);
+        } else {
+          setVoiceState("IDLE");
+        }
       }
     } catch (error) {
       console.error("Chat API Error:", error);
@@ -1895,8 +2029,8 @@ export default function ChatWidget() {
 
           </div>
 
-          {/* Voice State Information Panel */}
-          {voiceMode && (
+          {/* Voice State Information Panel — shown when voice mode is on OR when TTS is actively playing */}
+          {(voiceMode || playbackState !== "IDLE") && (
             <div className="bg-white border-t px-4 py-2 flex flex-col gap-1.5">
               {/* Listening panel */}
               {voiceState === "LISTENING" && (
@@ -2066,17 +2200,20 @@ export default function ChatWidget() {
               className="flex-1 border border-gray-300 rounded-lg px-3.5 py-2.5 text-black text-base md:text-sm placeholder-gray-400 outline-none focus:border-blue-600 disabled:bg-gray-100 disabled:text-gray-500"
             />
 
-            {/* Voice Input Mic Button */}
-            {voiceMode && isSpeechSupported && (
+            {/* Voice Input Mic Button — always visible when speech is supported */}
+            {isSpeechSupported && (
               <button
                 onClick={handleMicClick}
-                title={voiceState === "LISTENING" ? "Stop recording" : "Record voice message"}
-                className={`p-3 rounded-lg text-white transition duration-200 touch-manipulation ${voiceState === "LISTENING"
+                title={voiceState === "LISTENING" ? "Stop recording" : "Tap to speak"}
+                className={`p-3 rounded-lg text-white transition duration-200 touch-manipulation ${
+                  voiceState === "LISTENING"
                     ? "bg-red-500 hover:bg-red-600 voice-listening-btn"
                     : voiceState === "SPEAKING"
                       ? "bg-orange-500 hover:bg-orange-600 animate-pulse"
-                      : "bg-blue-500 hover:bg-blue-600"
-                  }`}
+                      : voiceMode
+                        ? "bg-blue-600 hover:bg-blue-700 ring-2 ring-blue-300"
+                        : "bg-blue-500 hover:bg-blue-600"
+                }`}
               >
                 {voiceState === "LISTENING" ? <BsMicMuteFill size={18} /> : <BsMicFill size={18} />}
               </button>
