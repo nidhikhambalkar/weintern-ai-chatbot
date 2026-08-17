@@ -669,34 +669,49 @@ export default function ChatWidget() {
     ]
   };
 
+  // High-Priority Voice Command Detector Architecture:
+  // Evaluates raw input, interim snippets, AND the trailing 1-3 words of the transcript
+  // to detect control words (pause, continue, resume, stop) instantly without waiting for sentence completion or final results.
   const detectVoiceCommandType = (inputText: string): string | null => {
+    if (!inputText) return null;
+
     const { raw, transliterated } = normalizeCommandInput(inputText);
     if (!raw) return null;
 
-    const wordCount = raw.split(/\s+/).length;
-    // Guard against long normal questions containing keywords
-    if (wordCount > 5 && QUESTION_KEYWORDS_REGEX.test(raw)) {
-      return null;
-    }
+    // Check candidates: full raw input, transliterated, and trailing 1-3 word suffixes
+    const words = raw.split(/\s+/);
+    const suffix3 = words.length > 3 ? words.slice(-3).join(" ") : raw;
+    const suffix2 = words.length > 2 ? words.slice(-2).join(" ") : raw;
+    const suffix1 = words.length > 1 ? words.slice(-1).join(" ") : raw;
 
-    // 1. Direct regex pattern matching from COMMAND_PATTERNS
-    for (const [cmdType, patterns] of Object.entries(COMMAND_PATTERNS)) {
-      for (const pattern of patterns) {
-        if (pattern.test(raw) || pattern.test(transliterated)) {
-          return cmdType;
+    const candidates = [raw, transliterated, suffix3, suffix2, suffix1];
+
+    for (const cand of candidates) {
+      if (!cand) continue;
+      const candWords = cand.split(/\s+/).length;
+
+      // 1. Direct regex pattern matching from COMMAND_PATTERNS
+      for (const [cmdType, patterns] of Object.entries(COMMAND_PATTERNS)) {
+        for (const pattern of patterns) {
+          if (pattern.test(cand)) {
+            return cmdType;
+          }
+        }
+      }
+
+      // 2. Fast word-boundary fallback for short snippets (<= 4 words)
+      if (candWords <= 4) {
+        if (/\b(stop|stop speaking|stop reading|stop talking|stop the bot|please stop|shut up|quiet|halt|band karo|chup|chup ho jao|bas karo|awaaz band)\b/i.test(cand)) {
+          return "STOP";
+        }
+        if (/\b(pause|pause speaking|pause reading|pause the bot|please pause|pause please|wait|hold on|ruko thoda|thoda ruko|hold karo|ruko|roko)\b/i.test(cand)) {
+          return "PAUSE";
+        }
+        if (/\b(continue|resume|continue speaking|resume speaking|continue please|resume please|go on|keep speaking|carry on|chalu karo|phir se chalu|continue karo|resume karo)\b/i.test(cand)) {
+          return "RESUME";
         }
       }
     }
-
-    // 2. Fast word-boundary fallback for short interim phrases (<= 4 words)
-    const isStop = /\b(stop|stop speaking|stop reading|stop talking|shut up|quiet|halt|band karo|chup|chup ho jao|bas karo|awaaz band)\b/i.test(raw);
-    if (isStop) return "STOP";
-
-    const isPause = /\b(pause|pause speaking|pause reading|please pause|pause please|wait|hold on|ruko thoda|thoda ruko|hold karo)\b/i.test(raw);
-    if (isPause) return "PAUSE";
-
-    const isResume = /\b(continue|resume|continue speaking|resume speaking|go on|keep speaking|carry on|chalu karo|phir se chalu|continue karo|resume karo)\b/i.test(raw);
-    if (isResume) return "RESUME";
 
     return null;
   };
@@ -739,14 +754,13 @@ export default function ChatWidget() {
   const detectAndExecuteVoiceCommand = (text: string): boolean => {
     if (!text) return false;
 
-    const now = Date.now();
-    // Prevent duplicate command triggers within 600ms
-    if (now - lastExecutedCommandTimeRef.current < 600) {
-      return true;
-    }
-
     const cmdType = detectVoiceCommandType(text);
     if (cmdType) {
+      const now = Date.now();
+      // Prevent duplicate command triggers within 500ms
+      if (now - lastExecutedCommandTimeRef.current < 500) {
+        return true;
+      }
       lastExecutedCommandTimeRef.current = now;
 
       // Clear all transcript buffers immediately so control commands are never sent to AI
@@ -758,7 +772,7 @@ export default function ChatWidget() {
         silenceTimerRef.current = null;
       }
 
-      console.log(`⚡ Instant Voice Command Executed: [${cmdType}] from input: "${text}"`);
+      console.log(`⚡ Instant Priority Voice Command Executed: [${cmdType}] from input: "${text}"`);
 
       if (cmdType === "STOP") {
         executeVoiceControlCommand("stop");
@@ -1101,7 +1115,6 @@ export default function ChatWidget() {
 
   const startInterruptListener = () => {
     if (interruptListenerActiveRef.current) return; // already running
-    if (isListeningRef.current) return;            // main mic is active — no overlap
     const intRec = interruptRecRef.current;
     if (!intRec) return;
 
@@ -1170,16 +1183,6 @@ export default function ChatWidget() {
 
   // Start Speech-to-Text (STT) Recognition
   const startSpeechRecognition = () => {
-    // When starting STT, pause active TTS so microphone input is clean
-    const synth = synthesisRef.current || (typeof window !== "undefined" ? window.speechSynthesis : null);
-    if (synth && synth.speaking && !synth.paused) {
-      try {
-        synth.pause();
-        setPlaybackState("PAUSED");
-        setVoiceState("PAUSED");
-      } catch (e) {}
-    }
-
     // Prevent duplicate activation if already listening
     if (isListeningRef.current) {
       return;
