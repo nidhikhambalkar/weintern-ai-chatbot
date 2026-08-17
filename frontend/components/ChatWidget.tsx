@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { BsChatDotsFill, BsX, BsMicFill, BsMicMuteFill, BsVolumeUpFill, BsVolumeMuteFill, BsPlayFill, BsPauseFill, BsStopFill, BsCopy, BsPencilSquare, BsArrowClockwise, BsTrash, BsCheck2 } from "react-icons/bs";
 import { IoSend } from "react-icons/io5";
-import { sendChat, saveLead, getHistory, clearHistory } from "@/services/chatApi";
+import { sendChat, saveLead, getHistory, clearHistory, createEscalation } from "@/services/chatApi";
 
 type ChatMessage = {
   sender: "user" | "bot";
@@ -716,14 +716,14 @@ export default function ChatWidget() {
       return;
     }
 
-    // 2. Guard: Resume must NOT continue something that was completely stopped or never started!
-    if (playbackState === "IDLE" && !isVoicePausedRef.current && pausedMessageIndexRef.current === null && !currentPausedTextRef.current) {
-      console.log("No active paused speech to continue.");
-      return;
-    }
-
-    if (!currentPausedTextRef.current) {
-      console.log("No paused speech available to continue.");
+    // If no paused text/queue exists, check if there's a last bot message to speak from start
+    if (!currentPausedTextRef.current && sentenceQueueRef.current.length === 0) {
+      const lastBot = getLastBotResponse();
+      if (lastBot) {
+        handlePlayMessage(lastBot.index, lastBot.text, 0);
+        return;
+      }
+      console.log("No active speech to continue.");
       return;
     }
 
@@ -732,10 +732,11 @@ export default function ChatWidget() {
 
     const msgIdx = pausedMessageIndexRef.current ?? playingMessageIndex ?? -1;
 
-    // Cross-browser reliable resume: cancel native synthesis if paused/stuck and restart sentence queue at stored index & offset
+    // Cross-browser reliable resume: unfreeze & cancel native synthesis, then restart sentence queue at stored index & offset
     try {
-      if (synthesisRef.current.paused || synthesisRef.current.speaking) {
-        synthesisRef.current.cancel();
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.resume();
+        window.speechSynthesis.cancel();
       }
     } catch (e) {}
 
@@ -1058,7 +1059,8 @@ export default function ChatWidget() {
 
     if (typeof window !== "undefined" && window.speechSynthesis) {
       try {
-        window.speechSynthesis.pause();
+        window.speechSynthesis.resume();
+        window.speechSynthesis.cancel();
       } catch (e) {}
     }
     startInterruptListener();
@@ -1081,6 +1083,7 @@ export default function ChatWidget() {
 
     if (typeof window !== "undefined" && window.speechSynthesis) {
       try {
+        window.speechSynthesis.resume();
         window.speechSynthesis.cancel();
       } catch (e) {}
     }
@@ -1555,17 +1558,19 @@ export default function ChatWidget() {
 
       // Handle escalation triggers if returned from backend
       if (data.escalation) {
-        const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000';
-        const escalateRes = await fetch(`${apiBase}/api/escalate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ session_id: sessionId, issue: `User requested human support. Trigger phrase: "${userMessage}"` })
-        });
-        const escalateData = await escalateRes.json();
+        let escalationTicketId = "";
+        try {
+          const escalateData = await createEscalation(sessionId, `User requested human support. Trigger phrase: "${userMessage}"`);
+          if (escalateData.success && escalateData.data) {
+            escalationTicketId = escalateData.data.id || escalateData.data.session_id || "";
+          }
+        } catch (escalateErr) {
+          console.warn("Escalation ticket creation warning:", escalateErr);
+        }
 
         let escalationMessage = botReply;
-        if (escalateData.success) {
-          escalationMessage += `\n\n[Escalation Support Ticket Created: #${escalateData.data.id || escalateData.data.session_id}]`;
+        if (escalationTicketId) {
+          escalationMessage += `\n\n[Escalation Support Ticket Created: #${escalationTicketId}]`;
         }
 
         setMessages((prev) => [
@@ -1909,7 +1914,7 @@ export default function ChatWidget() {
                     <div className="flex items-center gap-2">
                       {msg.sender === "bot" && (
                         <div className="flex items-center gap-1.5">
-                          {((playingMessageIndex === index) || (playingMessageIndex === -1 && index === messages.length - 1)) ? (
+                          {((playingMessageIndex === index || pausedMessageIndexRef.current === index) || ((playingMessageIndex === -1 || pausedMessageIndexRef.current === -1) && index === messages.length - 1)) ? (
                             <>
                               {playbackState === "PLAYING" ? (
                                 <button

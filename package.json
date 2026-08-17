@@ -3,9 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "cd frontend && npm run build",
     "dev": "cd frontend && npm run dev",
-    "start": "cd frontend && npm run start"
+    "build": "cd frontend && npm run build",
+    "start": "cd frontend && npm run start",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "build:frontend": "npm run build --prefix frontend",
+    "seed:kb": "npm run seed:kb --prefix backend"
   },
   "dependencies": {
     "next": "16.3.0",
