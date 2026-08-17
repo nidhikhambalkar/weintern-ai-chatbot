@@ -552,6 +552,20 @@ export default function ChatWidget() {
     setLeadData({ name: "", email: "", phone: "", domain: "" });
   };
 
+  const handleSkipLeadForm = () => {
+    setShowLeadForm(false);
+    setLeadStep(0);
+    setLeadData({ name: "", email: "", phone: "", domain: "" });
+    setMessages((prev) => [
+      ...prev,
+      {
+        sender: "bot",
+        text: "Registration skipped. You can continue asking questions freely! If you want to register later, click Apply / Register.",
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      },
+    ]);
+  };
+
   const startLeadForm = () => {
     setShowLeadForm(true);
     setLeadStep(0);
@@ -1650,6 +1664,7 @@ export default function ChatWidget() {
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-40 p-4 overflow-y-auto flex items-center justify-center animate-in fade-in duration-200">
               <LeadForm
                 onClose={handleCloseLeadForm}
+                onSkip={handleSkipLeadForm}
                 onSuccess={(applicantName) => {
                   setMessages((prev) => [
                     ...prev,

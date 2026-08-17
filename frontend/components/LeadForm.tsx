@@ -7,9 +7,10 @@ import { BsX } from "react-icons/bs";
 interface LeadFormProps {
   onClose?: () => void;
   onSuccess?: (name: string) => void;
+  onSkip?: () => void;
 }
 
-export default function LeadForm({ onClose, onSuccess }: LeadFormProps) {
+export default function LeadForm({ onClose, onSuccess, onSkip }: LeadFormProps) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -72,6 +73,14 @@ export default function LeadForm({ onClose, onSuccess }: LeadFormProps) {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSkipClick = () => {
+    if (onSkip) {
+      onSkip();
+    } else if (onClose) {
+      onClose();
     }
   };
 
@@ -175,13 +184,25 @@ export default function LeadForm({ onClose, onSuccess }: LeadFormProps) {
           </select>
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition shadow-md disabled:opacity-50 cursor-pointer"
-        >
-          {loading ? "Submitting..." : "Submit Application"}
-        </button>
+        <div className="space-y-2 pt-1">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition shadow-md disabled:opacity-50 cursor-pointer"
+          >
+            {loading ? "Submitting..." : "Submit Application"}
+          </button>
+
+          {(onSkip || onClose) && (
+            <button
+              type="button"
+              onClick={handleSkipClick}
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 px-4 rounded-lg transition border border-gray-200 text-sm cursor-pointer"
+            >
+              Skip Registration & Continue Chat
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );
