@@ -136,10 +136,10 @@ const TOKEN_MAP = {
   criteria: "eligibility",
   qualify: "eligibility",
   qualification: "eligibility",
-  fresher: "eligibility",
-  freshers: "eligibility",
-  beginner: "eligibility",
-  beginners: "eligibility",
+  fresher: "fresher",
+  freshers: "fresher",
+  beginner: "beginner",
+  beginners: "beginner",
   anyone: "eligibility",
   stream: "eligibility",
   // Registration
@@ -616,10 +616,11 @@ function detectStrongCategory(queryTokens) {
     queryTokens.includes("employee") ||
     queryTokens.includes("employment") ||
     queryTokens.includes("hiring") ||
-    (queryTokens.includes("work") && (queryTokens.includes("weintern") || queryTokens.includes("company") || queryTokens.includes("here") || queryTokens.includes("want"))) ||
-    (queryTokens.includes("job") && (queryTokens.includes("opportunities") || queryTokens.includes("opportunity") || queryTokens.includes("vacancy") || queryTokens.includes("opening") || queryTokens.includes("apply") || queryTokens.includes("weintern") || queryTokens.includes("fulltime"))) ||
+    (queryTokens.includes("work") && (queryTokens.includes("weintern") || queryTokens.includes("company") || queryTokens.includes("here") || queryTokens.includes("want") || queryTokens.includes("fresher"))) ||
+    (queryTokens.includes("job") && (queryTokens.includes("opportunities") || queryTokens.includes("opportunity") || queryTokens.includes("vacancy") || queryTokens.includes("opening") || queryTokens.includes("apply") || queryTokens.includes("weintern") || queryTokens.includes("fulltime") || queryTokens.includes("fresher") || queryTokens.includes("freshers"))) ||
     queryTokens.includes("fulltime") ||
-    (queryTokens.includes("hire") && queryTokens.includes("interns"));
+    (queryTokens.includes("hire") && (queryTokens.includes("interns") || queryTokens.includes("fresher") || queryTokens.includes("freshers"))) ||
+    ((queryTokens.includes("fresher") || queryTokens.includes("freshers") || queryTokens.includes("experience")) && (queryTokens.includes("join") || queryTokens.includes("work") || queryTokens.includes("apply") || queryTokens.includes("hire") || queryTokens.includes("job")) && !queryTokens.includes("internship"));
 
   if (isEmploymentQuery) {
     return "employment";
@@ -885,10 +886,11 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory, rawQuery 
     queryTokens.includes("employee") ||
     queryTokens.includes("employment") ||
     queryTokens.includes("hiring") ||
-    (queryTokens.includes("work") && (queryTokens.includes("weintern") || queryTokens.includes("company") || queryTokens.includes("here") || queryTokens.includes("want"))) ||
-    (queryTokens.includes("job") && (queryTokens.includes("opportunities") || queryTokens.includes("opportunity") || queryTokens.includes("vacancy") || queryTokens.includes("opening") || queryTokens.includes("apply") || queryTokens.includes("weintern") || queryTokens.includes("fulltime"))) ||
+    (queryTokens.includes("work") && (queryTokens.includes("weintern") || queryTokens.includes("company") || queryTokens.includes("here") || queryTokens.includes("want") || queryTokens.includes("fresher"))) ||
+    (queryTokens.includes("job") && (queryTokens.includes("opportunities") || queryTokens.includes("opportunity") || queryTokens.includes("vacancy") || queryTokens.includes("opening") || queryTokens.includes("apply") || queryTokens.includes("weintern") || queryTokens.includes("fulltime") || queryTokens.includes("fresher") || queryTokens.includes("freshers"))) ||
     queryTokens.includes("fulltime") ||
-    (queryTokens.includes("hire") && queryTokens.includes("interns"));
+    (queryTokens.includes("hire") && (queryTokens.includes("interns") || queryTokens.includes("fresher") || queryTokens.includes("freshers"))) ||
+    ((queryTokens.includes("fresher") || queryTokens.includes("freshers") || queryTokens.includes("experience")) && (queryTokens.includes("join") || queryTokens.includes("work") || queryTokens.includes("apply") || queryTokens.includes("hire") || queryTokens.includes("job")) && !queryTokens.includes("internship"));
 
   if (isEmploymentQuery) {
     if (entry.category === "employment") {
@@ -1458,12 +1460,41 @@ function searchKnowledgeBase(message = "") {
   const queryTokens = query.split(" ").filter(Boolean);
   const categoryHints = inferCategoryHints(queryTokens);
 
+  const rawLower = message.toLowerCase();
+  const hasPlanPrice = /7[,\s]?999/.test(rawLower) || (/\b999\b/.test(rawLower) && !/fees|fee|price|cost|how much/.test(rawLower));
+  const hasCertContext = /plan|include|included|milega|milta|certificate|get|cert|lor/.test(rawLower);
+  let strongCategory = detectStrongCategory(queryTokens);
+  if (hasPlanPrice && hasCertContext && (strongCategory === null || strongCategory === "fees")) {
+    strongCategory = "certificates";
+  }
+
   // ── EXACT QUESTION MATCH SHORTCUT ────────────────────────────────────────
-  // Before running the full scoring loop, check if the user's normalised query
-  // exactly matches (or very closely matches) a KB entry's question text.
-  // This prevents near-identical entries (e.g. "What is WeIntern's address?")
-  // from winning over the direct target (e.g. "What is WeIntern?").
   const normalizedQuery = query.trim();
+
+  // First priority: check exact match within the detected strong category
+  if (strongCategory && knowledgeIndex[strongCategory]) {
+    for (const entry of knowledgeIndex[strongCategory]) {
+      const normEntryQ = normalize(entry.question || "").trim();
+      if (normEntryQ === normalizedQuery) {
+        const exactMatch = {
+          category: strongCategory,
+          question: entry.question || "",
+          answer: entry.answer || "",
+          score: 9999,
+        };
+        const contextText = `Category: ${strongCategory}. Question: ${entry.question}. Answer: ${entry.answer}`;
+        console.log("EXACT MATCH SHORTCUT (Strong Category):", entry.question);
+        return {
+          query: normalizedQuery,
+          matches: [exactMatch],
+          topMatch: exactMatch,
+          contextText,
+          hasMatch: true,
+        };
+      }
+    }
+  }
+
   for (const [cat, entries] of Object.entries(knowledgeIndex)) {
     for (const entry of entries) {
       const normEntryQ = normalize(entry.question || "").trim();
@@ -1488,16 +1519,6 @@ function searchKnowledgeBase(message = "") {
   }
   // ─────────────────────────────────────────────────────────────────────────
 
-  // Pre-detect plan-price certificate questions before token-based detection
-  // e.g. "What is included in 6599 plan?" or "999 wale plan mein kya milega?"
-  const rawLower = message.toLowerCase();
-  const hasPlanPrice = /7[,\s]?999/.test(rawLower) || (/\b999\b/.test(rawLower) && !/fees|fee|price|cost|how much/.test(rawLower));
-  const hasCertContext = /plan|include|included|milega|milta|certificate|get|cert|lor/.test(rawLower);
-  let strongCategory = detectStrongCategory(queryTokens);
-  // Override fees→certificates when asking what a plan *includes* (cert context)
-  if (hasPlanPrice && hasCertContext && (strongCategory === null || strongCategory === "fees")) {
-    strongCategory = "certificates";
-  }
   const isPlanCertQuery = hasPlanPrice && hasCertContext;
   const matches = [];
 
