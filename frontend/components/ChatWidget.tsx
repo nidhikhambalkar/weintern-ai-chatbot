@@ -325,6 +325,8 @@ export default function ChatWidget() {
   const pausedTextRemainderRef = useRef<string>("");        // text substring saved on pause
   const pausedMessageIndexForResumeRef = useRef<number | null>(null); // msg index for resume
   const interruptListenerActiveRef = useRef<boolean>(false); // is interrupt listener running
+  const speechAccumulatorRef = useRef<string>("");          // accumulates speech segments across continuous listening/pauses
+  const isVoiceSessionActiveRef = useRef<boolean>(false);    // tracks if user is in an active recording session
 
   useEffect(() => {
     isSpeakerMutedRef.current = isSpeakerMuted;
@@ -487,7 +489,7 @@ export default function ChatWidget() {
       if (SpeechRecognition) {
         setIsSpeechSupported(true);
         const rec = new SpeechRecognition();
-        rec.continuous = false;
+        rec.continuous = true;       // Allow continuous listening across pauses & multi-sentence speech
         rec.interimResults = true;
         rec.maxAlternatives = 5;
         rec.lang = "en-IN";
@@ -1136,9 +1138,41 @@ export default function ChatWidget() {
     }
   };
 
+  // Helper function to finalize complete accumulated speech and send it to chat
+  const finalizeSpeechAndProcess = () => {
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+
+    const fullText = (speechAccumulatorRef.current + " " + latestInterimTranscriptRef.current).replace(/\s+/g, " ").trim();
+    isVoiceSessionActiveRef.current = false;
+    isListeningRef.current = false;
+
+    const rec = recognitionRef.current;
+    if (rec) {
+      try { rec.stop(); } catch (_) {}
+    }
+
+    setInterimTranscript("");
+    latestInterimTranscriptRef.current = "";
+    speechAccumulatorRef.current = "";
+
+    if (fullText && fullText.length > 1) {
+      console.log("🎤 Finalizing complete speech request:", fullText);
+      const normalizedMsg = selectAndNormalizeTranscript([fullText]);
+      const isVoiceControlCommand = detectAndExecuteVoiceCommand(normalizedMsg);
+      if (!isVoiceControlCommand) {
+        processMessage(normalizedMsg, "voice");
+      }
+    } else {
+      setVoiceState("IDLE");
+    }
+  };
+
   // Start Speech-to-Text (STT) Recognition
   const startSpeechRecognition = () => {
-    // When starting STT, pause active TTS so microphone input is clean, but preserve activeUtteranceRef for voice commands
+    // When starting STT, pause active TTS so microphone input is clean
     const synth = synthesisRef.current || (typeof window !== "undefined" ? window.speechSynthesis : null);
     if (synth && synth.speaking && !synth.paused) {
       try {
@@ -1148,7 +1182,7 @@ export default function ChatWidget() {
       } catch (e) {}
     }
 
-    // Guard 2: Avoid duplicate calls if already listening
+    // Prevent duplicate activation if already listening
     if (isListeningRef.current) {
       return;
     }
@@ -1160,10 +1194,9 @@ export default function ChatWidget() {
       return;
     }
 
+    isVoiceSessionActiveRef.current = true;
     setVoiceState("LISTENING");
-    setInterimTranscript("");
     setErrorMessage("");
-    latestInterimTranscriptRef.current = "";
 
     rec.onstart = () => {
       isListeningRef.current = true;
@@ -1171,115 +1204,80 @@ export default function ChatWidget() {
     };
 
     rec.onresult = (event: any) => {
+      let newFinal = "";
       let interim = "";
-      let final = "";
       let alternatives: string[] = [];
 
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
+          newFinal += event.results[i][0].transcript + " ";
           for (let j = 0; j < event.results[i].length; j++) {
             if (event.results[i][j]?.transcript) {
               alternatives.push(event.results[i][j].transcript);
             }
           }
-          final += event.results[i][0].transcript;
         } else {
           interim += event.results[i][0].transcript;
-          // ── Intercept voice commands from INTERIM results for instant responsiveness ───────
-          const isExecuted = detectAndExecuteVoiceCommand(interim);
-          if (isExecuted) {
-            if (silenceTimerRef.current) {
-              clearTimeout(silenceTimerRef.current);
-              silenceTimerRef.current = null;
-            }
-            try { rec.stop(); } catch (_) {}
-            setInterimTranscript("");
-            latestInterimTranscriptRef.current = "";
-            return;
-          }
         }
       }
 
-      if (interim) {
-        setInterimTranscript(interim);
-        latestInterimTranscriptRef.current = interim;
-
-        // Reset silence timer on every new interim result
-        if (silenceTimerRef.current) {
-          clearTimeout(silenceTimerRef.current);
-        }
-
-        // 600ms Silence Auto-Finalizer: automatically finalize speech if user pauses for 600ms
-        silenceTimerRef.current = setTimeout(() => {
-          const textToProcess = (latestInterimTranscriptRef.current || interim).trim();
-          if (textToProcess && textToProcess.length > 1) {
-            console.log("⚡ Auto-finalizing transcript after 600ms silence:", textToProcess);
-            if (silenceTimerRef.current) {
-              clearTimeout(silenceTimerRef.current);
-              silenceTimerRef.current = null;
-            }
-            try { rec.stop(); } catch (e) {}
-            setInterimTranscript("");
-            latestInterimTranscriptRef.current = "";
-
-            const normalizedMsg = selectAndNormalizeTranscript([textToProcess]);
-            const isVoiceControlCommand = detectAndExecuteVoiceCommand(normalizedMsg);
-            if (!isVoiceControlCommand) {
-              processMessage(normalizedMsg, "voice");
-            }
-          }
-        }, 600);
+      if (newFinal) {
+        speechAccumulatorRef.current = (speechAccumulatorRef.current + " " + newFinal).replace(/\s+/g, " ").trim();
       }
 
-      if (final) {
+      const currentDisplay = (speechAccumulatorRef.current + " " + interim).replace(/\s+/g, " ").trim();
+      latestInterimTranscriptRef.current = interim;
+      setInterimTranscript(currentDisplay);
+
+      // Check for instant voice control commands (e.g. Stop, Pause, Resume)
+      const isExecuted = detectAndExecuteVoiceCommand(currentDisplay);
+      if (isExecuted) {
+        isVoiceSessionActiveRef.current = false;
         if (silenceTimerRef.current) {
           clearTimeout(silenceTimerRef.current);
           silenceTimerRef.current = null;
         }
-        latestInterimTranscriptRef.current = "";
+        try { rec.stop(); } catch (_) {}
         setInterimTranscript("");
-        try {
-          rec.stop();
-        } catch (e) {}
+        latestInterimTranscriptRef.current = "";
+        speechAccumulatorRef.current = "";
+        return;
+      }
 
-        // ── Language detection heuristic from raw final text ─────────────────
-        const devanagariRatio = (final.match(/[\u0900-\u097F]/g) || []).length / Math.max(final.length, 1);
-        const marathiWords = /(?:^|\s)(आहे|आहेत|आहेस|आहोत|मी|तुम्हाला|मला|आपल्या|करू|सांगू|शकेन|शकतो|शकते|काही|बद्दल|आणि|बरं|कशी|कसे|कसा|पण|तर|काय)(?:\s|$|[.,?!;])/i;
-        const marathiMarkers = marathiWords.test(final) || /[\u0963\u094D\u0902\u0919\u091C\u091E\u0967-\u096F]/.test(final);
-        let lang = "en-IN";
-        if (devanagariRatio > 0.3) {
-          lang = marathiMarkers ? "mr-IN" : "hi-IN";
-        }
-        setDetectedLang(lang);
-        if (recognitionRef.current) {
-          recognitionRef.current.lang = lang === "mr-IN" ? "mr-IN" : lang === "hi-IN" ? "hi-IN" : "en-IN";
-        }
-        // ────────────────────────────────────────────────────────────────────
+      // Reset silence auto-finalizer timer on any speech activity.
+      // Uses 2.2s of total continuous silence after user finishes speaking to allow natural pauses.
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+      }
 
-        // Select the best alternative (in case of homophone spelling errors) and normalize
-        const normalizedMsg = selectAndNormalizeTranscript(alternatives.length > 0 ? alternatives : [final]);
-
-        // Voice-command controls intercept
-        const isVoiceControlCommand = detectAndExecuteVoiceCommand(normalizedMsg);
-        if (isVoiceControlCommand) {
-          return;
-        }
-
-        processMessage(normalizedMsg, "voice");
+      if (currentDisplay.length > 0) {
+        silenceTimerRef.current = setTimeout(() => {
+          console.log("⚡ Natural end of speech detected (2.2s silence). Finalizing complete sentence...");
+          finalizeSpeechAndProcess();
+        }, 2200);
       }
     };
 
     rec.onerror = (event: any) => {
-      isListeningRef.current = false;
-      if (silenceTimerRef.current) {
-        clearTimeout(silenceTimerRef.current);
-        silenceTimerRef.current = null;
-      }
       if (event.error === "no-speech" || event.error === "aborted") {
+        // If voice session is still active (user didn't click stop), auto-restart listening
+        if (isVoiceSessionActiveRef.current) {
+          try {
+            rec.start();
+          } catch (_) {}
+          return;
+        }
+        isListeningRef.current = false;
         setVoiceState("IDLE");
         return;
       }
       console.error("STT Error:", event.error);
+      isListeningRef.current = false;
+      isVoiceSessionActiveRef.current = false;
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
       setVoiceState("ERROR");
       if (event.error === "not-allowed") {
         setErrorMessage("Mic permission denied. Please allow mic access.");
@@ -1293,14 +1291,29 @@ export default function ChatWidget() {
 
     rec.onend = () => {
       isListeningRef.current = false;
-      if (silenceTimerRef.current) {
-        clearTimeout(silenceTimerRef.current);
-        silenceTimerRef.current = null;
+      // If voice session is still active (user didn't manually stop mic and silence timer hasn't triggered),
+      // automatically restart listening to continue capturing speech seamlessly.
+      if (isVoiceSessionActiveRef.current) {
+        console.log("🔄 SpeechRecognition engine ended — auto-restarting to keep listening continuously...");
+        try {
+          rec.start();
+          isListeningRef.current = true;
+        } catch (e: any) {
+          if (e?.name !== "InvalidStateError") {
+            console.error("Auto-restart exception:", e);
+          }
+        }
+      } else {
+        if (silenceTimerRef.current) {
+          clearTimeout(silenceTimerRef.current);
+          silenceTimerRef.current = null;
+        }
+        setVoiceState((prev) => (prev === "LISTENING" ? "IDLE" : prev));
       }
-      setVoiceState((prev) => (prev === "LISTENING" ? "IDLE" : prev));
     };
 
     try {
+      speechAccumulatorRef.current = "";
       rec.start();
       isListeningRef.current = true;
     } catch (e: any) {
@@ -1311,6 +1324,7 @@ export default function ChatWidget() {
   };
 
   const stopSpeechRecognition = () => {
+    isVoiceSessionActiveRef.current = false;
     isListeningRef.current = false;
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
@@ -1326,13 +1340,12 @@ export default function ChatWidget() {
 
   const handleMicClick = () => {
     console.log("[TTS MIC]");
-    if (voiceState === "LISTENING") {
-      stopSpeechRecognition();
+    if (isVoiceSessionActiveRef.current || voiceState === "LISTENING") {
+      // Manually clicking mic while listening stops session and processes captured speech immediately
+      finalizeSpeechAndProcess();
     } else {
       // Stop any active TTS immediately so mic can listen cleanly
       handleStopMessage();
-      // Implicitly enable voice mode when user clicks mic
-      // (so bot auto-speaks its response back)
       if (!voiceModeRef.current) {
         setVoiceMode(true);
         voiceModeRef.current = true;
