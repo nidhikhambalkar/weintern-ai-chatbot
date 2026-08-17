@@ -571,9 +571,8 @@ export default function ChatWidget() {
       },
     ]);
 
-    if (voiceMode && !isSpeakerMuted) {
-      speakResponse(text);
-    }
+    // Bot MUST NOT AUTO-SPEAK on new answers. Remain silent until user clicks Play.
+    setVoiceState("IDLE");
   };
 
   const quickReply = async (question: string) => {
@@ -1103,11 +1102,9 @@ export default function ChatWidget() {
 
   // Start Speech-to-Text (STT) Recognition
   const startSpeechRecognition = () => {
-    // Guard 1: NEVER record user voice while BOT is speaking out loud!
-    if (isTtsSpeakingRef.current || (synthesisRef.current && synthesisRef.current.speaking && !synthesisRef.current.paused)) {
-      console.warn("Speech recognition blocked because TTS is speaking.");
-      return;
-    }
+    // ── REQUIREMENT 6: MIC PRIORITY ──────────────────────────────────────────
+    // The moment microphone recording starts, immediately stop any active or paused TTS completely!
+    handleStopMessage();
 
     // Guard 2: Avoid duplicate calls if already listening
     if (isListeningRef.current) {
@@ -1123,12 +1120,6 @@ export default function ChatWidget() {
 
     // Safely stop interrupt listener before launching STT
     stopInterruptListener();
-
-    // Cancel any active TTS if user explicitly starts microphone to speak a new query
-    if (synthesisRef.current && synthesisRef.current.speaking) {
-      synthesisRef.current.cancel();
-      isTtsSpeakingRef.current = false;
-    }
 
     setVoiceState("LISTENING");
     setInterimTranscript("");
@@ -1312,11 +1303,8 @@ export default function ChatWidget() {
   const handleMicClick = () => {
     if (voiceState === "LISTENING") {
       stopSpeechRecognition();
-    } else if (voiceState === "SPEAKING") {
-      handlePauseMessage();
-    } else if (voiceState === "PAUSED") {
-      handleResumeOrContinueMessage();
     } else {
+      handleStopMessage();
       startSpeechRecognition();
     }
   };
@@ -1362,9 +1350,8 @@ export default function ChatWidget() {
           },
         ]);
 
-        if (source === "voice" && !isSpeakerMuted) {
-          speakResponse(botReply);
-        }
+        // Bot MUST NOT AUTO-SPEAK on new answers. Remain silent until user clicks Play.
+        setVoiceState("IDLE");
         return;
       }
 
@@ -1387,9 +1374,7 @@ export default function ChatWidget() {
               time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             },
           ]);
-          if (source === "voice" && !isSpeakerMuted) {
-            speakResponse(errorReply);
-          }
+          setVoiceState("IDLE");
           return;
         }
 
@@ -1414,9 +1399,7 @@ export default function ChatWidget() {
           },
         ]);
 
-        if (source === "voice" && !isSpeakerMuted) {
-          speakResponse(botReply);
-        }
+        setVoiceState("IDLE");
         return;
       }
 
@@ -1439,9 +1422,7 @@ export default function ChatWidget() {
               time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             },
           ]);
-          if (source === "voice" && !isSpeakerMuted) {
-            speakResponse(errorReply);
-          }
+          setVoiceState("IDLE");
           return;
         }
 
@@ -1466,9 +1447,7 @@ export default function ChatWidget() {
           },
         ]);
 
-        if (source === "voice" && !isSpeakerMuted) {
-          speakResponse(botReply);
-        }
+        setVoiceState("IDLE");
         return;
       }
 
@@ -1507,11 +1486,7 @@ export default function ChatWidget() {
           setLeadStep(0);
           setLeadData({ name: "", email: "", phone: "", domain: "" });
 
-          if (source === "voice" && !isSpeakerMuted) {
-            speakResponse(botReply);
-          } else {
-            setVoiceState("IDLE");
-          }
+          setVoiceState("IDLE");
         } catch (error) {
           console.error("Lead saving error:", error);
           const errorReply = "Sorry, there was an issue saving your application. Please try submitting again.";
@@ -1523,11 +1498,7 @@ export default function ChatWidget() {
               time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             },
           ]);
-          if (source === "voice" && !isSpeakerMuted) {
-            speakResponse(errorReply);
-          } else {
-            setVoiceState("IDLE");
-          }
+          setVoiceState("IDLE");
         }
         return;
       }
@@ -1582,11 +1553,8 @@ export default function ChatWidget() {
           },
         ]);
 
-        if (source === "voice" && !isSpeakerMuted) {
-          speakResponse(botReply); // speak original text, exclude system ticket tags
-        } else {
-          setVoiceState("IDLE");
-        }
+        // Bot MUST NOT AUTO-SPEAK on new answers. Remain silent until user clicks Play.
+        setVoiceState("IDLE");
       } else {
         setMessages((prev) => [
           ...prev,
@@ -1597,11 +1565,8 @@ export default function ChatWidget() {
           },
         ]);
 
-        if (source === "voice" && !isSpeakerMuted) {
-          speakResponse(botReply);
-        } else {
-          setVoiceState("IDLE");
-        }
+        // Bot MUST NOT AUTO-SPEAK on new answers. Remain silent until user clicks Play.
+        setVoiceState("IDLE");
       }
     } catch (error) {
       console.error("Chat API Error:", error);
@@ -1617,13 +1582,9 @@ export default function ChatWidget() {
         },
       ]);
 
-      if (source === "voice" && !isSpeakerMuted) {
-        speakResponse("I had trouble connecting to the server. Please try again.");
-      } else {
-        setVoiceState("ERROR");
-        setErrorMessage("Network issue. Reverted to text chat fallback.");
-        setTimeout(() => setVoiceState("IDLE"), 4000);
-      }
+      setVoiceState("ERROR");
+      setErrorMessage("Network issue. Reverted to text chat fallback.");
+      setTimeout(() => setVoiceState("IDLE"), 4000);
     } finally {
       setIsTyping(false);
     }
