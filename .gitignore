@@ -6,3 +6,4 @@ node_modules/
 Thumbs.db
 weintern-ai-chatbot/
 
+.vercel

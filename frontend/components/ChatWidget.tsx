@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { BsChatDotsFill, BsX, BsMicFill, BsMicMuteFill, BsVolumeUpFill, BsVolumeMuteFill, BsPlayFill, BsPauseFill, BsStopFill, BsCopy, BsPencilSquare, BsArrowClockwise, BsTrash, BsCheck2 } from "react-icons/bs";
 import { IoSend } from "react-icons/io5";
-import { sendChat, saveLead, getHistory, clearHistory } from "@/services/chatApi";
+import { sendChat, saveLead, getHistory, clearHistory, createEscalation } from "@/services/chatApi";
 
 type ChatMessage = {
   sender: "user" | "bot";
@@ -323,12 +323,20 @@ export default function ChatWidget() {
   const isCancelledByCommandRef = useRef<boolean>(false);
   const pausedMessageIndexRef = useRef<number | null>(null);
   const isSpeakerMutedRef = useRef<boolean>(false);
+  const voiceModeRef = useRef<boolean>(false);
+  const isListeningRef = useRef<boolean>(false);
+  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const latestInterimTranscriptRef = useRef<string>("");
   const abortControllerRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     isSpeakerMutedRef.current = isSpeakerMuted;
   }, [isSpeakerMuted]);
+
+  useEffect(() => {
+    voiceModeRef.current = voiceMode;
+  }, [voiceMode]);
 
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -472,14 +480,11 @@ export default function ChatWidget() {
     return selectedVoiceRef.current;
   };
 
-  // Generate or load session ID & Initialize Web Speech API
+  // Initialize fresh session ID per page load & Web Speech API
   useEffect(() => {
     if (typeof window !== "undefined") {
-      let id = localStorage.getItem("weintern_session_id");
-      if (!id) {
-        id = "session_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
-        localStorage.setItem("weintern_session_id", id);
-      }
+      localStorage.removeItem("weintern_session_id");
+      const id = "session_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
       setSessionId(id);
 
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -543,7 +548,6 @@ export default function ChatWidget() {
     };
     fetchHistory();
   }, [sessionId]);
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
@@ -893,6 +897,15 @@ export default function ChatWidget() {
       sentenceQueueRef.current = [];
       currentSentenceIndexRef.current = 0;
       sentenceCharOffsetRef.current = 0;
+
+      // Auto-restart listening for hands-free continuous conversation if voice mode is active
+      if (voiceModeRef.current && !isSpeakerMutedRef.current && !isVoicePausedRef.current) {
+        setTimeout(() => {
+          if (voiceModeRef.current && !isTtsSpeakingRef.current) {
+            startSpeechRecognition();
+          }
+        }, 400);
+      }
       return;
     }
 
@@ -1086,9 +1099,14 @@ export default function ChatWidget() {
 
   // Start Speech-to-Text (STT) Recognition
   const startSpeechRecognition = () => {
-    // REQUIREMENT 2: NEVER record user voice while BOT is speaking!
+    // Guard 1: NEVER record user voice while BOT is speaking out loud!
     if (isTtsSpeakingRef.current || (synthesisRef.current && synthesisRef.current.speaking && !synthesisRef.current.paused)) {
       console.warn("Speech recognition blocked because TTS is speaking.");
+      return;
+    }
+
+    // Guard 2: Avoid duplicate calls if already listening
+    if (isListeningRef.current) {
       return;
     }
 
@@ -1099,6 +1117,9 @@ export default function ChatWidget() {
       return;
     }
 
+    // Safely stop interrupt listener before launching STT
+    stopInterruptListener();
+
     // Cancel any active TTS if user explicitly starts microphone to speak a new query
     if (synthesisRef.current && synthesisRef.current.speaking) {
       synthesisRef.current.cancel();
@@ -1108,18 +1129,25 @@ export default function ChatWidget() {
     setVoiceState("LISTENING");
     setInterimTranscript("");
     setErrorMessage("");
+    latestInterimTranscriptRef.current = "";
 
     rec.onstart = () => {
+      isListeningRef.current = true;
       setVoiceState("LISTENING");
     };
 
     rec.onresult = (event: any) => {
       // Discard any results if TTS started speaking during recording
       if (isTtsSpeakingRef.current) {
+        if (silenceTimerRef.current) {
+          clearTimeout(silenceTimerRef.current);
+          silenceTimerRef.current = null;
+        }
         try {
           rec.stop();
         } catch (e) {}
         setInterimTranscript("");
+        latestInterimTranscriptRef.current = "";
         return;
       }
 
@@ -1137,29 +1165,59 @@ export default function ChatWidget() {
           final += event.results[i][0].transcript;
         } else {
           interim += event.results[i][0].transcript;
-          // ── Intercept stop/continue commands from INTERIM results ───────
           // ── Intercept voice commands from INTERIM results for instant responsiveness ───────
           const isExecuted = detectAndExecuteVoiceCommand(interim);
           if (isExecuted) {
+            if (silenceTimerRef.current) {
+              clearTimeout(silenceTimerRef.current);
+              silenceTimerRef.current = null;
+            }
             try { rec.stop(); } catch (_) {}
             setInterimTranscript("");
+            latestInterimTranscriptRef.current = "";
             setVoiceState("IDLE");
             return;
           }
         }
       }
+
       if (interim) {
         setInterimTranscript(interim);
-        const interimClean = interim.toLowerCase().trim();
-        if (detectAndExecuteVoiceCommand(interimClean)) {
-          try {
-            rec.stop();
-          } catch (e) {}
-          setInterimTranscript("");
-          return;
+        latestInterimTranscriptRef.current = interim;
+
+        // Reset silence timer on every new interim result
+        if (silenceTimerRef.current) {
+          clearTimeout(silenceTimerRef.current);
         }
+
+        // 600ms Silence Auto-Finalizer: automatically finalize speech if user pauses for 600ms
+        silenceTimerRef.current = setTimeout(() => {
+          const textToProcess = (latestInterimTranscriptRef.current || interim).trim();
+          if (textToProcess && textToProcess.length > 1) {
+            console.log("⚡ Auto-finalizing transcript after 600ms silence:", textToProcess);
+            if (silenceTimerRef.current) {
+              clearTimeout(silenceTimerRef.current);
+              silenceTimerRef.current = null;
+            }
+            try { rec.stop(); } catch (e) {}
+            setInterimTranscript("");
+            latestInterimTranscriptRef.current = "";
+
+            const normalizedMsg = selectAndNormalizeTranscript([textToProcess]);
+            const isVoiceControlCommand = detectAndExecuteVoiceCommand(normalizedMsg);
+            if (!isVoiceControlCommand) {
+              processMessage(normalizedMsg, "voice");
+            }
+          }
+        }, 600);
       }
+
       if (final) {
+        if (silenceTimerRef.current) {
+          clearTimeout(silenceTimerRef.current);
+          silenceTimerRef.current = null;
+        }
+        latestInterimTranscriptRef.current = "";
         setInterimTranscript("");
         try {
           rec.stop();
@@ -1193,11 +1251,16 @@ export default function ChatWidget() {
     };
 
     rec.onerror = (event: any) => {
-      console.error("STT Error:", event.error);
-      if (event.error === "no-speech") {
+      isListeningRef.current = false;
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
+      if (event.error === "no-speech" || event.error === "aborted") {
         setVoiceState("IDLE");
         return;
       }
+      console.error("STT Error:", event.error);
       setVoiceState("ERROR");
       if (event.error === "not-allowed") {
         setErrorMessage("Mic permission denied. Please allow mic access.");
@@ -1206,23 +1269,34 @@ export default function ChatWidget() {
       }
       setTimeout(() => {
         setVoiceState((prev) => (prev === "ERROR" ? "IDLE" : prev));
-      }, 4000);
+      }, 1500);
     };
 
     rec.onend = () => {
+      isListeningRef.current = false;
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
       setVoiceState((prev) => (prev === "LISTENING" ? "IDLE" : prev));
     };
 
     try {
       rec.start();
-    } catch (e) {
-      console.error("SpeechRecognition start exception:", e);
-      setVoiceState("ERROR");
-      setErrorMessage("Microphone is already listening.");
+      isListeningRef.current = true;
+    } catch (e: any) {
+      if (e?.name !== "InvalidStateError") {
+        console.error("SpeechRecognition start exception:", e);
+      }
     }
   };
 
   const stopSpeechRecognition = () => {
+    isListeningRef.current = false;
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
@@ -1480,17 +1554,19 @@ export default function ChatWidget() {
 
       // Handle escalation triggers if returned from backend
       if (data.escalation) {
-        const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000';
-        const escalateRes = await fetch(`${apiBase}/api/escalate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ session_id: sessionId, issue: `User requested human support. Trigger phrase: "${userMessage}"` })
-        });
-        const escalateData = await escalateRes.json();
+        let escalationTicketId = "";
+        try {
+          const escalateData = await createEscalation(sessionId, `User requested human support. Trigger phrase: "${userMessage}"`);
+          if (escalateData.success && escalateData.data) {
+            escalationTicketId = escalateData.data.id || escalateData.data.session_id || "";
+          }
+        } catch (escalateErr) {
+          console.warn("Escalation ticket creation warning:", escalateErr);
+        }
 
         let escalationMessage = botReply;
-        if (escalateData.success) {
-          escalationMessage += `\n\n[Escalation Support Ticket Created: #${escalateData.data.id || escalateData.data.session_id}]`;
+        if (escalationTicketId) {
+          escalationMessage += `\n\n[Escalation Support Ticket Created: #${escalationTicketId}]`;
         }
 
         setMessages((prev) => [
@@ -1666,7 +1742,10 @@ export default function ChatWidget() {
                 onClick={() => {
                   const mode = !voiceMode;
                   setVoiceMode(mode);
-                  if (!mode) {
+                  voiceModeRef.current = mode;
+                  if (mode) {
+                    startSpeechRecognition();
+                  } else {
                     stopSpeechRecognition();
                     if (synthesisRef.current) {
                       synthesisRef.current.cancel();
