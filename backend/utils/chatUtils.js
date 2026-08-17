@@ -32,8 +32,7 @@ function normalizeSpokenText(text) {
 
   // 1. Normalize WeIntern name variations (case-insensitive)
   const weinternRegexes = [
-    /\b(v\s*intern|v-intern)\b/gi,
-    /\b(weintrn|we\s+in\s+turn|weinturn|wintern|we-intern|we\s+intern|we\s+inter|wee\s+intern|wee\s+intrn)\b/gi,
+    /\b(v\s*intern|v-intern|vinemtn|vinton|weimterm|weintarn|weintrn|weinternn|wee\s+intern|wee\s+intrn)\b/gi,
     /\b(be\s*intern|beintern|way\s*intern|we\s+intent|we\s+entered|vee\s+intern|vee\s+intrn|vee\s+internship|v\s+internship)\b/gi,
     /\b(we\s+entered\s+in|we\s+internship)\b/gi,
   ];
@@ -58,16 +57,21 @@ function normalizeSpokenText(text) {
     normalized = normalized.replace(regex, "EMI");
   });
 
-  // 4. Normalize other common speech-to-text mistakes contextually
-  normalized = normalized.replace(/\bplace\s+ment\b/gi, "placement");
-  normalized = normalized.replace(/\bplacment\b/gi, "placement");
-  normalized = normalized.replace(/\b(stipent|stepend|stipond)\b/gi, "stipend");
+  // 4. Normalize common typos and misspellings
+  normalized = normalized.replace(/\b(internshp|internsip|intership|internhip|intermship|imtenshop)\b/gi, "internship");
+  normalized = normalized.replace(/\b(benifits|benfits|benifit)\b/gi, "benefits");
+  normalized = normalized.replace(/\b(datascience|data\s+scince|datascince|datasciense|datasince)\b/gi, "Data Science");
+  normalized = normalized.replace(/\b(fullstak|full\s+stackk|fullstack|fullstam|fullstackkkk)\b/gi, "Full Stack");
+  normalized = normalized.replace(/\b(certficate|certifcate|certicate)\b/gi, "certificate");
+  normalized = normalized.replace(/\b(stipendd|stipand|stipond|stipent|stepend)\b/gi, "stipend");
+  normalized = normalized.replace(/\b(coursee|cours|cource|corse)\b/gi, "course");
+  normalized = normalized.replace(/\b(feess|fess|feez|phees)\b/gi, "fees");
+  normalized = normalized.replace(/\bashin\s+gurao\b/gi, "Ashwin Gurao");
 
   // 5. Map common transliterated Hindi/Marathi words to standard English keywords
   normalized = normalized.replace(/\bsrtiphiket\b/gi, "certificate");
   normalized = normalized.replace(/\bsartifiket\b/gi, "certificate");
   normalized = normalized.replace(/\bintrn\b/gi, "internship");
-  normalized = normalized.replace(/\bphees\b/gi, "fees");
   normalized = normalized.replace(/\b(kaam|kam)\b/gi, "work");
 
   return normalized;

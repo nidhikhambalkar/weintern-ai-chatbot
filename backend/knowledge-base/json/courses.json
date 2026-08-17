@@ -1,6 +1,66 @@
 [
   {
     "category": "courses",
+    "question": "What is UI/UX?",
+    "answer": "UI/UX Design (8 weeks) covers User Interface (UI) and User Experience (UX) design principles. You learn wireframing, prototyping, Figma, user research, design systems, and mobile/web app interface design while building practical live projects."
+  },
+  {
+    "category": "courses",
+    "question": "tell me more about ui/ux ?",
+    "answer": "UI/UX Design is an 8-week beginner-friendly course priced at ₹3,299. It covers Figma, wireframing, interactive prototyping, design systems, user research, and UI design for mobile/web. Includes 2 live portfolio projects, mentor guidance, certificate, and LOR."
+  },
+  {
+    "category": "courses",
+    "question": "why ui/ux is good ?",
+    "answer": "UI/UX Design is a high-demand, creative, and lucrative career field. It is beginner-friendly and does not require coding. At WeIntern, you build a real design portfolio in Figma, work on live app interfaces, and gain practical exposure for UI/UX designer roles."
+  },
+  {
+    "category": "courses",
+    "question": "what are the benefits on ui/ux course?",
+    "answer": "The benefits of the UI/UX Design course include:\n1. 100% practical training in Figma, wireframing & prototyping\n2. Real live interface projects to build a design portfolio\n3. No prior coding experience required (beginner friendly)\n4. Mentor guidance & 1-on-1 feedback on design submissions\n5. Official Certificate & LOR upon completion"
+  },
+  {
+    "category": "courses",
+    "question": "what is ai/ml course include",
+    "answer": "The AI & Automation course (8 weeks, ₹6,599) includes Python for AI, OpenAI API, LangChain, LLM prompt engineering, workflow automation with n8n/Make.com, AI Chatbots, Vector Databases, and FastAPI deployment."
+  },
+  {
+    "category": "courses",
+    "question": "why ai/ml is good for me?",
+    "answer": "AI & Automation is the fastest-growing technology sector. Learning AI & Automation at WeIntern allows you to build AI chatbots, automate business workflows, and leverage LLMs and APIs to create modern software products, boosting your tech career opportunities."
+  },
+  {
+    "category": "courses",
+    "question": "what are the benefits on ai/ml course?",
+    "answer": "The benefits of the AI & Automation course include:\n1. Practical hands-on training with OpenAI API, LLMs & LangChain\n2. Workflow automation experience using n8n & Make.com\n3. Building real AI Chatbots & Q&A vector search applications\n4. Mentor support from AI developers\n5. Official Training Certificate & LOR"
+  },
+  {
+    "category": "courses",
+    "question": "what are the benefits of digital marketing course?",
+    "answer": "The benefits of the Digital Marketing & SEO course (8 weeks, ₹2,499) include:\n1. Practical training in SEO, Google Ads, Meta Ads & Social Media Marketing\n2. Live campaign management & content strategy\n3. Learning Google Analytics & conversion optimization\n4. Beginner-friendly with no technical prerequisites\n5. Official Certificate & LOR for career placement"
+  },
+  {
+    "category": "courses",
+    "question": "What will I learn in Data Science?",
+    "answer": "In Data Science & Analytics (12 weeks, ₹6,599), you learn Python (Pandas, NumPy), SQL database queries, Data Visualization (Matplotlib, Seaborn, Tableau/Power BI), Exploratory Data Analysis, and Machine Learning algorithms (Scikit-Learn) through 3 real data projects."
+  },
+  {
+    "category": "courses",
+    "question": "What are the benefits of the Data Science course?",
+    "answer": "The benefits of the Data Science & Analytics course include:\n1. Mastery of in-demand tools: Python, Pandas, NumPy, SQL & Tableau\n2. Hands-on experience with 3 real-world data analytics & ML projects\n3. Practical machine learning model building with Scikit-Learn\n4. Mentor guidance & code reviews\n5. Official Training Certificate, LOR, and placement support"
+  },
+  {
+    "category": "courses",
+    "question": "datasince course mein kya sikhayenge?",
+    "answer": "Data Science & Analytics course (12 weeks) mein aapko Python (Pandas, NumPy), SQL queries, Data Visualization (Matplotlib, Seaborn, Tableau), Exploratory Data Analysis, aur Machine Learning (Scikit-Learn) sikhaya jata hai 3 live data projects ke saath."
+  },
+  {
+    "category": "courses",
+    "question": "What benefits will I get after finishing the Data Science course?",
+    "answer": "After completing the Data Science course, you gain:\n1. Official WeIntern Data Science Training Certificate\n2. Verified Letter of Recommendation (LOR)\n3. 3 Real Data Science projects added to your resume & portfolio\n4. Proficiency in Python, SQL, Data Visualization & ML\n5. Resume building & placement assistance for Data Analyst / Scientist roles"
+  },
+  {
+    "category": "courses",
     "question": "What are the courses?",
     "answer": "WeIntern offers the following industry-oriented training courses:\n\n1. Full Stack Web Development (12 weeks)\n2. Mobile App Development with Flutter (10 weeks)\n3. AI & Automation (8 weeks)\n4. Data Science & Analytics (12 weeks)\n5. Python Programming (10 weeks)\n6. Java Programming (12 weeks)\n7. C/C++ Programming (10 weeks)\n8. Cloud Computing & DevOps (12 weeks)\n9. UI/UX Design (8 weeks)\n10. Digital Marketing & SEO (8 weeks)"
   },

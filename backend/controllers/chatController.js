@@ -66,24 +66,90 @@ async function saveMessageToHistory(sessionId, sender, messageText, source = "te
   }
 }
 
+// Session topic memory for resolving follow-up queries (pronouns like "its benefits", "how long is it")
+const sessionTopicMap = new Map();
+
+function extractTopicFromQuery(query = "", matchResult = null) {
+  const q = query.toLowerCase();
+  if (q.includes("data science")) return "Data Science";
+  if (q.includes("full stack") || q.includes("fullstack")) return "Full Stack Web Development";
+  if (q.includes("ui") || q.includes("ux") || q.includes("figma")) return "UI/UX Design";
+  if (q.includes("ai") || q.includes("automation") || q.includes("ml")) return "AI & Automation";
+  if (q.includes("digital marketing") || q.includes("seo")) return "Digital Marketing";
+  if (q.includes("python")) return "Python Programming";
+  if (q.includes("java") && !q.includes("javascript")) return "Java Programming";
+  if (q.includes("c/c++") || q.includes("c++") || q.includes("cpp")) return "C/C++ Programming";
+  if (q.includes("cloud")) return "Cloud Computing";
+  if (q.includes("flutter") || q.includes("mobile app")) return "Mobile App Development";
+  if (q.includes("6-month") || q.includes("6 month")) return "6-month internship";
+  if (q.includes("3-month") || q.includes("3 month")) return "3-month internship";
+  if (q.includes("internship")) return "internship";
+
+  if (matchResult && matchResult.matches && matchResult.matches[0]) {
+    const qText = matchResult.matches[0].question.toLowerCase();
+    if (qText.includes("data science")) return "Data Science";
+    if (qText.includes("full stack")) return "Full Stack Web Development";
+    if (qText.includes("ui/ux")) return "UI/UX Design";
+    if (qText.includes("ai")) return "AI & Automation";
+    if (qText.includes("digital marketing")) return "Digital Marketing";
+    if (qText.includes("python")) return "Python Programming";
+    if (qText.includes("java")) return "Java Programming";
+    if (qText.includes("c/c++")) return "C/C++ Programming";
+    if (qText.includes("6-month") || qText.includes("6 month")) return "6-month internship";
+    if (qText.includes("3-month") || qText.includes("3 month")) return "3-month internship";
+  }
+
+  return null;
+}
+
+function resolveFollowUpQuery(message, sessionId) {
+  if (!sessionId || !sessionTopicMap.has(sessionId)) return message;
+  const lastTopic = sessionTopicMap.get(sessionId);
+  if (!lastTopic) return message;
+
+  const lower = message.toLowerCase();
+  const hasPronounFollowUp =
+    /\b(its|it|itself|this|that)\b/.test(lower) ||
+    /^(what are its|how long is|what is the fee for|fee for it|benefits of it|what do i get from it|tell me its)\b/.test(lower) ||
+    (lower.includes("benefits") && !lower.includes("course") && !lower.includes("internship") && !lower.includes("weintern")) ||
+    (lower.includes("duration") && !lower.includes("course") && !lower.includes("internship")) ||
+    (lower.includes("fee") && !lower.includes("course") && !lower.includes("internship"));
+
+  if (hasPronounFollowUp) {
+    if (lower.includes("benefit") || lower.includes("perk")) {
+      return `What are the benefits of ${lastTopic}?`;
+    }
+    if (lower.includes("duration") || lower.includes("how long") || lower.includes("time")) {
+      return `What is the duration of ${lastTopic}?`;
+    }
+    if (lower.includes("fee") || lower.includes("cost") || lower.includes("price")) {
+      return `What is the fee for ${lastTopic}?`;
+    }
+    return `${message} ${lastTopic}`;
+  }
+
+  return message;
+}
+
 exports.chat = async (req, res) => {
   const startTime = Date.now();
 
   try {
-    const message = sanitizeMessage(req.body?.message);
+    const rawMessage = sanitizeMessage(req.body?.message);
     const sessionId = req.body?.session_id || req.body?.sessionId;
     const source = req.body?.source || "text";
     const voiceMetadata = req.body?.voice_metadata || req.body?.voiceMetadata || null;
 
-    console.log(`User Question: "${message}" [Source: ${source}, Session: ${sessionId}]`);
-
-    if (!message) {
+    if (!rawMessage) {
       return res.status(400).json(buildErrorPayload(400, "message is required in request body"));
     }
 
+    const message = resolveFollowUpQuery(rawMessage, sessionId);
+    console.log(`User Question: "${rawMessage}" -> Resolved: "${message}" [Source: ${source}, Session: ${sessionId}]`);
+
     // Save user's message to history
     if (sessionId) {
-      await saveMessageToHistory(sessionId, "user", message, source, voiceMetadata);
+      await saveMessageToHistory(sessionId, "user", rawMessage, source, voiceMetadata);
     }
 
     const intent = detectIntent(message);
@@ -109,6 +175,11 @@ exports.chat = async (req, res) => {
 
     const knowledgeContext = searchKnowledgeBase(message);
     const escalation = detectEscalation(message);
+
+    const detectedTopic = extractTopicFromQuery(message, knowledgeContext);
+    if (sessionId && detectedTopic) {
+      sessionTopicMap.set(sessionId, detectedTopic);
+    }
 
     if (shouldUseKbFastPath(knowledgeContext)) {
       const kbFastReply = buildKbFastPayload(message, knowledgeContext);

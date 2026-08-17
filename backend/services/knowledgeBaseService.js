@@ -756,6 +756,22 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory) {
 
   const isCertificateQuery = queryTokens.includes("certificate") || queryTokens.includes("certificates") || queryTokens.includes("certification") || queryTokens.includes("cert");
 
+  // ── Negative penalty: Do NOT return company/CEO info for benefit/course/fee/internship queries ──
+  const isBenefitOrOutcomeQuery = queryTokens.includes("benefit") || queryTokens.includes("benefits") || queryTokens.includes("perk") || queryTokens.includes("perks") || queryTokens.includes("outcome") || queryTokens.includes("outcomes") || queryTokens.includes("gain") || queryTokens.includes("receive") || queryTokens.includes("after");
+  const isCourseOrInternshipQuery = queryTokens.includes("course") || queryTokens.includes("courses") || queryTokens.includes("internship") || queryTokens.includes("fee") || queryTokens.includes("fees") || queryTokens.includes("stipend") || isCertificateQuery;
+  const isCompanyIdentityRequested = queryTokens.includes("ceo") || queryTokens.includes("founder") || queryTokens.includes("owner") || queryTokens.includes("ashwin") || queryTokens.includes("namita") || queryTokens.includes("address") || queryTokens.includes("location") || queryTokens.includes("office") || queryTokens.includes("founded") || queryTokens.includes("started");
+
+  if ((isBenefitOrOutcomeQuery || isCourseOrInternshipQuery) && !isCompanyIdentityRequested) {
+    if (entry.category === "company") {
+      score -= 300; // Heavily penalise company/CEO entries when asking about benefits/courses/fees
+    }
+  }
+
+  // ── Specific benefit queries boost ─────────────────────────────────────
+  if (isBenefitOrOutcomeQuery && entry.category === "benefits") {
+    score += 150;
+  }
+
   // General company/about query boosting
   const aboutKeywords = [
     "weintern",
@@ -786,7 +802,7 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory) {
     companyIdentityKeywords.includes(token)
   );
 
-  if (hasAboutIntent && entry.category === "company" && !isCertificateQuery) {
+  if (hasAboutIntent && entry.category === "company" && !isCertificateQuery && !isBenefitOrOutcomeQuery && !isCourseOrInternshipQuery) {
     score += 25;
   }
 
@@ -900,6 +916,59 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory) {
     } else if (entry.category === "company" && normQ.includes("what is weintern")) {
       score -= 150;
     }
+  }
+
+  const isUiUxQuery = queryTokens.includes("ui") || queryTokens.includes("ux") || queryTokens.includes("figma") || queryTokens.includes("design");
+  if (isUiUxQuery) {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("ui") || normQ.includes("ux")) {
+      score += 200;
+    }
+  }
+
+  const isAiMlQuery = queryTokens.includes("ai") || queryTokens.includes("ml") || queryTokens.includes("automation") || queryTokens.includes("langchain") || queryTokens.includes("prompt");
+  if (isAiMlQuery) {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("ai") || normQ.includes("automation")) {
+      score += 200;
+    }
+  }
+
+  const isDigitalMarketingQuery = queryTokens.includes("marketing") || queryTokens.includes("seo") || queryTokens.includes("digital");
+  if (isDigitalMarketingQuery) {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("digital marketing") || normQ.includes("seo")) {
+      score += 200;
+    }
+  }
+
+  const isPythonQuery = queryTokens.includes("python");
+  if (isPythonQuery) {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("python")) {
+      score += 200;
+    }
+  }
+
+  const isJavaQuery = queryTokens.includes("java") && !queryTokens.includes("javascript");
+  if (isJavaQuery) {
+    const normQ = normalize(entry.question || "");
+    if (normQ.includes("java")) {
+      score += 200;
+    }
+  }
+
+  // Specific course fee booster
+  const isFeeQuery = queryTokens.includes("fee") || queryTokens.includes("fees") || queryTokens.includes("cost") || queryTokens.includes("price") || queryTokens.includes("structure");
+  if (isFeeQuery && entry.category === "fees") {
+    const normQ = normalize(entry.question || "");
+    if (isDataScienceQuery && normQ.includes("data science")) score += 250;
+    if (isFullStackQuery && normQ.includes("full stack")) score += 250;
+    if (isUiUxQuery && normQ.includes("ui") && normQ.includes("ux")) score += 250;
+    if (isAiMlQuery && normQ.includes("ai")) score += 250;
+    if (isDigitalMarketingQuery && (normQ.includes("digital marketing") || normQ.includes("marketing"))) score += 250;
+    if (isPythonQuery && normQ.includes("python")) score += 250;
+    if (isJavaQuery && normQ.includes("java")) score += 250;
   }
 
   queryTokens.forEach((token) => {

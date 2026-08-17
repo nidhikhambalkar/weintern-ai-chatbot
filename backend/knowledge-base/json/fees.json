@@ -1,6 +1,66 @@
 [
   {
     "category": "fees",
+    "question": "What is the fee for Data Science?",
+    "answer": "The fee for the Data Science & Analytics course (12 weeks) is ₹6,599."
+  },
+  {
+    "category": "fees",
+    "question": "What is the fee for Data Science course?",
+    "answer": "The fee for the Data Science & Analytics course (12 weeks) is ₹6,599."
+  },
+  {
+    "category": "fees",
+    "question": "What is the fee for Full Stack Web Development?",
+    "answer": "The fee for the Full Stack Web Development course (12 weeks) is ₹6,599."
+  },
+  {
+    "category": "fees",
+    "question": "What is the fee for AI & Automation?",
+    "answer": "The fee for the AI & Automation course (8 weeks) is ₹6,599."
+  },
+  {
+    "category": "fees",
+    "question": "What is the fee for Mobile App Development?",
+    "answer": "The fee for the Mobile App Development with Flutter course (10 weeks) is ₹10,699."
+  },
+  {
+    "category": "fees",
+    "question": "What is the fee for Cloud Computing?",
+    "answer": "The fee for the Cloud Computing & DevOps course (12 weeks) is ₹5,399."
+  },
+  {
+    "category": "fees",
+    "question": "What is the fee for Python Programming?",
+    "answer": "The fee for the Python Programming course (10 weeks) is ₹3,299."
+  },
+  {
+    "category": "fees",
+    "question": "What is the fee for Java Programming?",
+    "answer": "The fee for the Java Programming course (12 weeks) is ₹3,299."
+  },
+  {
+    "category": "fees",
+    "question": "What is the fee for C/C++ Programming?",
+    "answer": "The fee for the C/C++ Programming course (10 weeks) is ₹3,299."
+  },
+  {
+    "category": "fees",
+    "question": "What is the fee for UI/UX Design?",
+    "answer": "The fee for the UI/UX Design course (8 weeks) is ₹3,299."
+  },
+  {
+    "category": "fees",
+    "question": "What is the fee structure on digital marketing?",
+    "answer": "The fee for the Digital Marketing & SEO course (8 weeks) is ₹2,499."
+  },
+  {
+    "category": "fees",
+    "question": "What is the fee for Digital Marketing?",
+    "answer": "The fee for the Digital Marketing & SEO course (8 weeks) is ₹2,499."
+  },
+  {
+    "category": "fees",
     "question": "What are the internship fees, EMI options, and course prices?",
     "answer": "Here are the complete fee details for WeIntern programs and courses:\n\n📌 **6-Month Internship Program — ₹6,599**\n• Duration: 6 months (includes 2 months industry training + live project)\n• Price: ₹6,599\n• EMI Option: Split in 30:40:30 ratio across 3 installments (30% enrollment, 40% midpoint, 30% end)\n• One-Time Discount: 10% off on full upfront payment\n• Includes: Internship Certificate, Training Certificate, LOR, Mock Interview Prep, LinkedIn Profile Building, 100% Placement Guarantee, and performance stipend up to ₹10,000.\n\n📌 **3-Month Internship Program — ₹999**\n• Duration: 3 months\n• Price: ₹999 (one-time full payment)\n• Includes: Industry Training, Live Project, Internship Certificate, LOR, Placement Support, and performance stipend up to ₹10,000.\n\n📌 **All 10 Courses (Exact Durations & Fees)**\n1. Full Stack Web Development — 12 weeks — ₹6,599\n2. Mobile App Development — 10 weeks — ₹10,699\n3. AI & Automation — 8 weeks — ₹6,599\n4. Data Science & Analytics — 12 weeks — ₹6,599\n5. Python Programming — 10 weeks — ₹3,299\n6. Java Programming — 12 weeks — ₹3,299\n7. C/C++ Programming — 10 weeks — ₹3,299\n8. UI/UX Design — 8 weeks — ₹3,299\n9. Cloud Computing — 12 weeks — ₹5,399\n10. Digital Marketing — 8 weeks — ₹2,499\n\n💳 **Payment Methods**: Razorpay (UPI, Credit/Debit Cards, Net Banking, Paytm, PhonePe, GPay)."
   },
