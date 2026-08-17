@@ -568,7 +568,20 @@ export default function ChatWidget() {
 
   const startLeadForm = () => {
     setShowLeadForm(true);
-    setLeadStep(0);
+    setLeadStep(1);
+    const text = "📝 Great! Let's get you registered for the WeIntern Internship.\n\nPlease enter your Full Name:";
+    setMessages((prev) => [
+      ...prev,
+      {
+        sender: "bot",
+        text,
+        time: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      },
+    ]);
+
     setVoiceState("IDLE");
   };
 
@@ -1737,7 +1750,25 @@ export default function ChatWidget() {
                       </div>
                     </div>
                   ) : (
-                    <div className="whitespace-pre-line text-sm leading-relaxed">{msg.text}</div>
+                    <>
+                      <div className="whitespace-pre-line text-sm leading-relaxed">{msg.text}</div>
+                      {msg.sender === "bot" && (leadStep > 0 || showLeadForm) && index === messages.length - 1 && (
+                        <div className="mt-2.5 pt-2 border-t border-gray-100 flex flex-wrap gap-2">
+                          <button
+                            onClick={handleSkipLeadForm}
+                            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold rounded-lg border border-slate-300 text-xs transition flex items-center gap-1 shadow-sm cursor-pointer"
+                          >
+                            ⏩ Skip Registration / Continue without Registration
+                          </button>
+                          <button
+                            onClick={handleCloseLeadForm}
+                            className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 font-bold rounded-lg border border-red-200 text-xs transition flex items-center gap-1 cursor-pointer"
+                          >
+                            ✖ Close
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
 
                   {/* Action Bar & Footer */}
@@ -1947,6 +1978,29 @@ export default function ChatWidget() {
                   ⚠️ {errorMessage}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Registration Active Sticky Bar */}
+          {(showLeadForm || leadStep > 0) && (
+            <div className="bg-amber-50 border-t border-b border-amber-200 p-2 px-3 flex items-center justify-between gap-2 text-xs">
+              <span className="font-semibold text-amber-900 flex items-center gap-1">
+                📝 Registration in progress
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={handleSkipLeadForm}
+                  className="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 font-medium rounded-lg transition border border-amber-300 flex items-center gap-1 text-[11px] cursor-pointer"
+                >
+                  ⏩ Skip Registration
+                </button>
+                <button
+                  onClick={handleCloseLeadForm}
+                  className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-800 font-semibold rounded-lg transition border border-red-300 flex items-center gap-1 text-[11px] cursor-pointer"
+                >
+                  ✖ Close
+                </button>
+              </div>
             </div>
           )}
 
