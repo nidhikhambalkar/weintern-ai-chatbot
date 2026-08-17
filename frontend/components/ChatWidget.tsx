@@ -1010,20 +1010,6 @@ export default function ChatWidget() {
     };
 
     rec.onresult = (event: any) => {
-      // Discard any results if TTS started speaking during recording
-      if (isTtsSpeakingRef.current) {
-        if (silenceTimerRef.current) {
-          clearTimeout(silenceTimerRef.current);
-          silenceTimerRef.current = null;
-        }
-        try {
-          rec.stop();
-        } catch (e) {}
-        setInterimTranscript("");
-        latestInterimTranscriptRef.current = "";
-        return;
-      }
-
       let interim = "";
       let final = "";
       let alternatives: string[] = [];
@@ -1048,7 +1034,6 @@ export default function ChatWidget() {
             try { rec.stop(); } catch (_) {}
             setInterimTranscript("");
             latestInterimTranscriptRef.current = "";
-            setVoiceState("IDLE");
             return;
           }
         }
