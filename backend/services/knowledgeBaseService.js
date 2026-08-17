@@ -69,8 +69,11 @@ const TOKEN_MAP = {
   scholarships: "scholarship",
  
   interviews: "placement",
-  
-  jobs: "placement",
+  employee: "employee",
+  employees: "employee",
+  employment: "employment",
+  hiring: "hiring",
+  fulltime: "fulltime",
   rules: "policy",
   terms: "policy",
   conditions: "policy",
@@ -337,12 +340,13 @@ const TOKEN_MAP = {
 
 const CATEGORY_HINTS = {
   company: ["weintern", "company", "about weintern", "tell me about weintern", "what is weintern", "who is weintern", "who are weintern", "what does weintern do", "ceo", "founder", "owner", "location", "address", "introduce", "introduction", "overview", "info", "information", "platform", "edtech", "headquarter"],
+  employment: ["employee", "employment", "hiring", "hire", "work at weintern", "work for weintern", "job at weintern", "job opportunities", "is weintern hiring", "apply for job", "full-time", "full time", "hire interns as employees", "employee openings"],
   courses: ["course", "courses", "program", "learn", "training", "skill"],
   benefits: ["benefit", "benefits", "mentor", "mentor support", "doubt", "class", "recorded", "network", "soft skill", "softskills"],
   internship: ["internship", "intern", "onboarding", "attendance", "team", "selection", "daily task", "live project", "project", "register", "enroll", "apply", "payment", "pay", "upi", "eligible", "fresher", "beginner", "how long", "how many months"],
   certificates: ["certificate", "certification", "verify", "validity", "lor", "letter", "recommendation", "training certificate", "linkedin"],
   certification: ["certificate", "certification", "verify", "validity", "lor", "letter", "recommendation", "training certificate", "linkedin"],
-  placement: ["placement", "resume", "interview", "mock", "job", "career", "hire", "linkedin", "profile"],
+  placement: ["placement", "resume", "interview", "mock", "placement assistance", "job assistance", "placement guarantee", "linkedin", "profile"],
   fees: ["fees", "fee", "discount", "scholarship", "emi", "refund", "price"],
   contact: ["contact", "support", "helpdesk", "whatsapp", "email", "complaint", "escalation", "reach", "office hours", "phone", "number"],
   policies: ["policy", "terms", "conditions", "privacy", "conduct", "attendance", "rules"],
@@ -365,12 +369,18 @@ const CATEGORY_KEYWORD_MAP = {
     "introduce", "introduction", "overview", "info", "information",
     "platform", "edtech", "about", "vision", "mission"
   ],
+  employment: [
+    "employee", "employment", "hiring", "hire", "work at weintern", "work for weintern",
+    "job at weintern", "job opportunities", "is weintern hiring", "apply for job",
+    "fulltime", "full-time", "hire interns as employees", "employee openings",
+    "career opportunities", "join as employee", "join as an employee", "join your company"
+  ],
   courses: ["course", "courses", "program", "training", "skill", "learn", "about course", "about courses", "course details", "course information", "program details", "program information", "training details", "training information", "skill development", "learn skills", "learn programming", "learn coding", "learn data science", "learn ai ml", "learn python", "learn java", "learn ui ux", "learn digital marketing", "learn cyber security", "learn cloud computing"],
   benefits: ["benefit", "benefits", "mentor", "doubt", "class", "recorded", "network", "soft skill", "softskills"],
   internship: ["internship", "intern", "onboarding", "attendance", "team", "selection", "daily task", "live project", "project", "register", "enroll", "apply", "payment", "upi", "eligible", "fresher", "beginner"],
   certificates: ["certificate", "certification", "verify", "validity", "lor", "letter", "recommendation", "training certificate", "linkedin"],
   certification: ["certificate", "certification", "verify", "validity", "lor", "letter", "recommendation", "training certificate", "linkedin"],
-  placement: ["placement", "resume", "interview", "mock", "job", "career", "hire", "linkedin", "profile"],
+  placement: ["placement", "resume", "interview", "mock", "placement assistance", "job assistance", "placement guarantee", "linkedin", "profile"],
   fees: ["fees", "fee", "discount", "scholarship", "emi", "refund", "price"],
   contact: ["contact", "support", "helpdesk", "whatsapp", "email", "complaint", "escalation", "reach", "office hours"],
   policies: ["policy", "terms", "conditions", "privacy", "conduct", "attendance", "rules"],
@@ -396,6 +406,14 @@ function preNormalize(text = "") {
 
   // 2. Hinglish/informal phrase-level normalizations
   const phraseMap = [
+    // Employment & joining as employee intent
+    [/\b(can\s+i\s+)?join\s+(weintern\s+|your\s+company\s+)?as\s+(an?\s+)?employee\b/gi, "join as employee"],
+    [/\b(can\s+i|how\s+can\s+i|i\s+want\s+to)\s+work\s+(at|for|in)\s+weintern\b/gi, "work at weintern"],
+    [/\bis\s+weintern\s+hiring\b/gi, "is weintern hiring"],
+    [/\b(job|career|full\s*time)\s+(opportunity|opportunities|vacancies|openings|opening)\b/gi, "job opportunities"],
+    [/\bhire\s+interns?\s+as\s+employees?\b/gi, "hire interns as employees"],
+    [/\b(can\s+i\s+)?apply\s+for\s+a?\s*job\b/gi, "apply for job"],
+    [/\bcan\s+i\s+join\s+your\s+company\b/gi, "join as employee"],
     // Registration intent
     [/\b(register|enroll|apply|join|signup)\s+karna\s+(hai|h|hoga|he)\b/gi, "registration want"],
     [/\b(register|enroll|apply|join)\s+kaise\s+(kare|karu|karein|karna|hoga)\b/gi, "how registration"],
@@ -580,6 +598,7 @@ function inferCategoryHints(queryTokens) {
 function detectStrongCategory(queryTokens) {
   // Direct priority mapping for exact categories
   const directCategories = [
+    "employment",
     "placement",
     "fees",
     "domains",
@@ -592,6 +611,19 @@ function detectStrongCategory(queryTokens) {
     "company",
     "internship"
   ];
+
+  const isEmploymentQuery =
+    queryTokens.includes("employee") ||
+    queryTokens.includes("employment") ||
+    queryTokens.includes("hiring") ||
+    (queryTokens.includes("work") && (queryTokens.includes("weintern") || queryTokens.includes("company") || queryTokens.includes("here") || queryTokens.includes("want"))) ||
+    (queryTokens.includes("job") && (queryTokens.includes("opportunities") || queryTokens.includes("opportunity") || queryTokens.includes("vacancy") || queryTokens.includes("opening") || queryTokens.includes("apply") || queryTokens.includes("weintern") || queryTokens.includes("fulltime"))) ||
+    queryTokens.includes("fulltime") ||
+    (queryTokens.includes("hire") && queryTokens.includes("interns"));
+
+  if (isEmploymentQuery) {
+    return "employment";
+  }
   
   // Virtual category routing to physical KB categories
   const isSixMonthQuery = (
@@ -847,6 +879,24 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory, rawQuery 
   const querySet = new Set(queryTokens);
 
   let score = 0;
+
+  // ── EMPLOYMENT INTENT HIGH-PRIORITY SCORING ─────────────────────────────────
+  const isEmploymentQuery =
+    queryTokens.includes("employee") ||
+    queryTokens.includes("employment") ||
+    queryTokens.includes("hiring") ||
+    (queryTokens.includes("work") && (queryTokens.includes("weintern") || queryTokens.includes("company") || queryTokens.includes("here") || queryTokens.includes("want"))) ||
+    (queryTokens.includes("job") && (queryTokens.includes("opportunities") || queryTokens.includes("opportunity") || queryTokens.includes("vacancy") || queryTokens.includes("opening") || queryTokens.includes("apply") || queryTokens.includes("weintern") || queryTokens.includes("fulltime"))) ||
+    queryTokens.includes("fulltime") ||
+    (queryTokens.includes("hire") && queryTokens.includes("interns"));
+
+  if (isEmploymentQuery) {
+    if (entry.category === "employment") {
+      score += 600;
+    } else {
+      score -= 450;
+    }
+  }
 
   // ── COURSES_LIST HIGH-PRIORITY SCORING ──────────────────────────────────────
   const isListQuery = isCoursesListQuery(rawQuery || queryTokens.join(" "), queryTokens);

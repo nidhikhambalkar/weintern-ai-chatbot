@@ -15,34 +15,35 @@ const testQueries = [
   "which courses can I join",
   "list of courses",
   "list all the courses they provide",
-  
+  "tell me more about all the courses",
+
   // COURSE_CONTENT
   "What does UI/UX include?",
   "what ui ux include",
   "uiux mein kya sikhate ho?",
   "data science mein kya sikhate ho?",
   "what will i learn in full stack?",
-  
+
   // COURSE_BENEFITS
   "what are benefits of ui/ux?",
   "what are data science benefits?",
   "what are digital marketing benefits?",
-  
+
   // COURSE_FEES
   "what is the fee for ui/ux?",
   "how much is full stack fee?",
   "what is python fee?",
-  
+
   // COURSE_DURATION
   "what is mobile app development duration?",
   "what is c++ duration?",
-  
+
   // INTERNSHIP_BENEFITS & CONTENT
   "what are internship benefits?",
   "what is 6-month internship fee?",
   "who is eligible for internship?",
   "what is internship stipend?",
-  
+
   // COMPANY & CONTACT & FOUNDER & PLACEMENT
   "what is weinterm?",
   "who is ceo of weintern?",
@@ -50,10 +51,17 @@ const testQueries = [
   "do i get a certificate from course?",
   "what is weintern mission?",
   "is placement guarantee provided?",
-  "how to contact mentor?"
+  "how to contact mentor?",
+
+  // EMPLOYMENT INTENT VARIATIONS
+  "Can I join as an employee?",
+  "Can I work at WeIntern?",
+  "Are there job opportunities at WeIntern?",
+  "Is WeIntern hiring?",
+  "Can I apply for a job at WeIntern?"
 ];
 
-console.log("================ STARTING 35 INTENT & RETRIEVAL AUDIT TEST SUITE ================\n");
+console.log("================ STARTING INTENT & RETRIEVAL AUDIT TEST SUITE ================\n");
 
 let passedCount = 0;
 
@@ -62,10 +70,10 @@ testQueries.forEach((rawQ, i) => {
   const intent = detectIntent(sanitized);
   const kb = searchKnowledgeBase(sanitized);
   const topMatch = kb.matches[0];
-  
+
   const isCourseListQuery = /what courses|which courses|list of courses|courses available|courses provided|courses offer|programs do you have|what can i learn|list all/i.test(rawQ);
   const isMasterCourseAnswer = topMatch?.answer?.includes("Full Stack") && topMatch?.answer?.includes("Python");
-  
+
   let passed = false;
   if (isCourseListQuery) {
     passed = topMatch && (isMasterCourseAnswer || topMatch.question.toLowerCase().includes("courses") || topMatch.question.toLowerCase().includes("learn"));
