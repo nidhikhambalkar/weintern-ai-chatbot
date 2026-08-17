@@ -771,11 +771,14 @@ export default function ChatWidget() {
 
   const handleResumeOrContinueMessage = () => {
     const synth = synthesisRef.current || (typeof window !== "undefined" ? window.speechSynthesis : null);
-    console.log("[TTS CONTINUE]", {
-      paused: synth?.paused,
-      speaking: synth?.speaking,
+    
+    console.log("[TTS RESUME DEBUG - BEFORE]", {
       activeUtteranceExists: !!activeUtteranceRef.current,
+      speaking: synth?.speaking,
+      paused: synth?.paused,
       playbackState,
+      voiceState,
+      utteranceTextPreview: activeUtteranceRef.current?.text?.substring(0, 30),
     });
 
     // Rule: CONTINUE must verify active utterance exists and state is paused
@@ -793,7 +796,12 @@ export default function ChatWidget() {
 
     // Rule: Call ONLY speechSynthesis.resume() on the existing utterance without recreating or calling speak()
     try {
-      synth.resume();
+      console.log("[TTS RESUME] Calling window.speechSynthesis.resume()...");
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.resume();
+      } else if (synth) {
+        synth.resume();
+      }
     } catch (e) {
       console.error("[TTS CONTINUE ERROR]", e);
     }
@@ -801,6 +809,14 @@ export default function ChatWidget() {
     isTtsSpeakingRef.current = true;
     setPlaybackState("PLAYING");
     setVoiceState("SPEAKING");
+
+    console.log("[TTS RESUME DEBUG - AFTER]", {
+      activeUtteranceExists: !!activeUtteranceRef.current,
+      speaking: synth?.speaking,
+      paused: synth?.paused,
+      playbackState: "PLAYING",
+      voiceState: "SPEAKING",
+    });
   };
 
   // Speaks response using Web Speech Synthesis (TTS)
