@@ -175,10 +175,19 @@ export default function LeadForm({ onClose, onSuccess, onSkip }: LeadFormProps) 
             className="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 outline-none transition"
           >
             <option value="">Select a domain...</option>
+            <option value="Full Stack Web Development">Full Stack Web Development</option>
+            <option value="Mobile App Development">Mobile App Development</option>
+            <option value="AI & Automation">AI & Automation</option>
+            <option value="Data Science & Analytics">Data Science & Analytics</option>
+            <option value="Python Programming">Python Programming</option>
+            <option value="Java Programming">Java Programming</option>
+            <option value="C/C++ Programming">C/C++ Programming</option>
+            <option value="Cloud Computing & DevOps">Cloud Computing & DevOps</option>
+            <option value="UI/UX Design">UI/UX Design</option>
+            <option value="Digital Marketing & SEO">Digital Marketing & SEO</option>
             <option value="Full Stack Development">Full Stack Development</option>
             <option value="Data Science">Data Science</option>
             <option value="Artificial Intelligence & Machine Learning">AI & Machine Learning</option>
-            <option value="UI/UX Design">UI/UX Design</option>
             <option value="Digital Marketing">Digital Marketing</option>
             <option value="Cyber Security">Cyber Security</option>
           </select>
