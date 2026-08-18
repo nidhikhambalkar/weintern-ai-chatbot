@@ -273,7 +273,7 @@ function buildKnowledgeIndex() {
 
 const knowledgeIndex = buildKnowledgeIndex();
 
-// Flattened list of all 1979 FAQ entries with precomputed tokens
+// Flattened list of all FAQ entries with precomputed tokens
 const ALL_FAQ_ENTRIES = [];
 Object.entries(knowledgeIndex).forEach(([category, entries]) => {
   entries.forEach((entry) => {
@@ -308,7 +308,7 @@ ALL_FAQ_ENTRIES.forEach((faq) => {
 function searchKnowledgeBase(message = "") {
   const rawQuery = String(message || "").trim();
   if (!rawQuery) {
-    return { query: "", matches: [], contextText: "", hasMatch: false };
+    return { query: "", matches: [], topMatch: null, contextText: "", hasMatch: false };
   }
 
   const queryClean = cleanStr(rawQuery);
@@ -418,6 +418,7 @@ function searchKnowledgeBase(message = "") {
   return {
     query: queryClean,
     matches: [],
+    topMatch: null,
     contextText: "",
     hasMatch: false,
   };
