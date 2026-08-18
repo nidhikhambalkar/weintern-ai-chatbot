@@ -152,27 +152,6 @@ exports.chat = async (req, res) => {
       await saveMessageToHistory(sessionId, "user", rawMessage, source, voiceMetadata);
     }
 
-    const intent = detectIntent(message);
-
-    if (intent.type !== "weintern") {
-      const replyText = intent.response;
-      if (sessionId) {
-        await saveMessageToHistory(sessionId, "bot", replyText, "text", null);
-      }
-      return res.json({
-        success: true,
-        reply: replyText,
-        mode: intent.type,
-        escalation: false,
-        recommendedAction:
-          intent.type === "greeting"
-            ? "Continue with the guided conversation."
-            : "Please ask a WeIntern-related question.",
-        knowledgeMatches: [],
-        responseTimeMs: Date.now() - startTime,
-      });
-    }
-
     const knowledgeContext = searchKnowledgeBase(message);
     const escalation = detectEscalation(message);
 
@@ -194,6 +173,27 @@ exports.chat = async (req, res) => {
           escalation.length > 0
             ? "Please contact support or raise a human escalation request."
             : "Continue with the guided answer.",
+        responseTimeMs: Date.now() - startTime,
+      });
+    }
+
+    const intent = detectIntent(message);
+
+    if (intent.type !== "weintern") {
+      const replyText = intent.response;
+      if (sessionId) {
+        await saveMessageToHistory(sessionId, "bot", replyText, "text", null);
+      }
+      return res.json({
+        success: true,
+        reply: replyText,
+        mode: intent.type,
+        escalation: false,
+        recommendedAction:
+          intent.type === "greeting"
+            ? "Continue with the guided conversation."
+            : "Please ask a WeIntern-related question.",
+        knowledgeMatches: [],
         responseTimeMs: Date.now() - startTime,
       });
     }
