@@ -1,0 +1,88 @@
+{
+  "sessions": [
+    {
+      "_id": "2",
+      "id": 2,
+      "created_at": "2026-08-18T09:41:22.389Z",
+      "session_id": "sess-test-01"
+    },
+    {
+      "_id": "3",
+      "id": 3,
+      "created_at": "2026-08-18T10:33:56.346Z",
+      "session_id": "session_1787049225243_04owuqj",
+      "updated_at": "2026-08-18T10:33:56.410Z"
+    }
+  ],
+  "messages": [
+    {
+      "session_id": "sess-test-01",
+      "sender": "user",
+      "message": "What is the internship duration?",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T09:41:22.389Z",
+      "_id": "6a8428c265997335e5796f10"
+    },
+    {
+      "session_id": "session_1787049225243_04owuqj",
+      "sender": "user",
+      "message": "What are the internship fees, EMI options, and course prices?",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T10:33:56.379Z",
+      "_id": "6a843514fa8d091702ee0294"
+    },
+    {
+      "session_id": "session_1787049225243_04owuqj",
+      "sender": "bot",
+      "message": "Here are the complete fee details for WeIntern programs and courses:\n\n📌 **6-Month Internship Program — ₹6,599**\n• Duration: 6 months (includes 2 months industry training + live project)\n• Price: ₹6,599\n• EMI Option: Split in 30:40:30 ratio across 3 installments (30% enrollment, 40% midpoint, 30% end)\n• One-Time Discount: 10% off on full upfront payment\n• Includes: Internship Certificate, Training Certificate, LOR, Mock Interview Prep, LinkedIn Profile Building, 100% Placement Guarantee, and performance stipend up to ₹10,000.\n\n📌 **3-Month Internship Program — ₹999**\n• Duration: 3 months\n• Price: ₹999 (one-time full payment)\n• Includes: Industry Training, Live Project, Internship Certificate, LOR, Placement Support, and performance stipend up to ₹10,000.\n\n📌 **All 10 Courses (Exact Durations & Fees)**\n1. Full Stack Web Development — 12 weeks — ₹6,599\n2. Mobile App Development — 10 weeks — ₹10,699\n3. AI & Automation — 8 weeks — ₹6,599\n4. Data Science & Analytics — 12 weeks — ₹6,599\n5. Python Programming — 10 weeks — ₹3,299\n6. Java Programming — 12 weeks — ₹3,299\n7. C/C++ Programming — 10 weeks — ₹3,299\n8. UI/UX Design — 8 weeks — ₹3,299\n9. Cloud Computing — 12 weeks — ₹5,399\n10. Digital Marketing — 8 weeks — ₹2,499\n\n💳 **Payment Methods**: Razorpay (UPI, Credit/Debit Cards, Net Banking, Paytm, PhonePe, GPay).",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T10:33:56.411Z",
+      "_id": "6a843514fa8d091702ee0295"
+    }
+  ],
+  "leads": [
+    {
+      "name": "Alice Intern",
+      "email": "alice@example.com",
+      "phone": "9876543210",
+      "preferred_domain": "Web Development",
+      "status": "new",
+      "created_at": "2026-08-18T09:41:22.292Z",
+      "_id": "6a8428c265997335e5796f0f"
+    },
+    {
+      "_id": "2",
+      "id": 2,
+      "created_at": "2026-08-18T09:59:54.497Z",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "phone": "+91 9876543210",
+      "preferred_domain": "Full Stack Development",
+      "status": "new"
+    }
+  ],
+  "escalations": [
+    {
+      "session_id": "sess-test-01",
+      "issue": "User requested manual callback regarding certificate validity.",
+      "status": "in_progress",
+      "created_at": "2026-08-18T09:41:22.520Z",
+      "_id": "6a8428c265997335e5796f11",
+      "updated_at": "2026-08-18T09:41:22.619Z"
+    }
+  ],
+  "users": [],
+  "faqs": [],
+  "autoId": {
+    "sessions": 3,
+    "messages": 1,
+    "leads": 2,
+    "escalations": 1,
+    "users": 1,
+    "faqs": 1
+  },
+  "lastSaved": "2026-08-18T10:33:56.418Z"
+}
