@@ -798,5 +798,10 @@
     "category": "contact",
     "question": "Can I join WeIntern's community group (WhatsApp/Discord/LinkedIn)?",
     "answer": "Yes! Students receive community invitation links upon registration to connect on WhatsApp, Discord, and LinkedIn."
+  },
+  {
+    "category": "certificates",
+    "question": "What is LOR?",
+    "answer": "LOR stands for Letter of Recommendation. It is an official endorsement letter issued by WeIntern leadership to high-performing interns, validating their project contributions, technical skills, and professional conduct during the internship program."
   }
 ]

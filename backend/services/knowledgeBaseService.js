@@ -1529,6 +1529,7 @@ function searchKnowledgeBase(message = "") {
   return {
     query,
     matches: bestMatches,
+    topMatch: bestMatches[0] || null,
     contextText,
     hasMatch: bestMatches.length > 0,
   };
