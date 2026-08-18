@@ -1305,12 +1305,17 @@ export default function ChatWidget() {
       if (playbackStateRef.current === "IDLE" && voiceStateRef.current !== "PROCESSING") {
         if (silenceTimerRef.current) {
           clearTimeout(silenceTimerRef.current);
+          silenceTimerRef.current = null;
         }
+
+        // Only start long-silence timer if user has spoken something AND is not currently mid-word/mid-phrase
         if (currentDisplay.length > 0) {
+          // If interim speech is active, give user time; set timer for 3.5s of continuous silence after final speech chunk
+          const silenceDuration = interim ? 4000 : 3500;
           silenceTimerRef.current = setTimeout(() => {
-            console.log("⚡ Natural end of speech detected (2.0s silence). Finalizing sentence...");
+            console.log("⚡ Genuine end of speech detected (3.5s silence). Finalizing complete sentence...");
             finalizeSpeechAndProcess();
-          }, 2000);
+          }, silenceDuration);
         }
       }
     };
@@ -1320,7 +1325,7 @@ export default function ChatWidget() {
         if (isVoiceSessionActiveRef.current || isCommandOnlyModeRef.current || playbackStateRef.current !== "IDLE") {
           setTimeout(() => {
             if (!isListeningRef.current && recognitionRef.current) {
-              try { recognitionRef.current.start(); } catch (_) {}
+              try { recognitionRef.current.start(); isListeningRef.current = true; } catch (_) {}
             }
           }, 100);
           return;
@@ -1351,9 +1356,10 @@ export default function ChatWidget() {
 
     rec.onend = () => {
       isListeningRef.current = false;
+      // If voice session is active (user speaking question) or command mode active, restart automatically to capture long utterances
       if (isVoiceSessionActiveRef.current || isCommandOnlyModeRef.current || playbackStateRef.current === "PLAYING" || playbackStateRef.current === "PAUSED") {
         setTimeout(() => {
-          if (!isListeningRef.current && recognitionRef.current) {
+          if (!isListeningRef.current && recognitionRef.current && (isVoiceSessionActiveRef.current || isCommandOnlyModeRef.current)) {
             try {
               recognitionRef.current.start();
               isListeningRef.current = true;
