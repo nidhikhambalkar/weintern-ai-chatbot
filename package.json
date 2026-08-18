@@ -9,7 +9,8 @@
     "dev:backend": "npm run dev --prefix backend",
     "dev:frontend": "npm run dev --prefix frontend",
     "build:frontend": "npm run build --prefix frontend",
-    "seed:kb": "npm run seed:kb --prefix backend"
+    "seed:kb": "npm run seed:kb --prefix backend",
+    "seed:mongo": "npm run seed:mongo --prefix backend"
   },
   "dependencies": {
     "next": "16.3.0",

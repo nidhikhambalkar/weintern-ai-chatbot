@@ -285,6 +285,17 @@ export async function saveLead(lead: Record<string, unknown>) {
 	}
 }
 
+export async function getLeads() {
+	try {
+		const url = buildUrl('/api/leads');
+		const res = await safeFetch(url);
+		return await handleJsonResponse(res);
+	} catch (err: any) {
+		console.warn('[chatApi] Failed to fetch leads:', err.message);
+		return { success: false, data: [], error: err.message };
+	}
+}
+
 export async function getHistory(session_id: string) {
 	try {
 		const url = buildUrl('/api/history', { session_id });
@@ -339,5 +350,6 @@ export async function createEscalation(session_id: string, issue: string) {
 	}
 }
 
-export default { sendChat, saveLead, getHistory, saveHistory, clearHistory, createEscalation };
+export default { sendChat, saveLead, getLeads, getHistory, saveHistory, clearHistory, createEscalation };
+
 
