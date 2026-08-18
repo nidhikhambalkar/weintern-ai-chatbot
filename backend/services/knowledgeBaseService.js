@@ -414,6 +414,26 @@ function searchKnowledgeBase(message = "") {
       score += 10000;
     }
 
+    // ── Student Fee Payment Intent Booster ──────────────────────────────────────
+    const isPaymentQuery = /\b(how\s+to\s+(make\s+)?payment|how\s+(do\s+i|can\s+i)\s+pay|payment\s+kaise|fees\s+kaise|pay\s+fees|fees\s+pay|payment\s+options|payment\s+methods|razorpay|bank\s+transfer|upi|gpay|phonepe|paytm|emi|installment|installments|how\s+to\s+pay)\b/i.test(queryClean);
+
+    if (isPaymentQuery) {
+      const isClientIntegrationQuery = /\b(integrate|integration|client|custom\s+website|develop|software|build\s+website|stripe)\b/i.test(queryClean);
+      
+      if (!isClientIntegrationQuery) {
+        // Suppress IT Service WeNexa Payment Integration FAQs
+        if (faq.question.toLowerCase().includes("integrate payment") || faq.question.toLowerCase().includes("stripe integration")) {
+          score -= 8000;
+        }
+
+        // Boost Official Student Payment FAQs
+        const isOfficialPaymentFaq = (faq.answer.includes("Razorpay") || faq.question.toLowerCase().includes("payment") || faq.question.toLowerCase().includes("pay") || faq.question.toLowerCase().includes("emi")) && (faq.category === "fees" || faq.category === "faq" || faq.category === "internship");
+        if (isOfficialPaymentFaq) {
+          score += 10000;
+        }
+      }
+    }
+
     // ── Domain + Tech-Stack / Tools Intent Booster ────────────────────────
     const isTechStackQuery = /\b(technologies|technology|tech\s*stack|tools|tool|software|framework|frameworks|languages|what\s+will\s+i\s+learn|kya\s+sikhoge|kya\s+technologies|kaunse\s+tools|kya\s+kya\s+seekhenge|use\s+hota)\b/i.test(queryClean);
 
