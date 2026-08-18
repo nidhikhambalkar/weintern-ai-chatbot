@@ -22,7 +22,7 @@ function safeReadJson(filePath) {
   }
 }
 
-// GET / and GET /faq - return FAQ entries from MongoDB or KB JSON fallback
+// GET / and GET /faq - return all FAQ entries from MongoDB or KB JSON fallback across all categories
 router.get(["/", "/faq"], async (req, res) => {
   try {
     if (getIsDbConnected()) {
@@ -38,9 +38,25 @@ router.get(["/", "/faq"], async (req, res) => {
     console.warn("⚠️ [FAQ Route] MongoDB query error, falling back to JSON:", dbErr.message);
   }
 
-  const faqPath = path.join(KB_DIR, "faq.json");
-  const entries = safeReadJson(faqPath);
-  res.json({ success: true, source: "file", count: entries.length, data: entries });
+  const allFaqs = [];
+  const files = fs.existsSync(KB_DIR)
+    ? fs.readdirSync(KB_DIR).filter((file) => file.endsWith(".json"))
+    : [];
+
+  files.forEach((fileName) => {
+    const category = fileName.replace(/\.json$/, "");
+    const filePath = path.join(KB_DIR, fileName);
+    const entries = safeReadJson(filePath);
+    entries.forEach((entry) => {
+      allFaqs.push({
+        category: entry.category || category,
+        question: entry.question || entry.title || "",
+        answer: entry.answer || entry.description || "",
+      });
+    });
+  });
+
+  res.json({ success: true, source: "file", count: allFaqs.length, data: allFaqs });
 });
 
 module.exports = router;
