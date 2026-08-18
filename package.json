@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "postinstall": "cd frontend && npm install",
     "dev": "cd frontend && npm run dev",
     "build": "cd frontend && npm run build",
     "start": "cd frontend && npm run start",
@@ -13,8 +14,11 @@
     "seed:mongo": "npm run seed:mongo --prefix backend"
   },
   "dependencies": {
+    "@tailwindcss/postcss": "^4",
     "next": "16.3.0",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "react-icons": "^5.7.0",
+    "tailwindcss": "^4"
   }
 }

@@ -31,6 +31,14 @@
     {
       "session_id": "session_1787055082695_13lc260",
       "created_at": "2026-08-18T12:11:36.687Z"
+    },
+    {
+      "session_id": "session_1787055531527_m057w88",
+      "created_at": "2026-08-18T12:20:01.287Z"
+    },
+    {
+      "session_id": "session_1787057896409_yony1nj",
+      "created_at": "2026-08-18T12:58:51.061Z"
     }
   ],
   "messages": [
@@ -213,6 +221,264 @@
       "source": "text",
       "voice_metadata": null,
       "timestamp": "2026-08-18T12:11:54.810Z"
+    },
+    {
+      "id": 17,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "user",
+      "message": "what is we Intel",
+      "source": "voice",
+      "voice_metadata": {
+        "duration": 3.2,
+        "confidence": 0.95
+      },
+      "timestamp": "2026-08-18T12:20:01.312Z"
+    },
+    {
+      "id": 18,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "bot",
+      "message": "Yes, interns work on real live client projects or simulated industry assignments under mentor guidance rather than basic theoretical tasks.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:20:01.915Z"
+    },
+    {
+      "id": 19,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "user",
+      "message": "what is my internet",
+      "source": "voice",
+      "voice_metadata": {
+        "duration": 3.8,
+        "confidence": 0.95
+      },
+      "timestamp": "2026-08-18T12:20:16.592Z"
+    },
+    {
+      "id": 20,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "user",
+      "message": "what is",
+      "source": "voice",
+      "voice_metadata": {
+        "duration": 1.4,
+        "confidence": 0.95
+      },
+      "timestamp": "2026-08-18T12:20:33.036Z"
+    },
+    {
+      "id": 21,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "bot",
+      "message": "I'm the WeIntern Assistant. I can answer questions only about WeIntern internships, courses, fees, certifications, placements, mentor support, and related topics.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:20:33.936Z"
+    },
+    {
+      "id": 22,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "bot",
+      "message": "I'm sorry, I couldn't find that information in the official WeIntern knowledge base. Please contact the WeIntern support team at contact@we-intern.in or WhatsApp +91 74149 74582 for further assistance.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:20:43.867Z"
+    },
+    {
+      "id": 23,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "user",
+      "message": "we in",
+      "source": "voice",
+      "voice_metadata": {
+        "duration": 1,
+        "confidence": 0.95
+      },
+      "timestamp": "2026-08-18T12:20:48.840Z"
+    },
+    {
+      "id": 24,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "bot",
+      "message": "Yes, interns work on real live client projects or simulated industry assignments under mentor guidance rather than basic theoretical tasks.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:20:49.682Z"
+    },
+    {
+      "id": 25,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "user",
+      "message": "what is WeIntern",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:21:07.997Z"
+    },
+    {
+      "id": 26,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "bot",
+      "message": "WeIntern is an EdTech career development platform designed to help students, beginners, and freshers build real-world, industry-ready skills.\n\nKey Highlights:\n🚀 Learn → Build → Work → Earn Model — Combine structured domain training, hands-on live projects, team internship work, and performance-based stipend opportunities up to ₹10,000.\n📚 Comprehensive Programs — Offers industry-oriented training in Full Stack Web Development, Mobile App Development, AI & Automation, Data Science & Analytics, Python, Java, C/C++, UI/UX Design, Cloud Computing, and Digital Marketing.\n👨‍🏫 Mentor & Career Support — Dedicated guidance from experienced domain mentors, doubt resolution, resume building, and placement preparation.\n📜 Recognized Credentials — Official verified certificates backed by recognitions and associations including MSME (Government of India), NSDC, Skill India Mission, Ministry of Skill Development & Entrepreneurship, AICTE, Google Partner, AWS, and ISO 9001:2015 certification.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:21:08.001Z"
+    },
+    {
+      "id": 27,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "user",
+      "message": "What internship domains are available at WeIntern",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:21:47.633Z"
+    },
+    {
+      "id": 28,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "bot",
+      "message": "Available domains include Web Development, App Development, AI & Machine Learning, Data Science, UI/UX Design, Digital Marketing, Content Writing, Human Resources, Business Development, and Software Development.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:21:47.642Z"
+    },
+    {
+      "id": 29,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "user",
+      "message": "what is maintain maintain",
+      "source": "voice",
+      "voice_metadata": {
+        "duration": 5,
+        "confidence": 0.95
+      },
+      "timestamp": "2026-08-18T12:21:59.290Z"
+    },
+    {
+      "id": 30,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "bot",
+      "message": "Yes, ongoing app maintenance, bug fixes, and feature upgrades are supported.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:22:00.366Z"
+    },
+    {
+      "id": 31,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "user",
+      "message": "inten sorry",
+      "source": "voice",
+      "voice_metadata": {
+        "duration": 2.2,
+        "confidence": 0.95
+      },
+      "timestamp": "2026-08-18T12:22:11.996Z"
+    },
+    {
+      "id": 32,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "bot",
+      "message": "I'm the WeIntern Assistant. I can answer questions only about WeIntern internships, courses, fees, certifications, placements, mentor support, and related topics.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:22:12.710Z"
+    },
+    {
+      "id": 33,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "user",
+      "message": "what is we inter",
+      "source": "voice",
+      "voice_metadata": {
+        "duration": 3.2,
+        "confidence": 0.95
+      },
+      "timestamp": "2026-08-18T12:22:18.100Z"
+    },
+    {
+      "id": 34,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "bot",
+      "message": "Yes, interns work on real live client projects or simulated industry assignments under mentor guidance rather than basic theoretical tasks.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:22:19.037Z"
+    },
+    {
+      "id": 35,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "user",
+      "message": "what is WeIntern",
+      "source": "voice",
+      "voice_metadata": {
+        "duration": 3.2,
+        "confidence": 0.95
+      },
+      "timestamp": "2026-08-18T12:22:30.361Z"
+    },
+    {
+      "id": 36,
+      "session_id": "session_1787055531527_m057w88",
+      "sender": "bot",
+      "message": "WeIntern is an EdTech career development platform designed to help students, beginners, and freshers build real-world, industry-ready skills.\n\nKey Highlights:\n🚀 Learn → Build → Work → Earn Model — Combine structured domain training, hands-on live projects, team internship work, and performance-based stipend opportunities up to ₹10,000.\n📚 Comprehensive Programs — Offers industry-oriented training in Full Stack Web Development, Mobile App Development, AI & Automation, Data Science & Analytics, Python, Java, C/C++, UI/UX Design, Cloud Computing, and Digital Marketing.\n👨‍🏫 Mentor & Career Support — Dedicated guidance from experienced domain mentors, doubt resolution, resume building, and placement preparation.\n📜 Recognized Credentials — Official verified certificates backed by recognitions and associations including MSME (Government of India), NSDC, Skill India Mission, Ministry of Skill Development & Entrepreneurship, AICTE, Google Partner, AWS, and ISO 9001:2015 certification.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:22:30.377Z"
+    },
+    {
+      "id": 37,
+      "session_id": "session_1787057896409_yony1nj",
+      "sender": "user",
+      "message": "What internship domains are available at WeIntern",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:58:51.076Z"
+    },
+    {
+      "id": 38,
+      "session_id": "session_1787057896409_yony1nj",
+      "sender": "bot",
+      "message": "Available domains include Web Development, App Development, AI & Machine Learning, Data Science, UI/UX Design, Digital Marketing, Content Writing, Human Resources, Business Development, and Software Development.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:58:51.096Z"
+    },
+    {
+      "id": 39,
+      "session_id": "session_1787057896409_yony1nj",
+      "sender": "user",
+      "message": "How can I contact your team?",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:59:14.514Z"
+    },
+    {
+      "id": 40,
+      "session_id": "session_1787057896409_yony1nj",
+      "sender": "bot",
+      "message": "You can contact us through our Website Contact Form, LinkedIn, Email (contact@we-intern.in), WhatsApp (+91 74149 74582), or Social Media Channels.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:59:14.525Z"
+    },
+    {
+      "id": 41,
+      "session_id": "session_1787057896409_yony1nj",
+      "sender": "user",
+      "message": "What internship domains are available at WeIntern",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:59:27.002Z"
+    },
+    {
+      "id": 42,
+      "session_id": "session_1787057896409_yony1nj",
+      "sender": "bot",
+      "message": "Available domains include Web Development, App Development, AI & Machine Learning, Data Science, UI/UX Design, Digital Marketing, Content Writing, Human Resources, Business Development, and Software Development.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:59:27.017Z"
     }
   ],
   "leads": [
@@ -250,11 +516,11 @@
   "faqs": [],
   "autoId": {
     "sessions": 4,
-    "messages": 17,
+    "messages": 43,
     "leads": 2,
     "escalations": 1,
     "users": 1,
     "faqs": 1
   },
-  "lastSaved": "2026-08-18T12:11:54.811Z"
+  "lastSaved": "2026-08-18T12:59:27.017Z"
 }
