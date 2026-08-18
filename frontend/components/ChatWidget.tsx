@@ -1952,11 +1952,11 @@ function StudentAvatar() {
             type="button"
             onClick={() => setOpen(true)}
             aria-label="Open WeIntern AI Assistant"
-            className="fixed bottom-5 right-5 z-[9999] cursor-pointer"
+            className="fixed bottom-3 right-3 sm:bottom-5 sm:right-5 z-[9999] cursor-pointer touch-manipulation"
           >
-            <div className="boy-launcher relative flex h-[76px] w-[76px] items-center justify-center rounded-full border-[3px] border-white bg-gradient-to-br from-sky-400 via-blue-500 to-blue-800 shadow-[0_12px_40px_rgba(14,116,244,0.4)]">
+            <div className="boy-launcher relative flex h-16 w-16 sm:h-[76px] sm:w-[76px] items-center justify-center rounded-full border-[3px] border-white bg-gradient-to-br from-sky-400 via-blue-500 to-blue-800 shadow-[0_12px_40px_rgba(14,116,244,0.4)]">
               <AIBoyAvatar size="launcher" />
-              <span className="online-dot absolute bottom-0 right-0 h-5 w-5 rounded-full border-[3px] border-white bg-green-500" />
+              <span className="online-dot absolute bottom-0 right-0 h-4 w-4 sm:h-5 sm:w-5 rounded-full border-2 sm:border-[3px] border-white bg-green-500" />
             </div>
           </button>
         </>
@@ -1981,47 +1981,48 @@ function StudentAvatar() {
           </div>
 
           {/* CHAT WINDOW CONTAINER */}
-          <div className="fixed bottom-5 right-5 z-[9999] flex h-[min(720px,calc(100vh-40px))] w-[410px] max-w-[calc(100vw-24px)] flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_25px_90px_rgba(15,23,42,0.30)]">
+          <div className="fixed inset-0 sm:inset-auto sm:bottom-5 sm:right-5 z-[9999] flex h-[100dvh] sm:h-[min(720px,calc(100vh-40px))] w-full sm:w-[410px] max-w-full sm:max-w-[calc(100vw-24px)] flex-col overflow-hidden rounded-none sm:rounded-[28px] border-0 sm:border border-slate-200 bg-white shadow-2xl sm:shadow-[0_25px_90px_rgba(15,23,42,0.30)]">
 
             {/* HEADER */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-[#0784dc] via-[#087fce] to-[#0759a5] px-5 py-4 text-white">
-              <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
-              <div className="absolute -left-20 bottom-[-80px] h-44 w-44 rounded-full bg-cyan-200/10 blur-3xl" />
+            <div className="relative shrink-0 overflow-hidden bg-gradient-to-br from-[#0784dc] via-[#087fce] to-[#0759a5] px-3.5 sm:px-5 py-3.5 sm:py-4 text-white">
+              <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-white/10 blur-3xl pointer-events-none" />
+              <div className="absolute -left-20 bottom-[-80px] h-44 w-44 rounded-full bg-cyan-200/10 blur-3xl pointer-events-none" />
 
-              <div className="relative flex items-center justify-between">
+              <div className="relative flex items-center justify-between gap-2">
                 {/* LEFT */}
-                <div className="flex items-center gap-3">
-                  <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white shadow-lg">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                  <div className="relative flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white shadow-lg">
                     <img
                       src="/weintern_avatar.png"
                       alt="WeIntern AI Assistant"
                       draggable={false}
                       className="absolute left-[-40%] top-[-3%] h-[132%] w-[180%] max-w-none object-contain"
                     />
-                    <span className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white bg-green-500" />
+                    <span className="absolute bottom-0 right-0 h-3 w-3 sm:h-3.5 sm:w-3.5 rounded-full border-2 border-white bg-green-500" />
                   </div>
 
-                  <div>
-                    <h2 className="text-[16px] font-bold tracking-tight text-white">
+                  <div className="min-w-0">
+                    <h2 className="text-sm sm:text-[16px] font-bold tracking-tight text-white truncate">
                       WeIntern AI Assistant ✨
                     </h2>
-                    <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-white/85">
-                      <span className="h-1.5 w-1.5 rounded-full bg-green-300" />
-                      <span>Here to help you 24/7 {voiceMode && "• Voice Mode Active"}</span>
+                    <div className="mt-0.5 flex items-center gap-1 text-[10px] sm:text-[11px] text-white/85 truncate">
+                      <span className="h-1.5 w-1.5 rounded-full bg-green-300 shrink-0" />
+                      <span className="truncate">Here to help 24/7 {voiceMode && "• Voice Mode"}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* RIGHT HEADER CONTROLS */}
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
                   {/* Clear History */}
                   <button
                     type="button"
                     onClick={() => setShowClearConfirm(true)}
                     title="Clear chat history"
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 cursor-pointer"
+                    aria-label="Clear chat history"
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 cursor-pointer min-h-[32px] min-w-[32px]"
                   >
-                    <BsTrash size={15} />
+                    <BsTrash size={14} />
                   </button>
 
                   {/* Speaker Output Toggle */}
@@ -2035,9 +2036,10 @@ function StudentAvatar() {
                       }
                     }}
                     title={isSpeakerMuted ? "Unmute bot output" : "Mute bot output"}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 cursor-pointer"
+                    aria-label={isSpeakerMuted ? "Unmute bot output" : "Mute bot output"}
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 cursor-pointer min-h-[32px] min-w-[32px]"
                   >
-                    {isSpeakerMuted ? <BsVolumeMuteFill size={16} /> : <BsVolumeUpFill size={16} />}
+                    {isSpeakerMuted ? <BsVolumeMuteFill size={15} /> : <BsVolumeUpFill size={15} />}
                   </button>
 
                   {/* Voice Mode Toggle */}
@@ -2058,19 +2060,20 @@ function StudentAvatar() {
                       }
                     }}
                     title={voiceMode ? "Disable Voice Mode" : "Enable Voice Mode"}
-                    className={`flex h-8 w-8 items-center justify-center rounded-full transition cursor-pointer ${
+                    aria-label={voiceMode ? "Disable Voice Mode" : "Enable Voice Mode"}
+                    className={`flex h-8 w-8 items-center justify-center rounded-full transition cursor-pointer min-h-[32px] min-w-[32px] ${
                       voiceMode ? "bg-amber-400 text-gray-900 font-bold shadow-md" : "bg-white/10 hover:bg-white/20 text-white"
                     }`}
                   >
-                    {voiceMode ? <BsMicFill size={16} /> : <BsMicMuteFill size={16} />}
+                    {voiceMode ? <BsMicFill size={15} /> : <BsMicMuteFill size={15} />}
                   </button>
 
                   {/* CLOSE */}
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
-                    aria-label="Close chat"
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25 cursor-pointer ml-0.5"
+                    aria-label="Close chat window"
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25 cursor-pointer ml-0.5 min-h-[32px] min-w-[32px]"
                   >
                     <BsX size={22} />
                   </button>
@@ -2235,7 +2238,7 @@ function StudentAvatar() {
                     )}
 
                     <div
-                      className={`max-w-[76%] px-3.5 py-2.5 shadow-sm ${
+                      className={`max-w-[85%] sm:max-w-[78%] px-3.5 py-2.5 shadow-sm break-words-anywhere ${
                         msg.sender === "user"
                           ? "order-1 rounded-2xl rounded-br-md bg-gradient-to-r from-[#168de2] to-[#087fce] text-white"
                           : "rounded-2xl rounded-bl-md border border-slate-100 bg-white text-slate-700"
