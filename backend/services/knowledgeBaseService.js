@@ -388,6 +388,12 @@ function searchKnowledgeBase(message = "") {
       }
     }
 
+    // Trust & Recognition Domain Booster
+    const isTrustQuery = /\b(msme|nsdc|aicte|iso|trust|trustworthy|credible|credibility|recognition|recognitions|affiliated|affiliations|credentials)\b/i.test(queryClean);
+    if (isTrustQuery && faq.answer.includes("Ministry of MSME")) {
+      score += 10000;
+    }
+
     if (score >= 18) {
       scoredMatches.push({
         category: faq.category,
