@@ -47,6 +47,10 @@
     {
       "session_id": "test_session_verification",
       "created_at": "2026-08-18T14:01:12.761Z"
+    },
+    {
+      "session_id": "sim_test_session",
+      "created_at": "2026-08-18T14:07:31.336Z"
     }
   ],
   "messages": [
@@ -1012,6 +1016,240 @@
       "source": "text",
       "voice_metadata": null,
       "timestamp": "2026-08-18T14:01:13.355Z"
+    },
+    {
+      "id": 101,
+      "session_id": "sim_test_session",
+      "sender": "user",
+      "message": "Who are you?",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.356Z"
+    },
+    {
+      "id": 102,
+      "session_id": "sim_test_session",
+      "sender": "bot",
+      "message": "I’m the WeIntern AI Assistant. I can help you with information about WeIntern’s courses, internships, fees, benefits, certifications, eligibility, and other official WeIntern information.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.359Z"
+    },
+    {
+      "id": 103,
+      "session_id": "sim_test_session",
+      "sender": "user",
+      "message": "What is WeIntern",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.381Z"
+    },
+    {
+      "id": 104,
+      "session_id": "sim_test_session",
+      "sender": "bot",
+      "message": "WeIntern is an EdTech career development platform designed to help students, beginners, and freshers build real-world, industry-ready skills.\n\nKey Highlights:\n🚀 Learn → Build → Work → Earn Model — Combine structured domain training, hands-on live projects, team internship work, and performance-based stipend opportunities up to ₹10,000.\n📚 Comprehensive Programs — Offers industry-oriented training in Full Stack Web Development, Mobile App Development, AI & Automation, Data Science & Analytics, Python, Java, C/C++, UI/UX Design, Cloud Computing, and Digital Marketing.\n👨‍🏫 Mentor & Career Support — Dedicated guidance from experienced domain mentors, doubt resolution, resume building, and placement preparation.\n📜 Recognized Credentials — Official verified certificates backed by recognitions and associations including MSME (Government of India), NSDC, Skill India Mission, Ministry of Skill Development & Entrepreneurship, AICTE, Google Partner, AWS, and ISO 9001:2015 certification.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.383Z"
+    },
+    {
+      "id": 105,
+      "session_id": "sim_test_session",
+      "sender": "user",
+      "message": "What courses do you offer?",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.388Z"
+    },
+    {
+      "id": 106,
+      "session_id": "sim_test_session",
+      "sender": "bot",
+      "message": "WeIntern offers a complete career development ecosystem for students and freshers:\n\n**Programs:**\n• 6-Month Internship Program — ₹6,599 | 100% Placement Guarantee\n• 3-Month Internship Program — ₹999 | Placement Support\n\n**What's Included:**\n✅ Industry-oriented professional training\n✅ Live project experience\n✅ Experienced mentor guidance & doubt support\n✅ Internship Completion Certificate\n✅ Training Certificate\n✅ Letter of Recommendation (LOR) — 6-Month plan\n✅ Mock interview preparation\n✅ LinkedIn profile building\n✅ Resume building support\n✅ Performance-based stipend up to ₹10,000\n✅ 100% Placement guarantee — 6-Month plan\n\n**Domains:** Full Stack Web Dev, AI & Automation, Data Science, Python, Java, C/C++, Cloud Computing, DevOps, Digital Marketing, UI/UX Design, Cyber Security, and more.\n\n📱 WhatsApp: +91 74149 74582 | 🌐 we-intern.in",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.455Z"
+    },
+    {
+      "id": 107,
+      "session_id": "sim_test_session",
+      "sender": "user",
+      "message": "What are the fees?",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.461Z"
+    },
+    {
+      "id": 108,
+      "session_id": "sim_test_session",
+      "sender": "bot",
+      "message": "Here are the exact fees and durations for all 10 WeIntern courses:\n\n1. Full Stack Web Development — 12 weeks — ₹6,599\n2. Mobile App Development — 10 weeks — ₹10,699\n3. AI & Automation — 8 weeks — ₹6,599\n4. Data Science & Analytics — 12 weeks — ₹6,599\n5. Python Programming — 10 weeks — ₹3,299\n6. Java Programming — 12 weeks — ₹3,299\n7. C/C++ Programming — 10 weeks — ₹3,299\n8. UI/UX Design — 8 weeks — ₹3,299\n9. Cloud Computing — 12 weeks — ₹5,399\n10. Digital Marketing — 8 weeks — ₹2,499",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.501Z"
+    },
+    {
+      "id": 109,
+      "session_id": "sim_test_session",
+      "sender": "user",
+      "message": "Tell me about the internship program.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.506Z"
+    },
+    {
+      "id": 110,
+      "session_id": "sim_test_session",
+      "sender": "bot",
+      "message": "WeIntern internship durations range from 8 weeks to 12 weeks depending on the chosen domain. AI & Automation, UI/UX Design, and Digital Marketing are 8 weeks; Mobile App Development, Python Programming, and C/C++ Programming are 10 weeks; Full Stack Web Development, Data Science & Analytics, Cloud Computing, and Java Programming are 12 weeks.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.566Z"
+    },
+    {
+      "id": 111,
+      "session_id": "sim_test_session",
+      "sender": "user",
+      "message": "How can I register?",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.571Z"
+    },
+    {
+      "id": 112,
+      "session_id": "sim_test_session",
+      "sender": "bot",
+      "message": "To register for WeIntern:\n1. Click the 'Apply / Register' button or type 'register'/'apply'.\n2. Fill out the application form (Name, Email, Phone, Preferred Domain) in the chat.\n3. Our team will review your application and contact you via Email/WhatsApp within 24 hours to guide you with the next steps.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.612Z"
+    },
+    {
+      "id": 113,
+      "session_id": "sim_test_session",
+      "sender": "user",
+      "message": "What certificates do you provide?",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.616Z"
+    },
+    {
+      "id": 114,
+      "session_id": "sim_test_session",
+      "sender": "bot",
+      "message": "Yes! WeIntern provides multiple certificates based on your program:\n\n**6-Month Program (₹6,599):**\n📜 Internship Completion Certificate\n📜 Training Certificate\n📜 Letter of Recommendation (LOR)\n📜 Domain/Program-specific certificates\n\n**3-Month Program (₹999):**\n📜 Internship Certificate\n📜 Applicable program certificates\n\nCertificates are digitally verifiable. For more details: 📱 +91 74149 74582 | 🌐 we-intern.in",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.671Z"
+    },
+    {
+      "id": 115,
+      "session_id": "sim_test_session",
+      "sender": "user",
+      "message": "What domains are available?",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.676Z"
+    },
+    {
+      "id": 116,
+      "session_id": "sim_test_session",
+      "sender": "bot",
+      "message": "WeIntern offers internship training across 10+ technology and business domains:\n\n1. Full Stack Web Development\n2. Mobile App Development (Flutter)\n3. AI & Automation\n4. Data Science & Analytics\n5. Python Programming\n6. Java Programming\n7. C/C++ Programming\n8. Cloud Computing & DevOps\n9. UI/UX Design\n10. Digital Marketing",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.678Z"
+    },
+    {
+      "id": 117,
+      "session_id": "sim_test_session",
+      "sender": "user",
+      "message": "What is the duration of the courses?",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.682Z"
+    },
+    {
+      "id": 118,
+      "session_id": "sim_test_session",
+      "sender": "bot",
+      "message": "Here are the exact fees and durations for all 10 WeIntern courses:\n\n1. Full Stack Web Development — 12 weeks — ₹6,599\n2. Mobile App Development — 10 weeks — ₹10,699\n3. AI & Automation — 8 weeks — ₹6,599\n4. Data Science & Analytics — 12 weeks — ₹6,599\n5. Python Programming — 10 weeks — ₹3,299\n6. Java Programming — 12 weeks — ₹3,299\n7. C/C++ Programming — 10 weeks — ₹3,299\n8. UI/UX Design — 8 weeks — ₹3,299\n9. Cloud Computing — 12 weeks — ₹5,399\n10. Digital Marketing — 8 weeks — ₹2,499",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.744Z"
+    },
+    {
+      "id": 119,
+      "session_id": "sim_test_session",
+      "sender": "user",
+      "message": "WeIntern kya hai?",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.749Z"
+    },
+    {
+      "id": 120,
+      "session_id": "sim_test_session",
+      "sender": "bot",
+      "message": "WeIntern is an EdTech career development platform designed to help students, beginners, and freshers build real-world, industry-ready skills.\n\nKey Highlights:\n🚀 Learn → Build → Work → Earn Model — Combine structured domain training, hands-on live projects, team internship work, and performance-based stipend opportunities up to ₹10,000.\n📚 Comprehensive Programs — Offers industry-oriented training in Full Stack Web Development, Mobile App Development, AI & Automation, Data Science & Analytics, Python, Java, C/C++, UI/UX Design, Cloud Computing, and Digital Marketing.\n👨‍🏫 Mentor & Career Support — Dedicated guidance from experienced domain mentors, doubt resolution, resume building, and placement preparation.\n📜 Recognized Credentials — Official verified certificates backed by recognitions and associations including MSME (Government of India), NSDC, Skill India Mission, Ministry of Skill Development & Entrepreneurship, AICTE, Google Partner, AWS, and ISO 9001:2015 certification.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.751Z"
+    },
+    {
+      "id": 121,
+      "session_id": "sim_test_session",
+      "sender": "user",
+      "message": "WeIntern ke courses kya hai?",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.755Z"
+    },
+    {
+      "id": 122,
+      "session_id": "sim_test_session",
+      "sender": "bot",
+      "message": "WeIntern offers the following industry-oriented training courses:\n\n1. Full Stack Web Development (12 weeks)\n2. Mobile App Development with Flutter (10 weeks)\n3. AI & Automation (8 weeks)\n4. Data Science & Analytics (12 weeks)\n5. Python Programming (10 weeks)\n6. Java Programming (12 weeks)\n7. C/C++ Programming (10 weeks)\n8. Cloud Computing & DevOps (12 weeks)\n9. UI/UX Design (8 weeks)\n10. Digital Marketing & SEO (8 weeks)",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.814Z"
+    },
+    {
+      "id": 123,
+      "session_id": "sim_test_session",
+      "sender": "user",
+      "message": "fees kya hai?",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.818Z"
+    },
+    {
+      "id": 124,
+      "session_id": "sim_test_session",
+      "sender": "bot",
+      "message": "The fee for the AI & Automation course (8 weeks) is ₹6,599.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.821Z"
+    },
+    {
+      "id": 125,
+      "session_id": "sim_test_session",
+      "sender": "user",
+      "message": "mujhe internship ke baare mein batao",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.825Z"
+    },
+    {
+      "id": 126,
+      "session_id": "sim_test_session",
+      "sender": "bot",
+      "message": "WeIntern is an EdTech career development platform designed to help students, beginners, and freshers build real-world, industry-ready skills.\n\nKey Highlights:\n🚀 Learn → Build → Work → Earn Model — Combine structured domain training, hands-on live projects, team internship work, and performance-based stipend opportunities up to ₹10,000.\n📚 Comprehensive Programs — Offers industry-oriented training in Full Stack Web Development, Mobile App Development, AI & Automation, Data Science & Analytics, Python, Java, C/C++, UI/UX Design, Cloud Computing, and Digital Marketing.\n👨‍🏫 Mentor & Career Support — Dedicated guidance from experienced domain mentors, doubt resolution, resume building, and placement preparation.\n📜 Recognized Credentials — Official verified certificates backed by recognitions and associations including MSME (Government of India), NSDC, Skill India Mission, Ministry of Skill Development & Entrepreneurship, AICTE, Google Partner, AWS, and ISO 9001:2015 certification.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T14:07:31.877Z"
     }
   ],
   "leads": [
@@ -1049,11 +1287,11 @@
   "faqs": [],
   "autoId": {
     "sessions": 4,
-    "messages": 101,
+    "messages": 127,
     "leads": 2,
     "escalations": 1,
     "users": 1,
     "faqs": 1
   },
-  "lastSaved": "2026-08-18T14:01:13.355Z"
+  "lastSaved": "2026-08-18T14:07:31.877Z"
 }
