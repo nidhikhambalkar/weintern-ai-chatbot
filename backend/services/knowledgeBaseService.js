@@ -388,8 +388,14 @@ function searchKnowledgeBase(message = "") {
       }
     }
 
+    // Overview Domain Booster
+    const isOverviewQuery = /\b(weintern info|info about weintern|what is weintern|tell me about weintern|weintern kya hai|explain weintern|give me information about weintern|weintern ke baare|what does weintern do)\b/i.test(queryClean);
+    if (isOverviewQuery && faq.answer.includes("Learn → Build → Work → Earn")) {
+      score += 10000;
+    }
+
     // Trust & Recognition Domain Booster
-    const isTrustQuery = /\b(msme|nsdc|aicte|iso|trust|trustworthy|credible|credibility|recognition|recognitions|affiliated|affiliations|credentials)\b/i.test(queryClean);
+    const isTrustQuery = /\b(msme|nsdc|aicte|iso|trust|trustworthy|credible|credibility|legit|legitimate|recognition|recognitions|recognized|affiliated|affiliations|credentials)\b/i.test(queryClean);
     if (isTrustQuery && faq.answer.includes("Ministry of MSME")) {
       score += 10000;
     }
