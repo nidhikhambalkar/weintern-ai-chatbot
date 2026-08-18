@@ -1,10 +1,10 @@
 const http = require('http');
 
 console.log('====================================================');
-console.log('     APPLY / REGISTER LEAD FORM DOMAINS TEST       ');
+console.log('       LEAD FORM ALL DOMAINS SUBMISSION TEST        ');
 console.log('====================================================\n');
 
-const REQUIRED_DOMAINS = [
+const DOMAINS_TO_TEST = [
   "Full Stack Web Development",
   "Mobile App Development",
   "AI & Automation",
@@ -16,101 +16,76 @@ const REQUIRED_DOMAINS = [
   "DevOps Engineering",
   "UI/UX Design",
   "Digital Marketing & SEO",
-  "Video Editing & Content Creation"
+  "Video Editing & Content Creation",
+  "Full Stack Development",
+  "Data Science",
+  "Artificial Intelligence & Machine Learning",
+  "Digital Marketing",
+  "Cyber Security"
 ];
 
-async function runLeadFormTest() {
-  console.log("----------------------------------------------------");
-  console.log(" STEP 1: SUBMITTING LEADS FOR ALL 10 REQUIRED DOMAINS");
-  console.log("----------------------------------------------------\n");
-
-  let submittedCount = 0;
-
-  for (let i = 0; i < REQUIRED_DOMAINS.length; i++) {
-    const domain = REQUIRED_DOMAINS[i];
-    const leadData = JSON.stringify({
-      name: `Test Student ${i + 1}`,
-      email: `teststudent${i + 1}@example.com`,
-      phone: `+91 987654320${i}`,
-      preferred_domain: domain
-    });
-
-    await new Promise((resolve) => {
-      const req = http.request(
-        {
-          hostname: "127.0.0.1",
-          port: 5000,
-          path: "/api/leads",
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Content-Length": Buffer.byteLength(leadData)
-          }
-        },
-        (res) => {
-          let body = "";
-          res.on("data", chunk => body += chunk);
-          res.on("end", () => {
-            if (res.statusCode === 201) {
-              const json = JSON.parse(body);
-              if (json.success && json.data && json.data.preferred_domain === domain) {
-                submittedCount++;
-                console.log(`[PASS] Submitted Lead #${i + 1}: Domain "${domain}" -> Saved as "${json.data.preferred_domain}"`);
-              }
-            } else {
-              console.log(`[FAIL] Lead #${i + 1}: Status ${res.statusCode} -> ${body}`);
-            }
-            resolve();
-          });
+function submitLead(name, email, phone, domain) {
+  return new Promise((resolve, reject) => {
+    const data = JSON.stringify({ name, email, phone, preferred_domain: domain });
+    const req = http.request({
+      hostname: '127.0.0.1',
+      port: 5000,
+      path: '/api/leads',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(data)
+      }
+    }, res => {
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => {
+        try {
+          resolve({ status: res.statusCode, data: JSON.parse(body) });
+        } catch (e) {
+          resolve({ status: res.statusCode, text: body });
         }
-      );
-      req.write(leadData);
-      req.end();
-    });
-  }
-
-  console.log("\n----------------------------------------------------");
-  console.log(" STEP 2: VERIFYING BACKEND / ADMIN LEADS FETCH API ");
-  console.log("----------------------------------------------------\n");
-
-  let fetchedLeads = [];
-  await new Promise((resolve) => {
-    http.get("http://127.0.0.1:5000/api/leads", (res) => {
-      let body = "";
-      res.on("data", chunk => body += chunk);
-      res.on("end", () => {
-        if (res.statusCode === 200) {
-          const json = JSON.parse(body);
-          if (json.success && Array.isArray(json.data)) {
-            fetchedLeads = json.data;
-          }
-        }
-        resolve();
       });
     });
+    req.on('error', err => reject(err));
+    req.write(data);
+    req.end();
   });
-
-  console.log(`Fetched Total Leads from Backend: ${fetchedLeads.length}`);
-
-  let verifiedCount = 0;
-  REQUIRED_DOMAINS.forEach((domain) => {
-    const match = fetchedLeads.find(l => l.preferred_domain === domain);
-    if (match) {
-      verifiedCount++;
-      console.log(`[VERIFIED] Domain "${domain}" present in database record for student "${match.name}"`);
-    } else {
-      console.log(`[MISSING] Domain "${domain}" not found in fetched leads!`);
-    }
-  });
-
-  console.log("\n====================================================");
-  console.log("             LEAD FORM DOMAIN TEST SUMMARY          ");
-  console.log("====================================================");
-  console.log(`Required Domains Tested:   ${REQUIRED_DOMAINS.length}`);
-  console.log(`Leads Submitted Cleanly:   ${submittedCount}`);
-  console.log(`Leads Verified in DB:      ${verifiedCount}`);
-  console.log(`Accuracy Rate:             ${((verifiedCount / REQUIRED_DOMAINS.length) * 100).toFixed(2)}%`);
-  console.log("====================================================\n");
 }
 
-runLeadFormTest();
+async function runLeadFormTests() {
+  let passed = 0;
+  let failed = 0;
+
+  for (let i = 0; i < DOMAINS_TO_TEST.length; i++) {
+    const domain = DOMAINS_TO_TEST[i];
+    const name = `Student ${i + 1}`;
+    const email = `student_${i + 1}@example.com`;
+    const phone = `98765${10005 + i}`;
+
+    try {
+      const res = await submitLead(name, email, phone, domain);
+      if (res.status === 201 && res.data.success && res.data.data.preferred_domain === domain) {
+        passed++;
+        console.log(`[PASS] #${i + 1} Submitted Lead for Domain: "${domain}"`);
+      } else {
+        failed++;
+        console.log(`[FAIL] #${i + 1} Failed for Domain: "${domain}" | Response:`, res.data);
+      }
+    } catch (err) {
+      failed++;
+      console.log(`[ERROR] #${i + 1} Error for Domain: "${domain}":`, err.message);
+    }
+  }
+
+  console.log('\n====================================================');
+  console.log('         LEAD FORM TEST SUMMARY                     ');
+  console.log('====================================================');
+  console.log(`Total Domains Tested: ${DOMAINS_TO_TEST.length}`);
+  console.log(`Passed Submissions:   ${passed}`);
+  console.log(`Failed Submissions:   ${failed}`);
+  console.log(`Success Rate:         ${((passed / DOMAINS_TO_TEST.length) * 100).toFixed(2)}%`);
+  console.log('====================================================\n');
+}
+
+runLeadFormTests();

@@ -350,49 +350,6 @@ export async function createEscalation(session_id: string, issue: string) {
 	}
 }
 
-export async function createPaymentOrder(details: {
-	name: string;
-	email: string;
-	phone: string;
-	preferred_domain: string;
-	internship_duration: string;
-}) {
-	try {
-		const url = buildUrl('/api/leads/payment/order');
-		const res = await safeFetch(url, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(details),
-		});
-		return await handleJsonResponse(res);
-	} catch (err: any) {
-		console.warn('[chatApi] Payment order failed:', err.message);
-		return { success: false, error: err.message };
-	}
-}
-
-export async function verifyPayment(paymentPayload: {
-	razorpay_order_id?: string;
-	razorpay_payment_id?: string;
-	razorpay_signature?: string;
-	email: string;
-	phone: string;
-	payment_status?: string;
-}) {
-	try {
-		const url = buildUrl('/api/leads/payment/verify');
-		const res = await safeFetch(url, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(paymentPayload),
-		});
-		return await handleJsonResponse(res);
-	} catch (err: any) {
-		console.warn('[chatApi] Payment verification failed:', err.message);
-		return { success: false, error: err.message };
-	}
-}
-
-export default { sendChat, saveLead, getLeads, getHistory, saveHistory, clearHistory, createEscalation, createPaymentOrder, verifyPayment };
+export default { sendChat, saveLead, getLeads, getHistory, saveHistory, clearHistory, createEscalation };
 
 
