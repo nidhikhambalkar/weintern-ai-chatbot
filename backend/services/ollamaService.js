@@ -2,7 +2,8 @@ const axios = require("axios");
 
 const OLLAMA_HOST = process.env.OLLAMA_HOST || "http://localhost:11434";
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "llama3.2";
-const OLLAMA_TIMEOUT_MS = Number(process.env.OLLAMA_TIMEOUT_MS || 60000);
+// Bounded timeout for AI LLM requests (3 seconds default so cloud production never hangs)
+const OLLAMA_TIMEOUT_MS = Number(process.env.OLLAMA_TIMEOUT_MS || 3000);
 
 const SYSTEM_PROMPT = `You are WeIntern AI, the official virtual assistant of WeIntern.
 
@@ -67,9 +68,19 @@ function buildFallbackResponse(message, context) {
 }
 
 async function generateChatResponse({ message, context }) {
+  const isCloudProduction = process.env.NODE_ENV === "production" && OLLAMA_HOST.includes("localhost");
+
+  // If in cloud production without a remote LLM host, immediately use KB fallback to eliminate latency
+  if (isCloudProduction && context?.matches?.length > 0) {
+    console.log("[AI Service] Cloud production mode detected without external LLM host. Fast-pathing KB answer.");
+    return buildFallbackResponse(message, context);
+  }
+
   const prompt = `${SYSTEM_PROMPT}\n\nKnowledge Context:\n${context?.contextText || "No additional context available."}\n\nUser Message:\n${message}\n\nGive a helpful answer in 2-4 short paragraphs or bullets.`;
+  const startTime = Date.now();
 
   try {
+    console.log(`[AI Service] Requesting LLM response for: "${message.substring(0, 50)}..."`);
     const response = await axios.post(
       `${OLLAMA_HOST}/api/generate`,
       {
@@ -86,26 +97,33 @@ async function generateChatResponse({ message, context }) {
       }
     );
 
+    const duration = Date.now() - startTime;
     const answer = response?.data?.response || "";
 
-    return {
-      success: true,
-      mode: "ollama",
-      response: answer.trim(),
-    };
+    if (answer && answer.trim().length > 0) {
+      console.log(`[AI Service] LLM generation completed successfully in ${duration}ms`);
+      return {
+        success: true,
+        mode: "ollama",
+        response: answer.trim(),
+      };
+    }
+    throw new Error("Empty response from LLM");
   } catch (error) {
+    const duration = Date.now() - startTime;
+    console.warn(`[AI Service] LLM unavailable/failed in ${duration}ms (${error.message}). Utilizing Knowledge Base fallback.`);
     return buildFallbackResponse(message, context);
   }
 }
 
 async function pingOllama() {
   try {
-    const res = await axios.get(`${OLLAMA_HOST}/api/tags`, { timeout: 5000 });
+    const res = await axios.get(`${OLLAMA_HOST}/api/tags`, { timeout: 3000 });
     const models = res.data?.models || [];
     return { ok: true, model: OLLAMA_MODEL, models };
   } catch (err) {
     try {
-      const versionRes = await axios.get(`${OLLAMA_HOST}/api/version`, { timeout: 5000 });
+      const versionRes = await axios.get(`${OLLAMA_HOST}/api/version`, { timeout: 3000 });
       return { ok: true, model: OLLAMA_MODEL, version: versionRes.data?.version };
     } catch (vErr) {
       return { ok: false, error: err.message };

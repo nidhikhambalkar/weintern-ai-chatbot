@@ -263,7 +263,12 @@ export async function sendChat(message: string, source: string = 'text', session
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ message, source, session_id, voice_metadata: voiceMetadata }),
 		});
-		return await handleJsonResponse(res);
+		const data = await handleJsonResponse(res);
+		const answerText = data?.data?.answer || data?.reply || data?.response || data?.message || "";
+		return {
+			...data,
+			reply: answerText,
+		};
 	} catch (err: any) {
 		console.warn("[chatApi] Backend connection issue, utilizing offline fallback response:", err.message);
 		return getOfflineFallbackResponse(message);

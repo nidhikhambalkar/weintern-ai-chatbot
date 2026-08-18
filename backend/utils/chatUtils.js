@@ -138,7 +138,11 @@ function buildKbFastPayload(message, context) {
 
   return {
     success: true,
+    message: "Success",
     reply: topMatch.answer,
+    data: {
+      answer: topMatch.answer,
+    },
     mode: "kb-fast",
     escalation: false,
     recommendedAction: "Continue with the guided answer.",
