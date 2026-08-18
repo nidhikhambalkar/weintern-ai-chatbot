@@ -402,9 +402,22 @@ function searchKnowledgeBase(message = "") {
       }
     }
 
+    // ── Bot Identity Intent Booster vs Company Overview ────────────────────────
+    const isBotIdentityQuery = /\b(who\s+are\s+you|who\s+are\s+you\s+exactly|what\s+are\s+you|introduce\s+yourself|tell\s+me\s+about\s+yourself|what\s+can\s+you\s+do|are\s+you\s+a\s+(weintern\s+)?chatbot|are\s+you\s+a\s+(weintern\s+)?bot|what\s+is\s+this\s+chatbot|what\s+is\s+this\s+bot|what\s+do\s+you\s+do|how\s+can\s+you\s+help\s+me|who\s+made\s+you|who\s+built\s+you|what\s+is\s+your\s+name|aap\s+kaun\s+ho|tum\s+kaun\s+ho|tu\s+kon\s+ahes|ap\s+kaun\s+ho|tum\s+kon\s+ho|who\s+r\s+u|what\s+r\s+u)\b/i.test(queryClean);
+    const isExplicitCompanyQuery = /\b(what\s+is\s+weintern|what\s+is\s+weintern\s+company|who\s+is\s+weintern(\s+company)?|who\s+are\s+weintern(\s+company)?|tell\s+me\s+about\s+weintern(\s+company)?|about\s+weintern\s+company)\b/i.test(queryClean);
+
+    if (isBotIdentityQuery && !isExplicitCompanyQuery) {
+      if (faq.question.toLowerCase().includes("who are you") || faq.question.toLowerCase().includes("what is this chatbot") || faq.question.toLowerCase().includes("tell me about yourself") || faq.question.toLowerCase().includes("introduce yourself") || faq.question.toLowerCase().includes("what can you do") || faq.question.toLowerCase().includes("are you a weintern chatbot")) {
+        score += 20000;
+      }
+      if (faq.question.toLowerCase().includes("what is weintern") || faq.question.toLowerCase().includes("who are weintern") || faq.question.toLowerCase().includes("who is weintern") || faq.question.toLowerCase().includes("tell me about weintern") || faq.question.toLowerCase().includes("introduce weintern")) {
+        score -= 15000;
+      }
+    }
+
     // Overview Domain Booster
-    const isOverviewQuery = /\b(weintern info|info about weintern|what is weintern|tell me about weintern|weintern kya hai|explain weintern|give me information about weintern|weintern ke baare|what does weintern do)\b/i.test(queryClean);
-    if (isOverviewQuery && faq.answer.includes("Learn → Build → Work → Earn")) {
+    const isOverviewQuery = /\b(weintern info|info about weintern|what is weintern|what is weintern company|weintern company|tell me about weintern|weintern kya hai|explain weintern|give me information about weintern|weintern ke baare|what does weintern do)\b/i.test(queryClean);
+    if (isOverviewQuery && (faq.question.toLowerCase().includes("what is weintern") || faq.answer.includes("Learn → Build → Work → Earn"))) {
       score += 10000;
     }
 
