@@ -122,6 +122,18 @@ const TOKEN_MAP = {
   zoom: "orientation",
   joining: "orientation",
   session: "orientation",
+  // Events / Webinars / Workshops / Seminars / Community
+  webinar: "webinar",
+  webinars: "webinar",
+  event: "event",
+  events: "event",
+  workshop: "workshop",
+  workshops: "workshop",
+  seminar: "seminar",
+  seminars: "seminar",
+  hackathon: "hackathon",
+  hackathons: "hackathon",
+  community: "community",
   // Duration
   duration: "duration",
   kitne: "duration",
@@ -357,9 +369,16 @@ const CATEGORY_HINTS = {
   eligibility: ["eligible", "eligibility", "criteria", "qualification", "fresher", "beginner", "who can join", "can i join", "minimum", "stream"],
   duration: ["duration", "how long", "how many months", "months", "weeks", "long is", "mahine"],
   registration: ["register", "registration", "enroll", "enrollment", "apply", "sign up", "how to join", "steps to apply"],
+  events: ["webinar", "webinars", "workshop", "workshops", "seminar", "seminars", "event", "events", "hackathon", "hackathons", "community", "conduct webinars", "organize webinars", "host events"],
 };
 
 const CATEGORY_KEYWORD_MAP = {
+  events: [
+    "webinar", "webinars", "workshop", "workshops", "seminar", "seminars",
+    "event", "events", "hackathon", "hackathons", "community", "community group",
+    "conduct webinars", "organize webinars", "host events", "attend webinars",
+    "upcoming webinars", "live webinars"
+  ],
   company: [
     "weintern", "company", "about weintern", "tell me about weintern",
     "info about weintern", "information about weintern",
@@ -600,6 +619,7 @@ function inferCategoryHints(queryTokens) {
 function detectStrongCategory(queryTokens) {
   // Direct priority mapping for exact categories
   const directCategories = [
+    "events",
     "employment",
     "placement",
     "fees",
@@ -614,15 +634,45 @@ function detectStrongCategory(queryTokens) {
     "internship"
   ];
 
+  const isEventsOrWebinarsQuery =
+    queryTokens.includes("webinar") ||
+    queryTokens.includes("webinars") ||
+    queryTokens.includes("workshop") ||
+    queryTokens.includes("workshops") ||
+    queryTokens.includes("seminar") ||
+    queryTokens.includes("seminars") ||
+    queryTokens.includes("event") ||
+    queryTokens.includes("events") ||
+    queryTokens.includes("hackathon") ||
+    queryTokens.includes("hackathons") ||
+    (queryTokens.includes("community") && !queryTokens.includes("doubt"));
+
+  if (isEventsOrWebinarsQuery) {
+    return "events";
+  }
+
+  const isFresherEligibilityQuery =
+    (queryTokens.includes("fresher") || queryTokens.includes("freshers") || queryTokens.includes("beginner") || queryTokens.includes("beginners") || queryTokens.includes("experience")) &&
+    (queryTokens.includes("join") || queryTokens.includes("eligible") || queryTokens.includes("eligibility") || queryTokens.includes("apply") || queryTokens.includes("enroll")) &&
+    !queryTokens.includes("employee") &&
+    !queryTokens.includes("hiring") &&
+    !queryTokens.includes("fulltime") &&
+    !queryTokens.includes("job") &&
+    !queryTokens.includes("jobs");
+
+  if (isFresherEligibilityQuery) {
+    return "faq";
+  }
+
   const isEmploymentQuery =
-    queryTokens.includes("employee") ||
+    !isFresherEligibilityQuery &&
+    (queryTokens.includes("employee") ||
     queryTokens.includes("employment") ||
     queryTokens.includes("hiring") ||
-    (queryTokens.includes("work") && (queryTokens.includes("weintern") || queryTokens.includes("company") || queryTokens.includes("here") || queryTokens.includes("want") || queryTokens.includes("fresher"))) ||
-    (queryTokens.includes("job") && (queryTokens.includes("opportunities") || queryTokens.includes("opportunity") || queryTokens.includes("vacancy") || queryTokens.includes("opening") || queryTokens.includes("apply") || queryTokens.includes("weintern") || queryTokens.includes("fulltime") || queryTokens.includes("fresher") || queryTokens.includes("freshers"))) ||
+    (queryTokens.includes("work") && (queryTokens.includes("weintern") || queryTokens.includes("company") || queryTokens.includes("here") || queryTokens.includes("want"))) ||
+    (queryTokens.includes("job") && (queryTokens.includes("opportunities") || queryTokens.includes("opportunity") || queryTokens.includes("vacancy") || queryTokens.includes("opening") || queryTokens.includes("apply") || queryTokens.includes("weintern") || queryTokens.includes("fulltime"))) ||
     queryTokens.includes("fulltime") ||
-    (queryTokens.includes("hire") && (queryTokens.includes("interns") || queryTokens.includes("fresher") || queryTokens.includes("freshers"))) ||
-    ((queryTokens.includes("fresher") || queryTokens.includes("freshers") || queryTokens.includes("experience")) && (queryTokens.includes("join") || queryTokens.includes("work") || queryTokens.includes("apply") || queryTokens.includes("hire") || queryTokens.includes("job")) && !queryTokens.includes("internship"));
+    (queryTokens.includes("hire") && (queryTokens.includes("interns") || queryTokens.includes("fresher") || queryTokens.includes("freshers"))));
 
   if (isEmploymentQuery) {
     return "employment";
@@ -883,16 +933,84 @@ function scoreMatch(entry, queryTokens, categoryHints, strongCategory, rawQuery 
 
   let score = 0;
 
+  // ── WEBINARS / EVENTS / WORKSHOPS / SEMINARS / COMMUNITY INTENT SCORING ─────
+  const isEventsOrWebinarsQuery =
+    queryTokens.includes("webinar") ||
+    queryTokens.includes("webinars") ||
+    queryTokens.includes("workshop") ||
+    queryTokens.includes("workshops") ||
+    queryTokens.includes("seminar") ||
+    queryTokens.includes("seminars") ||
+    queryTokens.includes("event") ||
+    queryTokens.includes("events") ||
+    queryTokens.includes("hackathon") ||
+    queryTokens.includes("hackathons") ||
+    (queryTokens.includes("community") && !queryTokens.includes("doubt"));
+
+  if (isEventsOrWebinarsQuery) {
+    const normQ = normalize(entry.question || "");
+    const normA = normalize(entry.answer || "");
+    const isEventEntry =
+      entry.category === "events" ||
+      normQ.includes("webinar") ||
+      normQ.includes("workshop") ||
+      normQ.includes("event") ||
+      normQ.includes("seminar") ||
+      normQ.includes("hackathon") ||
+      normQ.includes("community") ||
+      normA.includes("webinar") ||
+      normA.includes("workshop") ||
+      normA.includes("event") ||
+      normA.includes("seminar") ||
+      normA.includes("hackathon") ||
+      normA.includes("community");
+
+    if (isEventEntry) {
+      score += 650; // Massive high-priority boost for matching event entries!
+    } else {
+      score -= 500; // Heavy penalty for unrelated address, contact, CEO, course, or fee entries!
+    }
+  } else {
+    // Conversely, penalize event entries if the user is NOT asking about events/webinars
+    const normQ = normalize(entry.question || "");
+    if (entry.category === "events" || normQ.includes("webinar") || normQ.includes("workshop") || normQ.includes("seminar")) {
+      score -= 200;
+    }
+  }
+
+  // ── FRESHER ELIGIBILITY INTENT SCORING ──────────────────────────────────────
+  const isFresherEligibilityQuery =
+    (queryTokens.includes("fresher") || queryTokens.includes("freshers") || queryTokens.includes("beginner") || queryTokens.includes("beginners") || queryTokens.includes("experience")) &&
+    (queryTokens.includes("join") || queryTokens.includes("eligible") || queryTokens.includes("eligibility") || queryTokens.includes("apply") || queryTokens.includes("enroll")) &&
+    !queryTokens.includes("employee") &&
+    !queryTokens.includes("hiring") &&
+    !queryTokens.includes("fulltime") &&
+    !queryTokens.includes("job") &&
+    !queryTokens.includes("jobs");
+
+  if (isFresherEligibilityQuery) {
+    const isExpectedFresherAnswer = (entry.answer || "").includes("Yes. WeIntern programs are designed for students, beginners, and freshers.");
+    const isGenericEmploymentFallback = (entry.answer || "").includes("The available information does not specify current employee or full-time job openings");
+
+    if (isExpectedFresherAnswer) {
+      score += 750; // Massive boost for exact expected answer!
+    } else if (isGenericEmploymentFallback) {
+      score -= 800; // Heavy penalty for generic employment fallback!
+    } else if ((entry.question || "").toLowerCase().includes("fresher")) {
+      score += 300;
+    }
+  }
+
   // ── EMPLOYMENT INTENT HIGH-PRIORITY SCORING ─────────────────────────────────
   const isEmploymentQuery =
-    queryTokens.includes("employee") ||
+    !isFresherEligibilityQuery &&
+    (queryTokens.includes("employee") ||
     queryTokens.includes("employment") ||
     queryTokens.includes("hiring") ||
-    (queryTokens.includes("work") && (queryTokens.includes("weintern") || queryTokens.includes("company") || queryTokens.includes("here") || queryTokens.includes("want") || queryTokens.includes("fresher"))) ||
-    (queryTokens.includes("job") && (queryTokens.includes("opportunities") || queryTokens.includes("opportunity") || queryTokens.includes("vacancy") || queryTokens.includes("opening") || queryTokens.includes("apply") || queryTokens.includes("weintern") || queryTokens.includes("fulltime") || queryTokens.includes("fresher") || queryTokens.includes("freshers"))) ||
+    (queryTokens.includes("work") && (queryTokens.includes("weintern") || queryTokens.includes("company") || queryTokens.includes("here") || queryTokens.includes("want"))) ||
+    (queryTokens.includes("job") && (queryTokens.includes("opportunities") || queryTokens.includes("opportunity") || queryTokens.includes("vacancy") || queryTokens.includes("opening") || queryTokens.includes("apply") || queryTokens.includes("weintern") || queryTokens.includes("fulltime"))) ||
     queryTokens.includes("fulltime") ||
-    (queryTokens.includes("hire") && (queryTokens.includes("interns") || queryTokens.includes("fresher") || queryTokens.includes("freshers"))) ||
-    ((queryTokens.includes("fresher") || queryTokens.includes("freshers") || queryTokens.includes("experience")) && (queryTokens.includes("join") || queryTokens.includes("work") || queryTokens.includes("apply") || queryTokens.includes("hire") || queryTokens.includes("job")) && !queryTokens.includes("internship"));
+    (queryTokens.includes("hire") && (queryTokens.includes("interns") || queryTokens.includes("fresher") || queryTokens.includes("freshers"))));
 
   if (isEmploymentQuery) {
     if (entry.category === "employment") {
