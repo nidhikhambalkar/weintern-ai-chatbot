@@ -1966,17 +1966,17 @@ function StudentAvatar() {
       {open && (
         <>
           {/* FULL BODY BOY MASCOT OUTSIDE CHAT */}
-          <div className="boy-outside pointer-events-none fixed bottom-5 right-[425px] z-[9997] hidden md:block">
-            <div className="relative h-[300px] w-[195px]">
-              <div className="absolute bottom-0 left-1/2 h-20 w-28 -translate-x-1/2 rounded-full bg-sky-300/25 blur-2xl" />
+          <div className="boy-outside pointer-events-none fixed bottom-5 right-[430px] z-[9997] hidden lg:block">
+            <div className="relative h-[440px] w-[270px]">
+              <div className="absolute bottom-0 left-1/2 h-24 w-36 -translate-x-1/2 rounded-full bg-sky-300/30 blur-2xl" />
               <img
                 src="/weintern_mascot.png"
                 alt="WeIntern AI Assistant"
                 draggable={false}
-                className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_20px_25px_rgba(15,23,42,0.2)]"
+                className="absolute inset-0 h-full w-full object-contain filter drop-shadow-[0_25px_30px_rgba(15,23,42,0.25)]"
               />
-              <span className="sparkle absolute right-2 top-8 text-xl">✨</span>
-              <span className="sparkle absolute left-0 top-24 text-lg" style={{ animationDelay: "0.5s" }}>✨</span>
+              <span className="sparkle absolute right-2 top-8 text-2xl">✨</span>
+              <span className="sparkle absolute left-0 top-28 text-xl" style={{ animationDelay: "0.5s" }}>✨</span>
             </div>
           </div>
 
