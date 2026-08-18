@@ -103,6 +103,20 @@ const TYPO_MAP = {
   cource: "course",
   coures: "course",
   crouse: "course",
+  kors: "course",
+  kee: "ki",
+  kitnee: "kitni",
+
+  // Voice speech transliterations
+  jenyuin: "genuine",
+  jenuin: "genuine",
+  jenuine: "genuine",
+  "rikॉrded": "recorded",
+  rikorded: "recorded",
+  recoded: "recorded",
+  seshns: "sessions",
+  seshon: "session",
+  seshons: "sessions",
 
   // Fees typos
   feez: "fees",
