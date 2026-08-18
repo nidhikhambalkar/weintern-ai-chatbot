@@ -106,23 +106,49 @@ export default function DashboardPage() {
                   <tr className="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-600 uppercase tracking-wider">
                     <th className="px-6 py-3.5">#</th>
                     <th className="px-6 py-3.5">Student Name</th>
-                    <th className="px-6 py-3.5">Email Address</th>
-                    <th className="px-6 py-3.5">Phone Number</th>
+                    <th className="px-6 py-3.5">Contact Details</th>
                     <th className="px-6 py-3.5">Selected Domain</th>
+                    <th className="px-6 py-3.5">Duration</th>
+                    <th className="px-6 py-3.5">Amount</th>
+                    <th className="px-6 py-3.5">Payment Status</th>
                     <th className="px-6 py-3.5">Applied Date</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {leads.map((lead, idx) => (
+                  {leads.map((lead: any, idx) => (
                     <tr key={lead._id || lead.id || idx} className="hover:bg-slate-50/80 transition">
                       <td className="px-6 py-4 font-semibold text-slate-400 text-xs">{idx + 1}</td>
                       <td className="px-6 py-4 font-bold text-slate-900">{lead.name}</td>
-                      <td className="px-6 py-4 text-slate-600">{lead.email}</td>
-                      <td className="px-6 py-4 text-slate-600">{lead.phone}</td>
+                      <td className="px-6 py-4 text-xs text-slate-600">
+                        <div>{lead.email}</div>
+                        <div className="text-slate-400 font-mono mt-0.5">{lead.phone}</div>
+                      </td>
                       <td className="px-6 py-4">
                         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
                           🎯 {lead.preferred_domain}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 font-bold text-slate-800 text-xs">
+                        {lead.internship_duration || "3 Months"}
+                      </td>
+                      <td className="px-6 py-4 font-extrabold text-slate-900 text-xs">
+                        ₹{lead.amount ? lead.amount : (lead.internship_duration === "6 Months" ? "6,599" : "999")}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold ${
+                            lead.payment_status === "PAID"
+                              ? "bg-green-100 text-green-800 border border-green-300"
+                              : lead.payment_status === "FAILED"
+                              ? "bg-red-100 text-red-800 border border-red-300"
+                              : "bg-amber-100 text-amber-800 border border-amber-300"
+                          }`}
+                        >
+                          {lead.payment_status || "PENDING"}
+                        </span>
+                        {lead.payment_id && (
+                          <div className="text-[10px] text-slate-400 font-mono mt-1">ID: {lead.payment_id}</div>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-xs text-slate-500">
                         {lead.created_at ? new Date(lead.created_at).toLocaleString() : "Just now"}
