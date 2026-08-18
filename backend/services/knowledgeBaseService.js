@@ -414,6 +414,71 @@ function searchKnowledgeBase(message = "") {
       score += 10000;
     }
 
+    // ── Domain + Tech-Stack / Tools Intent Booster ────────────────────────
+    const isTechStackQuery = /\b(technologies|technology|tech\s*stack|tools|tool|software|framework|frameworks|languages|what\s+will\s+i\s+learn|kya\s+sikhoge|kya\s+technologies|kaunse\s+tools|kya\s+kya\s+seekhenge|use\s+hota)\b/i.test(queryClean);
+
+    if (isTechStackQuery) {
+      // 1. UI/UX Design
+      const isUiUx = /\b(ui\/ux|ui\s+ux|uiux|user\s+interface|designing)\b/i.test(queryClean);
+      if (isUiUx && (faq.question.includes("UI/UX") || faq.question.includes("UI UX")) && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack") || faq.question.toLowerCase().includes("sikhoge"))) {
+        score += 10000;
+      }
+
+      // 2. Full Stack Web Development
+      const isFullStack = /\b(full\s*stack|web\s+dev|web\s+development|frontend|backend)\b/i.test(queryClean);
+      if (isFullStack && faq.question.includes("Full Stack") && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack") || faq.question.toLowerCase().includes("sikhate"))) {
+        score += 10000;
+      }
+
+      // 3. Mobile App Development
+      const isMobileApp = /\b(mobile\s+app|app\s+dev|flutter|dart|app\s+development)\b/i.test(queryClean);
+      if (isMobileApp && faq.question.includes("Mobile App") && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack"))) {
+        score += 10000;
+      }
+
+      // 4. AI & Automation
+      const isAi = /\b(ai\s*&\s*automation|ai\s+automation|artificial\s+intelligence|langchain|openai|n8n)\b/i.test(queryClean);
+      if (isAi && faq.question.includes("AI & Automation") && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack"))) {
+        score += 10000;
+      }
+
+      // 5. Data Science & Analytics
+      const isDataScience = /\b(data\s+science|analytics|pandas|numpy|tableau|scikit)\b/i.test(queryClean);
+      if (isDataScience && faq.question.includes("Data Science") && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack"))) {
+        score += 10000;
+      }
+
+      // 6. Python Programming
+      const isPython = /\bpython\b/i.test(queryClean);
+      if (isPython && faq.question.includes("Python Programming") && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack") || faq.question.toLowerCase().includes("use"))) {
+        score += 10000;
+      }
+
+      // 7. Java Programming
+      const isJava = /\bjava\b/i.test(queryClean) && !/\bjavascript\b/i.test(queryClean);
+      if (isJava && faq.question.includes("Java Programming") && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack"))) {
+        score += 10000;
+      }
+
+      // 8. C/C++ Programming
+      const isCpp = /\b(c\/c\+\+|cpp|c\s*\+\+|c\s+programming)\b/i.test(queryClean);
+      if (isCpp && faq.question.includes("C/C++ Programming") && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack"))) {
+        score += 10000;
+      }
+
+      // 9. Cloud Computing & DevOps
+      const isCloud = /\b(cloud|devops|aws|docker|kubernetes)\b/i.test(queryClean);
+      if (isCloud && faq.question.includes("Cloud Computing") && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack") || faq.question.toLowerCase().includes("hain"))) {
+        score += 10000;
+      }
+
+      // 10. Digital Marketing & SEO
+      const isMarketing = /\b(digital\s+marketing|marketing|seo|google\s+ads|meta\s+ads)\b/i.test(queryClean);
+      if (isMarketing && faq.question.includes("Digital Marketing") && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack") || faq.question.toLowerCase().includes("tools"))) {
+        score += 10000;
+      }
+    }
+
     if (score >= 18) {
       scoredMatches.push({
         category: faq.category,
