@@ -12,27 +12,27 @@
   {
     "category": "company",
     "question": "Where is WeIntern located?",
-    "answer": "WeIntern operates remotely and serves clients across India and internationally. Its headquarters are located in Kharadi, Pune, Maharashtra, India."
+    "answer": "WeIntern operates remotely and serves clients across India and internationally."
   },
   {
     "category": "company",
     "question": "What industries do you serve?",
-    "answer": "We serve Startups, Educational Institutions, E-Commerce Businesses, Healthcare Companies, Real Estate Businesses, Retail Businesses, Manufacturing Companies, Professional Service Firms, and Technology Companies."
+    "answer": "We serve:\n• Startups\n• Educational Institutions\n• E-Commerce Businesses\n• Healthcare Companies\n• Real Estate Businesses\n• Retail Businesses\n• Manufacturing Companies\n• Professional Service Firms\n• Technology Companies"
   },
   {
     "category": "company",
     "question": "Why should I choose WeNexa?",
-    "answer": "WeNexa offers affordable pricing, custom solutions, modern technologies, fast project delivery, dedicated support, scalable software solutions, and AI-powered automation services."
+    "answer": "WeNexa offers:\n• Affordable pricing\n• Custom solutions\n• Modern technologies\n• Fast project delivery\n• Dedicated support\n• Scalable software solutions\n• AI-powered automation services"
   },
   {
     "category": "contact",
     "question": "How can I contact your team?",
-    "answer": "You can contact us through: Website Contact Form, LinkedIn, Email (contact@we-intern.in / support@we-intern.in), WhatsApp (+91 74149 74582), and official social media channels."
+    "answer": "You can contact us through:\n• Website Contact Form\n• LinkedIn\n• Email\n• WhatsApp\n• Social Media Channels"
   },
   {
     "category": "company",
     "question": "Do you work with international clients?",
-    "answer": "Yes, we work with clients globally across India and internationally."
+    "answer": "Yes, we work with clients globally."
   },
   {
     "category": "policies",
@@ -57,22 +57,22 @@
   {
     "category": "services",
     "question": "What types of websites do you build?",
-    "answer": "We build Business Websites, Corporate Websites, Portfolio Websites, Landing Pages, E-Commerce Websites, Educational Platforms, SaaS Platforms, and Custom Web Applications."
+    "answer": "• Business Websites\n• Corporate Websites\n• Portfolio Websites\n• Landing Pages\n• E-Commerce Websites\n• Educational Platforms\n• SaaS Platforms\n• Custom Web Applications"
   },
   {
     "category": "services",
     "question": "How long does it take to build a website?",
-    "answer": "Depending on complexity: Landing Page (3–7 Days), Business Website (1–3 Weeks), E-Commerce Website (2–6 Weeks), and Custom Web App (1–6 Months)."
+    "answer": "Depending on complexity:\n• Landing Page: 3–7 Days\n• Business Website: 1–3 Weeks\n• E-Commerce Website: 2–6 Weeks\n• Custom Web App: 1–6 Months"
   },
   {
     "category": "services",
     "question": "Do you provide website maintenance?",
-    "answer": "Yes, website maintenance and support plans are available."
+    "answer": "Yes, maintenance and support plans are available."
   },
   {
     "category": "services",
     "question": "Will my website be mobile responsive?",
-    "answer": "Yes, all websites are fully optimized for mobile, tablet, and desktop devices."
+    "answer": "Yes, all websites are optimized for mobile, tablet, and desktop devices."
   },
   {
     "category": "services",
@@ -87,721 +87,716 @@
   {
     "category": "services",
     "question": "Do you build SEO-friendly websites?",
-    "answer": "Yes, SEO best practices are implemented during website development."
+    "answer": "Yes, SEO best practices are implemented during development."
   },
   {
     "category": "services",
     "question": "Can you integrate payment gateways?",
-    "answer": "Yes, we support integration of Razorpay, Stripe, PayPal, Cashfree, and other payment providers."
+    "answer": "Yes, we support:\n• Razorpay\n• Stripe\n• PayPal\n• Cashfree\n• Other payment providers"
   },
   {
     "category": "services",
     "question": "Will I own the website after completion?",
-    "answer": "Yes, the client receives 100% full ownership of the final project code and assets."
+    "answer": "Yes, the client receives ownership of the final project."
   },
   {
     "category": "services",
     "question": "Do you develop mobile apps?",
-    "answer": "Yes, we develop custom mobile applications for iOS and Android."
+    "answer": "Yes."
   },
   {
     "category": "services",
-    "question": "Which mobile platforms do you support?",
-    "answer": "We support Android, iOS, and cross-platform mobile applications."
+    "question": "Which platforms do you support?",
+    "answer": "• Android\n• iOS\n• Cross-platform applications"
   },
   {
     "category": "services",
     "question": "Do you develop Flutter apps?",
-    "answer": "Yes, Flutter cross-platform mobile app development is one of our key specialties."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Can you build startup MVPs?",
-    "answer": "Yes, MVP (Minimum Viable Product) development for startups is one of our core services."
+    "answer": "Yes, MVP development is one of our core services."
   },
   {
     "category": "services",
     "question": "Do you publish apps on Play Store and App Store?",
-    "answer": "Yes, full deployment assistance on Google Play Store and Apple App Store is provided."
+    "answer": "Yes, deployment assistance is provided."
   },
   {
     "category": "services",
     "question": "Can you maintain existing apps?",
-    "answer": "Yes, we offer ongoing maintenance and update support for existing mobile applications."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Can you integrate APIs into mobile apps?",
-    "answer": "Yes, we integrate RESTful APIs, third-party services, and payment gateways into mobile apps."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Do you provide app UI/UX design?",
-    "answer": "Yes, complete mobile app UI/UX design services are included."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Do you build AI chatbots?",
-    "answer": "Yes, we build intelligent AI chatbots tailored for customer support, lead generation, and business automation."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "What types of AI chatbots do you build?",
-    "answer": "We build Website Chatbots, Customer Support Chatbots, Lead Generation Chatbots, WhatsApp Chatbots, Knowledge Base Chatbots, and AI Sales Assistants."
+    "answer": "• Website Chatbots\n• Customer Support Chatbots\n• Lead Generation Chatbots\n• WhatsApp Chatbots\n• Knowledge Base Chatbots\n• AI Sales Assistants"
   },
   {
     "category": "services",
     "question": "Can your chatbot answer FAQs automatically?",
-    "answer": "Yes, our AI chatbots automate FAQ responses using custom knowledge base indexing and RAG technology."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Can the chatbot be trained on company data?",
-    "answer": "Yes, chatbots can be trained directly on custom company documents, PDFs, FAQs, and databases."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Can AI chatbots be integrated into websites?",
-    "answer": "Yes, AI chatbots can be embedded into any website, web portal, or mobile app."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Can chatbots collect leads?",
-    "answer": "Yes, automated lead collection and qualification forms are built into our chatbots."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Can chatbots book meetings?",
-    "answer": "Yes, calendar integration for booking meetings and appointments is supported."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Can chatbots connect with CRMs?",
-    "answer": "Yes, our AI chatbots seamlessly connect with CRM systems, ERPs, and databases."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Do you build AI agents?",
-    "answer": "Yes, we build custom AI agents capable of autonomous task execution and business workflow automation."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "What is an AI agent?",
-    "answer": "An AI agent is an intelligent software system capable of performing complex tasks, making decisions, retrieving information, and automating multi-step workflows."
+    "answer": "An AI agent is an intelligent system capable of performing tasks, making decisions, retrieving information, and automating workflows."
   },
   {
     "category": "services",
     "question": "Can AI agents automate business operations?",
-    "answer": "Yes, AI agents can automate data extraction, customer service, lead qualification, and internal operational workflows."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Which AI technologies do you use?",
-    "answer": "We use OpenAI (GPT-4/GPT-3.5), LangChain, Vector Databases (Pinecone/Chroma), Retrieval-Augmented Generation (RAG), and Custom AI Workflows."
+    "answer": "• OpenAI\n• LangChain\n• Vector Databases\n• Retrieval-Augmented Generation (RAG)\n• Custom AI Workflows"
   },
   {
     "category": "services",
     "question": "Can AI be integrated into existing systems?",
-    "answer": "Yes, AI solutions can be integrated into existing websites, mobile apps, CRMs, and backend infrastructure."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Do you build custom software?",
-    "answer": "Yes, we develop bespoke custom software solutions tailored to business requirements."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "What software solutions do you provide?",
-    "answer": "We provide CRM Systems, ERP Systems, HRMS Platforms, Inventory Management, Business Management Systems, Custom Dashboards, and SaaS Platforms."
+    "answer": "• CRM Systems\n• ERP Systems\n• HRMS Platforms\n• Inventory Management\n• Business Management Systems\n• Custom Dashboards\n• SaaS Platforms"
   },
   {
     "category": "services",
     "question": "Can software be customized for our business?",
-    "answer": "Yes, every software solution is fully customizable according to your exact business specifications."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Do you provide source code?",
-    "answer": "Yes, complete source code ownership is provided based on project agreements."
+    "answer": "Yes, based on project agreements."
   },
   {
     "category": "services",
     "question": "Do you offer cloud deployment?",
-    "answer": "Yes, cloud deployment on AWS, Azure, Google Cloud, Vercel, and Render is provided."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Do you provide software maintenance?",
-    "answer": "Yes, ongoing software maintenance, updates, and support plans are available."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Can you modernize legacy software?",
-    "answer": "Yes, we refactor and modernize legacy codebases and outdated software systems."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Do you provide UI/UX design services?",
-    "answer": "Yes, we offer complete UI/UX design services for web and mobile platforms."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "What design services do you offer?",
-    "answer": "We offer Website Design, Mobile App Design, SaaS Dashboard Design, Wireframing, Prototyping, and User Research."
+    "answer": "• Website Design\n• Mobile App Design\n• SaaS Dashboard Design\n• Wireframing\n• Prototyping\n• User Research"
   },
   {
     "category": "services",
     "question": "Which design tools do you use?",
-    "answer": "We use industry-standard design tools including Figma, Adobe XD, Photoshop, and Illustrator."
+    "answer": "• Figma\n• Adobe XD\n• Photoshop\n• Illustrator"
   },
   {
     "category": "services",
     "question": "Can I get a prototype before development?",
-    "answer": "Yes, interactive clickable Figma prototypes can be delivered prior to full development."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Do you provide SEO services?",
-    "answer": "Yes, comprehensive Search Engine Optimization (SEO) services are available."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "What SEO services are included?",
-    "answer": "Our SEO services include On-Page SEO, Technical SEO, Local SEO, Keyword Research, and SEO Audits."
+    "answer": "• On-Page SEO\n• Technical SEO\n• Local SEO\n• SEO Audits"
   },
   {
     "category": "services",
     "question": "Do you provide social media marketing?",
-    "answer": "Yes, end-to-end social media marketing and brand management services are provided."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Do you offer LinkedIn lead generation?",
-    "answer": "Yes, targeted B2B LinkedIn lead generation campaigns are offered."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Can you manage advertising campaigns?",
-    "answer": "Yes, we setup and optimize pay-per-click advertising campaigns across Google Ads and Meta Ads."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Do you provide content marketing services?",
-    "answer": "Yes, content creation, copywriting, blog writing, and marketing asset design services are available."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Can you improve website rankings?",
-    "answer": "Yes, using white-hat SEO best practices, keyword targeting, and technical optimizations."
+    "answer": "Yes, using SEO best practices."
   },
   {
     "category": "fees",
     "question": "How much does a website cost?",
-    "answer": "Website pricing depends on project scope, features, and custom design requirements. Custom quotations are provided after initial discussion."
+    "answer": "Pricing depends on project scope and requirements."
   },
   {
     "category": "fees",
     "question": "Do you offer customized quotations?",
-    "answer": "Yes, free customized project quotations are provided based on client requirements."
+    "answer": "Yes."
   },
   {
     "category": "fees",
     "question": "Is advance payment required?",
-    "answer": "Typically yes, an initial deposit or milestone advance is required before project kickoff."
+    "answer": "Typically, yes."
   },
   {
     "category": "fees",
     "question": "What payment methods do you accept?",
-    "answer": "We accept Bank Transfer (NEFT/IMPS), UPI (GPay/PhonePe), Credit/Debit Cards, and Online Payment Gateways (Razorpay/Stripe)."
+    "answer": "• Bank Transfer\n• UPI\n• Online Payment Gateways"
   },
   {
     "category": "fees",
     "question": "Do you provide invoices?",
-    "answer": "Yes, GST tax invoices are provided for all client payments."
+    "answer": "Yes."
   },
   {
     "category": "fees",
     "question": "Can projects be paid in milestones?",
-    "answer": "Yes, milestone-based payment schedules (e.g. 30:40:30) can be structured for custom projects."
+    "answer": "Yes."
   },
   {
     "category": "fees",
     "question": "Do you offer maintenance packages?",
-    "answer": "Yes, affordable monthly and annual maintenance packages are available."
+    "answer": "Yes."
   },
   {
     "category": "company",
     "question": "What is your development process?",
-    "answer": "Our development process consists of 7 steps: 1) Requirement Gathering, 2) Planning & Architecture, 3) UI/UX Design, 4) Development, 5) Testing & QA, 6) Deployment, and 7) Post-launch Support."
+    "answer": "• 1. Requirement Gathering\n• 2. Planning\n• 3. Design\n• 4. Development\n• 5. Testing\n• 6. Deployment\n• 7. Support"
   },
   {
     "category": "contact",
     "question": "How do you communicate during projects?",
-    "answer": "We communicate via WhatsApp, Email, Google Meet, Zoom, and dedicated Project Management tools."
+    "answer": "• WhatsApp\n• Email\n• Google Meet\n• Zoom\n• Project Management Tools"
   },
   {
     "category": "company",
     "question": "Will I receive progress updates?",
-    "answer": "Yes, regular weekly status updates and demo milestones are shared during development."
+    "answer": "Yes."
   },
   {
     "category": "policies",
     "question": "Can project requirements change midway?",
-    "answer": "Yes, requirement modifications can be made subject to feasibility and scope adjustments."
+    "answer": "Yes, subject to feasibility and scope adjustments."
   },
   {
     "category": "company",
     "question": "Do you provide documentation?",
-    "answer": "Yes, comprehensive system documentation, API docs, and user guides are provided."
+    "answer": "Yes."
   },
   {
     "category": "company",
     "question": "Do you provide training after delivery?",
-    "answer": "Yes, admin walkthroughs and team training sessions are provided after system delivery."
+    "answer": "Yes, if required."
   },
   {
     "category": "support",
     "question": "Do you provide technical support after project completion?",
-    "answer": "Yes, post-launch technical support and maintenance periods are included."
+    "answer": "Yes."
   },
   {
     "category": "support",
     "question": "How long does support last?",
-    "answer": "Support duration depends on the agreed package, typically ranging from 1 to 12 months."
+    "answer": "Based on the selected support package."
   },
   {
     "category": "support",
     "question": "Do you provide bug fixes?",
-    "answer": "Yes, free bug fixes are included during the warranty and maintenance period."
+    "answer": "Yes."
   },
   {
     "category": "support",
     "question": "Do you monitor deployed systems?",
-    "answer": "Yes, automated server monitoring and uptime tracking services are available."
+    "answer": "Support plans may include monitoring services."
   },
   {
     "category": "services",
     "question": "Can you scale systems as our business grows?",
-    "answer": "Yes, all software and cloud architectures are built scalable to accommodate business growth."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Do you provide backup solutions?",
-    "answer": "Yes, automated daily and weekly database backup solutions are configured."
+    "answer": "Yes."
   },
   {
     "category": "company",
     "question": "Who founded WeIntern?",
-    "answer": "WeIntern was founded by Ashwin Gurao and co-founded by Namita Gope."
+    "answer": "Ashwin Gurao."
   },
   {
     "category": "company",
     "question": "What is the vision of WeIntern?",
-    "answer": "The vision of WeIntern is to bridge the gap between technology, business growth, and practical innovation through impactful digital solutions and industry-focused learning."
+    "answer": "To bridge the gap between technology, business growth, and practical innovation through impactful digital solutions."
   },
   {
     "category": "company",
     "question": "What makes WeIntern different?",
-    "answer": "WeIntern stands out through its strong focus on innovation, affordable pricing, AI-powered solutions, live project experience, and delivering measurable business value."
+    "answer": "A strong focus on innovation, affordability, AI-powered solutions, and delivering measurable business value."
   },
   {
     "category": "company",
     "question": "What is your long-term goal?",
-    "answer": "Our long-term goal is to become a leading technology, AI, and EdTech solutions provider helping businesses transform digitally and students build career-ready skills."
+    "answer": "To become a leading technology and AI solutions company helping businesses transform digitally."
   },
   {
     "category": "contact",
     "question": "How do I start a project?",
-    "answer": "You can start a project by sharing your requirements via our website contact form, email at contact@we-intern.in, or WhatsApp +91 74149 74582."
+    "answer": "Share your requirements with our team through the website or contact channels."
   },
   {
     "category": "contact",
     "question": "What information do you need before providing a quote?",
-    "answer": "Before providing a quote, we need to know: Project Type, Key Features Required, Target Timeline, Estimated Budget Range, and Business Goals."
+    "answer": "• Project Type\n• Features Required\n• Timeline\n• Budget Range\n• Business Goals"
   },
   {
     "category": "company",
     "question": "How soon can a project start?",
-    "answer": "Projects can typically start within 24 to 48 hours following requirement discussion and contract approval."
+    "answer": "After requirement discussion and project approval."
   },
   {
     "category": "company",
     "question": "Can you work as a long-term technology partner?",
-    "answer": "Yes, we act as a dedicated technology partner for growing startups and established businesses."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Do you provide dedicated development teams?",
-    "answer": "Yes, dedicated remote software developers and engineering teams can be hired on a monthly basis."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Can you handle enterprise-level projects?",
-    "answer": "Yes, our team has experience handling enterprise-scale software development and cloud architectures."
+    "answer": "Yes, depending on project requirements."
   },
   {
     "category": "services",
     "question": "Do you provide AI consultation?",
-    "answer": "Yes, we provide strategic AI consultation to help businesses identify automation opportunities and implement LLM/RAG solutions."
+    "answer": "Yes."
   },
   {
     "category": "services",
     "question": "Can I request a custom solution not listed on your website?",
-    "answer": "Absolutely! Custom software development and bespoke tech solutions are our core strengths."
+    "answer": "Absolutely. Custom solutions are one of our core strengths."
   },
   {
     "category": "internship",
     "question": "Does WeIntern offer internships for students?",
-    "answer": "Yes! WeIntern offers structured internship programs for students, freshers, and beginners across technology, AI, software development, and business domains."
+    "answer": "Yes, WeIntern offers internship programs for students and freshers across technology, AI, and business domains."
   },
   {
     "category": "domains",
     "question": "What internship domains are available at WeIntern?",
-    "answer": "WeIntern offers internship tracks in Full Stack Web Development, Mobile App Development, AI & Machine Learning, Data Science & Analytics, Python Programming, Java Programming, C/C++ Programming, UI/UX Design, Cloud Computing, and Digital Marketing."
+    "answer": "• Web Development\n• App Development\n• AI & Machine Learning\n• Data Science\n• UI/UX Design\n• Digital Marketing\n• Content Writing\n• Human Resources\n• Business Development\n• Software Development"
   },
   {
     "category": "eligibility",
     "question": "Who can apply for a WeIntern internship?",
-    "answer": "College students, fresh graduates, beginners, and career-changers looking to gain practical, hands-on industry experience can apply."
+    "answer": "College students, freshers, and career-changers looking to gain practical, hands-on experience can apply."
   },
   {
     "category": "eligibility",
     "question": "Is prior experience required to join an internship?",
-    "answer": "No! Internships are open to beginners and freshers as well as students with prior knowledge. Most programs start from fundamentals."
+    "answer": "No, internships are open to beginners as well as students with prior knowledge; requirements vary by role."
   },
   {
     "category": "internship",
     "question": "Are the internships remote or in-office?",
-    "answer": "WeIntern internships are primarily remote (virtual/online), allowing students to work flexibly from anywhere."
+    "answer": "Internships are primarily remote, allowing students to work from anywhere."
   },
   {
     "category": "duration",
     "question": "What is the duration of an internship at WeIntern?",
-    "answer": "Internship durations typically range from 1 month to 6 months depending on the program: AI/ML, UI/UX, and Digital Marketing are 8 weeks; Mobile App, Python, and C/C++ are 10 weeks; Full Stack, Data Science, Java, and Cloud Computing are 12 weeks."
+    "answer": "Internship durations typically range from 1 month to 6 months, depending on the program and track chosen."
   },
   {
     "category": "fees",
     "question": "Is the internship free or paid?",
-    "answer": "WeIntern offers various programs — some short tracks are certificate-based, while specialized 6-month programs include performance-based stipend opportunities up to ₹10,000."
+    "answer": "Some internships are unpaid/certificate-based, while others include a stipend depending on the role, performance, and project."
   },
   {
     "category": "internship",
     "question": "Will I get real project experience during the internship?",
-    "answer": "Yes! Interns work on real-world, live, and simulated industry projects to build practical skills rather than just theoretical concepts."
+    "answer": "Yes, interns work on real, live, or simulated industry projects rather than just theoretical assignments."
   },
   {
     "category": "certificates",
     "question": "Will I receive a certificate after completing the internship?",
-    "answer": "Yes! An official Internship Completion Certificate is issued to all candidates who successfully complete their assigned project work."
+    "answer": "Yes, an internship completion certificate is provided to interns who successfully complete the program."
   },
   {
     "category": "certificates",
     "question": "Will I get a Letter of Recommendation (LOR)?",
-    "answer": "Yes! Top-performing interns receive an official Letter of Recommendation (LOR) signed by the leadership team."
+    "answer": "Yes, top-performing interns may receive a Letter of Recommendation based on their performance."
   },
   {
     "category": "fees",
     "question": "Is there a fee to join the internship program?",
-    "answer": "Program fees vary depending on the chosen domain and duration (e.g. ₹2,499 for 8-week Digital Marketing up to ₹6,599 for 12-week Full Stack / 6-Month program). Flexible EMI options (30:40:30 ratio) are available."
+    "answer": "The fee structure, if applicable, depends on the specific internship track; some programs are entirely free."
   },
   {
     "category": "registration",
     "question": "How do I apply for an internship at WeIntern?",
-    "answer": "You can apply directly through our website we-intern.in or click 'Apply / Register' in this chat widget to fill out your details."
+    "answer": "Students can apply through the WeIntern website, application form, or by contacting the team directly."
   },
   {
     "category": "internship",
     "question": "What is the selection process for internships?",
-    "answer": "The selection process includes online application submission, basic profile screening, domain confirmation, and onboarding."
+    "answer": "It typically includes application submission, screening or a short interview (if applicable), and onboarding."
   },
   {
     "category": "benefits",
     "question": "Will I be assigned a mentor during the internship?",
-    "answer": "Yes! Every intern is guided by dedicated industry mentors and team leads throughout the program."
+    "answer": "Yes, interns are guided by mentors or team leads throughout the program."
   },
   {
     "category": "benefits",
     "question": "What skills will I gain from the internship?",
-    "answer": "Interns gain hands-on technical skills, real-world project experience, Git workflow knowledge, teamwork, problem-solving, and resume-ready assets."
+    "answer": "Interns gain hands-on technical skills, real-world project experience, teamwork, and professional workplace exposure."
   },
   {
     "category": "eligibility",
     "question": "Can I do the internship along with my college studies?",
-    "answer": "Yes! WeIntern internships feature flexible schedule options designed to be completed alongside regular college coursework."
+    "answer": "Yes, most internships are flexible and can be done alongside college coursework."
   },
   {
     "category": "certificates",
     "question": "Will I get a formal offer or appointment letter?",
-    "answer": "Yes, selected candidates receive an official Internship Offer / Selection Letter at the start of their program."
+    "answer": "Yes, selected interns typically receive an offer/appointment letter at the start of the internship."
   },
   {
     "category": "placement",
     "question": "Can the internship convert into a full-time job?",
-    "answer": "High-performing interns may be evaluated for full-time employment roles within WeIntern or referred to hiring partners."
+    "answer": "High-performing interns may be considered for full-time roles based on performance and business requirements."
   },
   {
     "category": "internship",
     "question": "What tools or technologies will I work with during the internship?",
-    "answer": "Depending on your domain, you will work with modern stacks: React, Node.js, Python, Flutter, Figma, AWS, Docker, Pandas, or AI LLM tools."
+    "answer": "This depends on the domain chosen — for example, web/app development stacks, AI/ML tools, design tools, or marketing platforms."
   },
   {
     "category": "internship",
     "question": "Will I work independently or in a team?",
-    "answer": "Interns work both in collaborative team environments under mentor guidance and handle individual module assignments."
+    "answer": "Interns typically work as part of a team under mentor guidance, while also handling individual tasks."
   },
   {
     "category": "support",
     "question": "Will I get doubt-clearing support during the internship?",
-    "answer": "Yes! Mentors host live doubt-solving sessions and provide continuous support in dedicated WhatsApp/community channels."
+    "answer": "Yes, mentors and team members are available to help resolve doubts during the internship."
   },
   {
     "category": "support",
     "question": "Can I get a mid-internship progress review?",
-    "answer": "Yes, periodic performance reviews and feedback are provided to help you track your learning growth."
+    "answer": "Yes, periodic feedback and progress reviews may be provided during the internship."
   },
   {
     "category": "policies",
     "question": "What happens if I miss a deadline during the internship?",
-    "answer": "Deadlines are handled with flexibility if communicated to mentors in advance; consistent non-performance may impact final certification."
+    "answer": "Deadlines are generally handled with flexibility when communicated in advance; consistent non-performance may affect certification."
   },
   {
     "category": "internship",
     "question": "Can I switch my internship domain after starting?",
-    "answer": "Domain switches can be requested early in the program and are evaluated on a case-by-case basis."
+    "answer": "Domain switches may be considered on a case-by-case basis, subject to feasibility."
   },
   {
     "category": "benefits",
     "question": "Why should I choose WeIntern over other internship platforms?",
-    "answer": "WeIntern prioritizes genuine project-based learning, live mentorship, flexible remote work, verified certificates, and practical skills over simple video lectures."
+    "answer": "WeIntern focuses on real project-based learning, mentorship, flexible remote internships, and practical, industry-relevant skills rather than just theory."
   },
   {
     "category": "benefits",
     "question": "How is WeIntern different from other internship providers?",
-    "answer": "Unlike platforms that issue generic certificates without real tasks, WeIntern focuses on building actual portfolio projects and providing real industry exposure."
+    "answer": "Unlike platforms that only issue certificates, WeIntern emphasizes genuine project work, mentorship, and skill-building that adds real value to a resume."
   },
   {
     "category": "company",
     "question": "Is WeIntern a legitimate and trustworthy platform for internships?",
-    "answer": "Yes! WeIntern is a registered EdTech & IT company (WeIntern Pvt Ltd) with active commercial software clients and thousands of successful student alumni."
+    "answer": "Yes, WeIntern is part of the WeIntern Pvt Ltd and WeNexa ecosystem, which works with real clients and live projects."
   },
   {
     "category": "certificates",
     "question": "Does WeIntern only give certificates without real learning?",
-    "answer": "No. Certificates are awarded only after actual completion and evaluation of assigned project modules."
+    "answer": "No, the focus is on genuine, hands-on project work — certificates are issued upon actual completion of assigned work."
   },
   {
     "category": "certificates",
     "question": "Will my internship look good on my resume?",
-    "answer": "Yes! Practical project experience, verified certificates, and LORs significantly strengthen student resumes for campus placements."
+    "answer": "Yes, practical project experience, mentorship, and a recognized certificate can meaningfully strengthen a student's resume."
   },
   {
     "category": "placement",
     "question": "Does WeIntern help with interview preparation or career guidance?",
-    "answer": "Yes! Resume building, mock interviews, and LinkedIn profile optimization guidance are provided."
+    "answer": "Career guidance and mentorship support may be provided as part of select internship programs."
   },
   {
     "category": "internship",
     "question": "Can I showcase my internship projects in a portfolio?",
-    "answer": "Yes! Students are encouraged to publish their completed projects on GitHub and personal portfolios."
+    "answer": "Yes, students are encouraged to add completed internship projects to their personal portfolio, subject to confidentiality/NDA terms."
   },
   {
     "category": "domains",
     "question": "Does WeIntern provide internship experience in AI, which is in high demand?",
-    "answer": "Yes! AI & Automation is one of WeIntern's core tracks, covering LLMs, Prompt Engineering, and AI workflow building."
+    "answer": "Yes, AI & Automation is one of WeIntern's core focus areas, and AI-related internships are available."
   },
   {
     "category": "eligibility",
     "question": "Is there any age or academic-year restriction for internships?",
-    "answer": "No! Students from 1st year to final year, diploma holders, and fresh graduates from all academic backgrounds can join."
+    "answer": "Internships are generally open to students from various academic years; specific eligibility may vary by program."
   },
   {
     "category": "placement",
     "question": "Can final-year students apply for a long-term internship that could lead to a job?",
-    "answer": "Yes! Final-year students can enroll in 6-month programs, and top performers are considered for full-time hiring."
+    "answer": "Yes, final-year students can apply, and strong performers may be considered for full-time opportunities."
   },
   {
     "category": "certificates",
     "question": "Will my internship be recognized on LinkedIn?",
-    "answer": "Yes! Candidates can add WeIntern as their internship employer and tag their verified completion certificate on LinkedIn."
+    "answer": "Yes, students are encouraged to add their WeIntern internship experience and certificate to their LinkedIn profile."
   },
   {
     "category": "certificates",
     "question": "What makes WeIntern's certificate credible?",
-    "answer": "Certificates are issued by an active EdTech and IT Services corporation and carry unique verification IDs."
+    "answer": "Certificates reflect actual completed project work and are issued by a functioning EdTech and IT services company, not a template-only provider."
   },
   {
     "category": "fees",
     "question": "Do I need to pay anything hidden or extra during the internship?",
-    "answer": "No! All program fees are communicated transparently upfront with zero hidden charges."
+    "answer": "Any applicable fees are communicated clearly upfront before joining; there are no hidden charges."
   },
   {
     "category": "contact",
     "question": "Can I ask questions before joining the internship?",
-    "answer": "Yes! You can ask questions in this chat widget or reach out to our team at support@we-intern.in / WhatsApp +91 74149 74582."
+    "answer": "Yes, prospective interns can reach out to the team with any questions before applying or joining."
   },
   {
     "category": "eligibility",
     "question": "Does WeIntern support students from non-technical backgrounds too?",
-    "answer": "Yes! Non-technical tracks including Digital Marketing, UI/UX Design, and Business Development are available for non-coding students."
+    "answer": "Yes, non-technical tracks such as Digital Marketing, Content Writing, and Human Resources are also available for students from diverse backgrounds."
   },
   {
     "category": "courses",
     "question": "Does WeIntern offer online courses or training programs?",
-    "answer": "Yes! WeIntern offers structured live training courses alongside internship project tracks."
+    "answer": "Yes, as an EdTech company, WeIntern offers structured courses and training programs in addition to internships."
   },
   {
     "category": "courses",
     "question": "What subjects or courses are available?",
-    "answer": "Courses include Web Development, AI & Machine Learning, Data Science, App Development, UI/UX Design, Digital Marketing, Python, Java, C/C++, and Cloud Computing."
+    "answer": "• Web Development\n• AI & Machine Learning\n• Data Science\n• App Development\n• UI/UX Design\n• Digital Marketing\n• Software Development Fundamentals"
   },
   {
     "category": "courses",
     "question": "Are the courses self-paced or instructor-led?",
-    "answer": "Programs feature a hybrid structure: live instructor/mentor sessions combined with flexible self-paced module assignments."
+    "answer": "Both formats may be available depending on the course; details are shared at the time of enrollment."
   },
   {
     "category": "certificates",
     "question": "Do courses include a certification?",
-    "answer": "Yes, a Certificate of Completion is awarded upon finishing all course modules and assignments."
+    "answer": "Yes, a certificate of completion is provided for eligible courses."
   },
   {
     "category": "fees",
     "question": "Are there any free courses available?",
-    "answer": "Introductory workshops, webinars, and masterclasses are periodically offered free for community members."
+    "answer": "Some introductory or short courses may be offered for free, alongside paid in-depth programs."
   },
   {
     "category": "courses",
     "question": "Do you provide recorded sessions?",
-    "answer": "Yes! Recorded class sessions are provided so learners can revisit concepts at any time."
+    "answer": "Yes, recorded sessions are typically provided for learners to revisit course content."
   },
   {
     "category": "courses",
     "question": "Can I access course material after completion?",
-    "answer": "Yes! Long-term access to course materials and reference resources is provided."
+    "answer": "Access duration depends on the specific course terms shared at enrollment."
   },
   {
     "category": "courses",
     "question": "Do you offer live doubt-clearing sessions for courses?",
-    "answer": "Yes! Live mentor Q&A sessions are scheduled regularly to clear doubts."
+    "answer": "Yes, live sessions or mentor support may be included depending on the course."
   },
   {
     "category": "contact",
     "question": "Is there a community or peer group for learners?",
-    "answer": "Yes! Learners join vibrant WhatsApp and Discord community groups to collaborate with peers and mentors."
+    "answer": "Yes, learners can connect with peers and mentors through WeIntern's community channels."
   },
   {
     "category": "company",
     "question": "Can colleges or institutions partner with WeIntern for training programs?",
-    "answer": "Yes! WeIntern collaborates with engineering colleges and universities for institutional MOU training and placement drives."
+    "answer": "Yes, WeIntern collaborates with colleges and institutions for training and skill-development programs."
   },
   {
     "category": "certificates",
     "question": "How can employers verify my WeIntern certificate?",
-    "answer": "Employers can verify certificates using the unique Certificate Verification ID on our website or by contacting support@we-intern.in."
+    "answer": "Certificates can typically be verified through a unique certificate ID or by contacting the WeIntern team directly."
   },
   {
     "category": "certificates",
     "question": "Does the certificate include a unique ID or QR code?",
-    "answer": "Yes, every WeIntern certificate features a unique verification ID."
+    "answer": "Yes, certificates generally include a unique identifier for verification purposes."
   },
   {
     "category": "certificates",
     "question": "What if I lose my certificate?",
-    "answer": "You can request a reissued digital copy at any time by emailing support@we-intern.in with your registered email."
+    "answer": "You can contact the WeIntern team to request a reissued copy of your certificate."
   },
   {
     "category": "certificates",
     "question": "Can I request a duplicate certificate?",
-    "answer": "Yes, duplicate certificate requests are handled by reaching out to support."
+    "answer": "Yes, duplicate certificates can be requested by reaching out to the support team."
   },
   {
     "category": "certificates",
     "question": "Is the certificate digitally signed or shareable online?",
-    "answer": "Yes, certificates are digitally issued and optimized for instant sharing on LinkedIn, resumes, and portfolios."
+    "answer": "Yes, certificates are designed to be easily shared on platforms like LinkedIn and with employers."
   },
   {
     "category": "policies",
     "question": "Does WeIntern have a referral program?",
-    "answer": "Yes! Students can refer friends to WeIntern programs and earn referral benefits."
+    "answer": "Yes, students can refer friends or peers to WeIntern's internship and course programs."
   },
   {
     "category": "policies",
     "question": "What are the benefits of referring a friend?",
-    "answer": "Referrers receive cashback discounts or rewards upon successful enrollment of their referred peers."
+    "answer": "Referral benefits, where applicable, are communicated at the time of the referral program's availability."
   },
   {
     "category": "company",
     "question": "Is there an alumni network for past interns?",
-    "answer": "Yes! Past interns join the WeIntern Alumni Network for ongoing career updates and networking."
+    "answer": "Yes, past interns can stay connected through WeIntern's alumni and community network."
   },
   {
     "category": "placement",
     "question": "Can alumni access future opportunities or job referrals?",
-    "answer": "Yes! Alumni receive priority notifications for job openings and hiring partner referrals."
+    "answer": "Alumni may be considered for future openings, referrals, or advanced opportunities based on their performance history."
   },
   {
     "category": "placement",
     "question": "Does WeIntern help with job placement after the internship?",
-    "answer": "Yes! WeIntern provides career guidance, resume building, and 100% placement support for 6-month program candidates."
+    "answer": "Career support and guidance may be offered to strong performers, though placement is not guaranteed."
   },
   {
     "category": "placement",
     "question": "Do you conduct mock interviews?",
-    "answer": "Yes! Technical and HR mock interview sessions are conducted for program participants."
+    "answer": "Mock interviews or interview guidance may be provided as part of select programs."
   },
   {
     "category": "placement",
     "question": "Can WeIntern refer me to hiring partners?",
-    "answer": "Yes! High-performing interns are recommended to corporate partners within WeIntern's network."
+    "answer": "Top-performing interns may be referred to relevant opportunities within WeIntern's network, where available."
   },
   {
     "category": "placement",
     "question": "Do you help with resume building?",
-    "answer": "Yes! Mentors review and optimize student resumes to highlight internship projects effectively."
+    "answer": "Resume guidance may be offered as part of mentorship support during the internship or course."
   },
   {
     "category": "policies",
     "question": "What is the refund policy for paid internships or courses?",
-    "answer": "Refund terms and conditions are communicated upfront at enrollment. Written refund requests are processed according to company guidelines."
+    "answer": "Refund terms, where applicable, are shared clearly at the time of enrollment or payment."
   },
   {
     "category": "policies",
     "question": "Can I cancel my internship or course registration?",
-    "answer": "Registration cancellations can be evaluated prior to program kickoff by contacting support."
+    "answer": "Cancellations may be possible depending on the program stage; please contact the team for specific cases."
   },
   {
     "category": "policies",
     "question": "How is my personal data protected?",
-    "answer": "Student data is strictly protected under WeIntern privacy guidelines and Non-Disclosure Agreements (NDAs)."
+    "answer": "Student and client data is handled with confidentiality; sensitive project data is further protected under NDA where applicable."
   },
   {
     "category": "support",
     "question": "Who do I contact if I have a complaint?",
-    "answer": "Complaints can be escalated directly to support@we-intern.in or WhatsApp +91 74149 74582."
+    "answer": "Complaints can be raised through the website contact form, email, or WhatsApp support channels."
   },
   {
     "category": "support",
     "question": "Is there a grievance redressal process?",
-    "answer": "Yes! Concerns submitted by students or clients are reviewed promptly by the management team."
+    "answer": "Yes, concerns raised by students or clients are reviewed and addressed by the WeIntern team."
   },
   {
     "category": "company",
     "question": "Does WeIntern conduct webinars or workshops?",
-    "answer": "Yes! Free technical webinars, AI workshops, and career guidance masterclasses are organized regularly."
+    "answer": "Yes, webinars and workshops may be conducted on technology, AI, and career-related topics."
   },
   {
     "category": "company",
     "question": "Do you organize hackathons or challenges?",
-    "answer": "Yes! Coding challenges and hackathons are hosted periodically with exciting prizes and certificates."
+    "answer": "Yes, hackathons or coding challenges may be organized periodically for students and interns."
   },
   {
     "category": "contact",
     "question": "Can I join WeIntern's community group (WhatsApp/Discord/LinkedIn)?",
-    "answer": "Yes! Students receive community invitation links upon registration to connect on WhatsApp, Discord, and LinkedIn."
-  },
-  {
-    "category": "certificates",
-    "question": "What is LOR?",
-    "answer": "LOR stands for Letter of Recommendation. It is an official endorsement letter issued by WeIntern leadership to high-performing interns, validating their project contributions, technical skills, and professional conduct during the internship program."
+    "answer": "Yes, students and interns are typically invited to join a community group for updates, networking, and support."
   }
 ]
