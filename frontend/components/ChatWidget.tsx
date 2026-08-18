@@ -569,13 +569,25 @@ export default function ChatWidget() {
     setVoiceState("IDLE");
   };
 
-  const quickReply = async (question: string) => {
-    if (question.includes("Apply") || question.includes("Register")) {
+  const quickReply = async (actionType: string) => {
+    if (actionType === "apply" || actionType.includes("Apply") || actionType.includes("Register")) {
       startLeadForm();
       return;
     }
+
+    let queryText = actionType;
+    if (actionType === "fees" || actionType.includes("Fees")) {
+      queryText = "What are the internship fees, EMI options, and course prices?";
+    } else if (actionType === "domains" || actionType.includes("Domains")) {
+      queryText = "What internship domains are available at WeIntern?";
+    } else if (actionType === "certificates" || actionType.includes("Certificates")) {
+      queryText = "Will I receive a certificate after completing the internship?";
+    } else if (actionType === "contact" || actionType.includes("Contact")) {
+      queryText = "How can I contact your team?";
+    }
+
     setMessage("");
-    await processMessage(question, "text");
+    await processMessage(queryText, "text");
   };
 
   // ── Helper to fetch the last response spoken by WeIntern AI ─────────────
@@ -2060,36 +2072,36 @@ export default function ChatWidget() {
           <div className="border-t p-3 flex overflow-x-auto gap-2 bg-white border-b border-gray-100 no-scrollbar scroll-smooth">
 
             <button
-              onClick={() => quickReply("Apply / Register")}
-              className="flex-shrink-0 border border-blue-600 bg-blue-50 text-blue-700 font-medium rounded-full px-3 py-1 text-xs hover:bg-blue-600 hover:text-white transition duration-200 touch-manipulation"
+              onClick={() => quickReply("apply")}
+              className="flex-shrink-0 border border-blue-600 bg-blue-50 text-blue-700 font-medium rounded-full px-3 py-1 text-xs hover:bg-blue-600 hover:text-white transition duration-200 touch-manipulation cursor-pointer"
             >
               ✨ Apply / Register
             </button>
 
             <button
-              onClick={() => quickReply("Fees & EMI")}
-              className="flex-shrink-0 border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200 touch-manipulation"
+              onClick={() => quickReply("fees")}
+              className="flex-shrink-0 border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200 touch-manipulation cursor-pointer"
             >
               Fees & EMI
             </button>
 
             <button
-              onClick={() => quickReply("Domains")}
-              className="flex-shrink-0 border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200 touch-manipulation"
+              onClick={() => quickReply("domains")}
+              className="flex-shrink-0 border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200 touch-manipulation cursor-pointer"
             >
               Domains
             </button>
 
             <button
-              onClick={() => quickReply("Certificates")}
-              className="flex-shrink-0 border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200 touch-manipulation"
+              onClick={() => quickReply("certificates")}
+              className="flex-shrink-0 border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200 touch-manipulation cursor-pointer"
             >
               Certificates
             </button>
 
             <button
-              onClick={() => quickReply("Contact")}
-              className="flex-shrink-0 border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200 touch-manipulation"
+              onClick={() => quickReply("contact")}
+              className="flex-shrink-0 border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200 touch-manipulation cursor-pointer"
             >
               Contact
             </button>
