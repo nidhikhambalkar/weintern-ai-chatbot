@@ -1846,646 +1846,801 @@ export default function ChatWidget() {
     await processMessage(userMessage, "text");
   };
 
+/* =========================================================
+   AI BOY AVATAR
+========================================================= */
+
+function AIBoyAvatar({
+  size = "small",
+}: {
+  size?: "small" | "header" | "launcher";
+}) {
+  const sizes = {
+    small: "h-9 w-9",
+    header: "h-12 w-12",
+    launcher: "h-[68px] w-[68px]",
+  };
+
+  return (
+    <div
+      className={`relative shrink-0 overflow-hidden rounded-full ${sizes[size]}`}
+    >
+      <div className="absolute inset-0 rounded-full bg-sky-200/50" />
+      <img
+        src="/weintern_avatar.png"
+        alt="WeIntern AI Assistant"
+        draggable={false}
+        className={
+          size === "small"
+            ? "absolute left-[-42%] top-[-3%] h-[132%] w-[184%] max-w-none object-contain"
+            : size === "header"
+              ? "absolute left-[-40%] top-[-3%] h-[132%] w-[180%] max-w-none object-contain"
+              : "absolute left-[-39%] top-[-3%] h-[132%] w-[180%] max-w-none object-contain"
+        }
+      />
+    </div>
+  );
+}
+
+/* =========================================================
+   STUDENT AVATAR
+========================================================= */
+
+function StudentAvatar() {
+  return (
+    <div className="student-pop flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-100 shadow-sm">
+      <span className="text-[21px]" aria-hidden="true">
+        👩🏻‍🎓
+      </span>
+    </div>
+  );
+}
+
   return (
     <>
-      {/* Floating Action Toggle Button */}
-      <button
-        onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 bg-gradient-to-r from-blue-600 to-sky-500 text-white p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition duration-300 z-50 flex items-center justify-center cursor-pointer shadow-blue-500/40"
-        title={open ? "Close chat" : "Open WeIntern AI Assistant"}
-        aria-label="Toggle chat widget"
-      >
-        <BsChatDotsFill size={26} />
-      </button>
+      <style jsx global>{`
+        @keyframes boyFloat {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-9px); }
+        }
+        @keyframes boyFloatBig {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-12px) rotate(-1deg); }
+        }
+        @keyframes bubbleFloat {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-4px); }
+        }
+        @keyframes pulseOnline {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.15); opacity: 0.75; }
+        }
+        @keyframes studentPop {
+          from { transform: scale(0.75); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes sparkle {
+          0%, 100% { opacity: 0.4; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1.15); }
+        }
+        .boy-launcher { animation: boyFloat 3s ease-in-out infinite; }
+        .boy-outside { animation: boyFloatBig 3.2s ease-in-out infinite; }
+        .ask-bubble { animation: bubbleFloat 3s ease-in-out infinite; }
+        .online-dot { animation: pulseOnline 2s ease-in-out infinite; }
+        .student-pop { animation: studentPop 0.25s ease-out; }
+        .sparkle { animation: sparkle 2s ease-in-out infinite; }
+        .chat-scroll::-webkit-scrollbar { width: 5px; }
+        .chat-scroll::-webkit-scrollbar-track { background: transparent; }
+        .chat-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+      `}</style>
 
-      {/* Chat Window */}
+      {/* CLOSED LAUNCHER STATE */}
+      {!open && (
+        <>
+          {/* ASK ME ANYTHING BUBBLE */}
+          <div className="ask-bubble fixed bottom-[105px] right-5 z-[9998]">
+            <div className="relative rounded-2xl border border-blue-100 bg-white px-4 py-2.5 shadow-[0_12px_35px_rgba(15,23,42,0.15)]">
+              <div className="text-[12px] font-bold text-slate-700">
+                💡 Ask me anything!
+              </div>
+              <div className="absolute -bottom-1.5 right-5 h-3 w-3 rotate-45 border-r border-b border-blue-100 bg-white" />
+            </div>
+          </div>
+
+          {/* LAUNCHER BUTTON */}
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            aria-label="Open WeIntern AI Assistant"
+            className="fixed bottom-5 right-5 z-[9999] cursor-pointer"
+          >
+            <div className="boy-launcher relative flex h-[76px] w-[76px] items-center justify-center rounded-full border-[3px] border-white bg-gradient-to-br from-sky-400 via-blue-500 to-blue-800 shadow-[0_12px_40px_rgba(14,116,244,0.4)]">
+              <AIBoyAvatar size="launcher" />
+              <span className="online-dot absolute bottom-0 right-0 h-5 w-5 rounded-full border-[3px] border-white bg-green-500" />
+            </div>
+          </button>
+        </>
+      )}
+
+      {/* OPEN CHAT STATE */}
       {open && (
-        <div className="fixed bottom-0 right-0 w-full h-[100dvh] sm:bottom-6 sm:right-6 sm:w-[410px] sm:max-w-[calc(100vw-2rem)] sm:h-[620px] sm:max-h-[calc(100vh-3rem)] bg-white sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-gray-100 z-50">
-
-          {/* 3D Mascot Character (Visible on desktop alongside chat window) */}
-          <div className="hidden sm:block absolute -left-44 bottom-0 w-44 h-80 pointer-events-none z-40 select-none">
-            <img
-              src="/weintern_mascot.png"
-              alt="WeIntern Mascot"
-              className="w-full h-full object-contain filter drop-shadow-2xl"
-            />
-          </div>
-
-          {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-sky-500 text-white p-3.5 sm:p-4 flex justify-between items-center shadow-md relative z-10">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <img
-                  src="/weintern_avatar.png"
-                  alt="WeIntern Avatar"
-                  className="w-10 h-10 rounded-full border-2 border-white/90 shadow-md object-cover flex-shrink-0"
-                />
-                <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-blue-600 rounded-full"></span>
-              </div>
-              <div>
-                <h2 className="font-bold flex items-center gap-1 text-sm sm:text-base tracking-tight text-white">
-                  WeIntern AI Assistant ✨
-                </h2>
-                <p className="text-[11px] text-blue-100/90 font-medium flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full inline-block animate-pulse"></span>
-                  Here to help you 24/7 {voiceMode && "• Voice Mode Active"}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-1.5 items-center">
-              {/* Clear History */}
-              <button
-                onClick={() => setShowClearConfirm(true)}
-                title="Clear chat history"
-                className="p-1.5 bg-white/10 hover:bg-white/25 rounded-full text-white transition-colors cursor-pointer"
-              >
-                <BsTrash size={16} />
-              </button>
-
-              {/* Speaker Output Toggle */}
-              <button
-                onClick={() => {
-                  if (isSpeakerMuted) {
-                    handleUnmute();
-                  } else {
-                    handleMute();
-                  }
-                }}
-                title={isSpeakerMuted ? "Unmute bot output" : "Mute bot output"}
-                className="p-1.5 bg-white/10 hover:bg-white/25 rounded-full text-white transition-colors cursor-pointer"
-              >
-                {isSpeakerMuted ? <BsVolumeMuteFill size={18} /> : <BsVolumeUpFill size={18} />}
-              </button>
-
-              {/* Voice Mode (STT) Toggle */}
-              <button
-                onClick={() => {
-                  const mode = !voiceMode;
-                  setVoiceMode(mode);
-                  voiceModeRef.current = mode;
-                  if (mode) {
-                    startSpeechRecognition();
-                  } else {
-                    stopSpeechRecognition();
-                    if (synthesisRef.current) {
-                      synthesisRef.current.cancel();
-                    }
-                    setVoiceState("IDLE");
-                  }
-                }}
-                title={voiceMode ? "Disable Voice Mode" : "Enable Voice Mode"}
-                className={`p-1.5 rounded-full transition-colors cursor-pointer ${
-                  voiceMode ? "bg-amber-400 text-gray-900 font-bold shadow-md" : "bg-white/10 hover:bg-white/25 text-white"
-                }`}
-              >
-                {voiceMode ? <BsMicFill size={18} /> : <BsMicMuteFill size={18} />}
-              </button>
-
-              <button
-                onClick={() => setOpen(false)}
-                className="p-1.5 bg-white/20 hover:bg-white/35 text-white rounded-full transition-colors cursor-pointer ml-0.5"
-                title="Close chat window"
-              >
-                <BsX size={22} />
-              </button>
+        <>
+          {/* FULL BODY BOY MASCOT OUTSIDE CHAT */}
+          <div className="boy-outside pointer-events-none fixed bottom-5 right-[425px] z-[9997] hidden md:block">
+            <div className="relative h-[300px] w-[195px]">
+              <div className="absolute bottom-0 left-1/2 h-20 w-28 -translate-x-1/2 rounded-full bg-sky-300/25 blur-2xl" />
+              <img
+                src="/weintern_mascot.png"
+                alt="WeIntern AI Assistant"
+                draggable={false}
+                className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_20px_25px_rgba(15,23,42,0.2)]"
+              />
+              <span className="sparkle absolute right-2 top-8 text-xl">✨</span>
+              <span className="sparkle absolute left-0 top-24 text-lg" style={{ animationDelay: "0.5s" }}>✨</span>
             </div>
           </div>
 
-          {/* Toast Notification */}
-          {toastMessage && (
-            <div className="absolute top-16 left-1/2 -translate-x-1/2 bg-gray-800/90 text-white text-xs px-3.5 py-1.5 rounded-full shadow-lg z-50 font-medium">
-              {toastMessage}
-            </div>
-          )}
+          {/* CHAT WINDOW CONTAINER */}
+          <div className="fixed bottom-5 right-5 z-[9999] flex h-[min(720px,calc(100vh-40px))] w-[410px] max-w-[calc(100vw-24px)] flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_25px_90px_rgba(15,23,42,0.30)]">
 
-          {/* Clear History Confirmation Modal */}
-          {showClearConfirm && (
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-2xl p-5 shadow-2xl max-w-[280px] w-full text-center space-y-3 border border-gray-100">
-                <div className="w-11 h-11 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto text-lg">
-                  <BsTrash />
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-800 text-sm">Clear Chat History?</h3>
-                  <p className="text-[11px] text-gray-500 mt-1">All saved messages for this session will be deleted.</p>
-                </div>
-                <div className="flex gap-2 justify-center pt-1">
-                  <button
-                    onClick={() => setShowClearConfirm(false)}
-                    className="px-3 py-1.5 text-xs rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium flex-1 transition cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleClearHistory}
-                    className="px-3 py-1.5 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium flex-1 shadow transition cursor-pointer"
-                  >
-                    Clear
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+            {/* HEADER */}
+            <div className="relative overflow-hidden bg-gradient-to-br from-[#0784dc] via-[#087fce] to-[#0759a5] px-5 py-4 text-white">
+              <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
+              <div className="absolute -left-20 bottom-[-80px] h-44 w-44 rounded-full bg-cyan-200/10 blur-3xl" />
 
-          {/* Apply / Register Lead Form Modal Overlay */}
-          {showLeadForm && (
-            <div className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm z-50 p-2 sm:p-4 overflow-y-auto flex items-center justify-center animate-in fade-in duration-200">
-              <div className="w-full max-w-sm my-auto">
-                <LeadForm
-                  onClose={handleCloseLeadForm}
-                  onSkip={handleSkipLeadForm}
-                  onSuccess={(applicantName) => {
-                    setMessages((prev) => [
-                      ...prev,
-                      {
-                        sender: "bot",
-                        text: `🎉 Thank you for registering, ${applicantName}! Your details have been submitted successfully. Our team will contact you soon.`,
-                        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-                      },
-                    ]);
-                    setTimeout(() => {
-                      handleCloseLeadForm();
-                    }, 2000);
-                  }}
-                />
-              </div>
-            </div>
-          )}
+              <div className="relative flex items-center justify-between">
+                {/* LEFT */}
+                <div className="flex items-center gap-3">
+                  <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white shadow-lg">
+                    <img
+                      src="/weintern_avatar.png"
+                      alt="WeIntern AI Assistant"
+                      draggable={false}
+                      className="absolute left-[-40%] top-[-3%] h-[132%] w-[180%] max-w-none object-contain"
+                    />
+                    <span className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white bg-green-500" />
+                  </div>
 
-          {/* Messages */}
-          <div className="flex-1 p-3.5 sm:p-4 overflow-y-auto space-y-3.5 bg-gradient-to-b from-slate-50 to-blue-50/20 flex flex-col">
-
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
-              >
-                {msg.sender === "bot" && (
-                  <img
-                    src="/weintern_avatar.png"
-                    alt="Bot Avatar"
-                    className="w-8 h-8 rounded-full border border-blue-200 object-cover flex-shrink-0 self-start mt-0.5 shadow-xs mr-2"
-                  />
-                )}
-
-                <div
-                  className={`p-3.5 rounded-2xl shadow-xs max-w-[85%] ${
-                    msg.sender === "user"
-                      ? "bg-gradient-to-r from-blue-600 to-sky-500 text-white rounded-tr-xs shadow-md"
-                      : "bg-white text-gray-800 border border-gray-150 rounded-tl-xs"
-                  }`}
-                >
-                  {editingIndex === index ? (
-                    <div className="space-y-2 min-w-[200px]">
-                      <textarea
-                        value={editText}
-                        onChange={(e) => setEditText(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            handleSaveEditedMessage(index);
-                          } else if (e.key === "Escape") {
-                            handleCancelEdit();
-                          }
-                        }}
-                        autoFocus
-                        rows={Math.max(2, editText.split("\n").length)}
-                        className="w-full bg-white text-gray-900 text-sm p-2 rounded-lg border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
-                      />
-                      <div className="flex justify-end gap-1.5 pt-0.5">
-                        <button
-                          onClick={handleCancelEdit}
-                          className="px-2.5 py-1 text-[11px] rounded-md bg-blue-700/80 text-white hover:bg-blue-800 font-medium transition cursor-pointer"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={() => handleSaveEditedMessage(index)}
-                          className="px-2.5 py-1 text-[11px] rounded-md bg-emerald-500 text-white hover:bg-emerald-600 font-semibold shadow transition cursor-pointer flex items-center gap-1"
-                        >
-                          <BsCheck2 className="w-3.5 h-3.5 font-bold" />
-                          Save
-                        </button>
-                      </div>
+                  <div>
+                    <h2 className="text-[16px] font-bold tracking-tight text-white">
+                      WeIntern AI Assistant ✨
+                    </h2>
+                    <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-white/85">
+                      <span className="h-1.5 w-1.5 rounded-full bg-green-300" />
+                      <span>Here to help you 24/7 {voiceMode && "• Voice Mode Active"}</span>
                     </div>
-                  ) : (
-                    <>
-                      <div className="whitespace-pre-line text-sm leading-relaxed">{msg.text}</div>
-                      {msg.sender === "bot" && (leadStep > 0 || showLeadForm) && (msg.text.includes("registered") || msg.text.includes("Please enter your")) && (
-                        <div className="mt-2.5 pt-2 border-t border-gray-200 flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            onClick={handleSkipLeadForm}
-                            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold rounded-lg border border-slate-300 text-xs transition flex items-center gap-1 shadow-sm cursor-pointer"
-                          >
-                            ⏩ Skip Registration / Continue without Registration
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleCloseLeadForm}
-                            className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 font-bold rounded-lg border border-red-200 text-xs transition flex items-center gap-1 cursor-pointer"
-                          >
-                            ✖ Close
-                          </button>
-                        </div>
-                      )}
-                    </>
-                  )}
+                  </div>
+                </div>
 
-                  {/* Action Bar & Footer */}
-                  <div
-                    className={`flex items-center justify-between gap-2 mt-2 pt-1.5 border-t text-[11px] ${
-                      msg.sender === "user" ? "border-white/20 text-blue-100" : "border-gray-100 text-gray-400"
+                {/* RIGHT HEADER CONTROLS */}
+                <div className="flex items-center gap-1.5">
+                  {/* Clear History */}
+                  <button
+                    type="button"
+                    onClick={() => setShowClearConfirm(true)}
+                    title="Clear chat history"
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 cursor-pointer"
+                  >
+                    <BsTrash size={15} />
+                  </button>
+
+                  {/* Speaker Output Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (isSpeakerMuted) {
+                        handleUnmute();
+                      } else {
+                        handleMute();
+                      }
+                    }}
+                    title={isSpeakerMuted ? "Unmute bot output" : "Mute bot output"}
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 cursor-pointer"
+                  >
+                    {isSpeakerMuted ? <BsVolumeMuteFill size={16} /> : <BsVolumeUpFill size={16} />}
+                  </button>
+
+                  {/* Voice Mode Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const mode = !voiceMode;
+                      setVoiceMode(mode);
+                      voiceModeRef.current = mode;
+                      if (mode) {
+                        startSpeechRecognition();
+                      } else {
+                        stopSpeechRecognition();
+                        if (synthesisRef.current) {
+                          synthesisRef.current.cancel();
+                        }
+                        setVoiceState("IDLE");
+                      }
+                    }}
+                    title={voiceMode ? "Disable Voice Mode" : "Enable Voice Mode"}
+                    className={`flex h-8 w-8 items-center justify-center rounded-full transition cursor-pointer ${
+                      voiceMode ? "bg-amber-400 text-gray-900 font-bold shadow-md" : "bg-white/10 hover:bg-white/20 text-white"
                     }`}
                   >
-                    {/* Action Buttons: Copy, Edit, Retry */}
-                    <div className="flex items-center gap-2">
-                      {/* Copy Button */}
-                      <button
-                        onClick={() => handleCopyMessage(index, msg.text)}
-                        title="Copy text"
-                        className="hover:opacity-80 transition duration-150 flex items-center gap-0.5 cursor-pointer"
-                      >
-                        {copiedIndex === index ? (
-                          <>
-                            <BsCheck2 className="w-3.5 h-3.5 text-emerald-400 font-bold" />
-                            <span className="text-[10px] text-emerald-400 font-semibold">Copied!</span>
-                          </>
-                        ) : (
-                          <BsCopy className="w-3 h-3" />
-                        )}
-                      </button>
+                    {voiceMode ? <BsMicFill size={16} /> : <BsMicMuteFill size={16} />}
+                  </button>
 
-                      {/* Edit Button (User) */}
-                      {msg.sender === "user" && (
-                        <button
-                          onClick={() => handleEditMessage(index, msg.text)}
-                          title="Edit message"
-                          className={`hover:opacity-80 transition duration-150 flex items-center gap-0.5 cursor-pointer ml-1 ${
-                            editingIndex === index ? "text-yellow-300 font-bold" : ""
-                          }`}
-                        >
-                          <BsPencilSquare className="w-3 h-3" />
-                        </button>
-                      )}
+                  {/* CLOSE */}
+                  <button
+                    type="button"
+                    onClick={() => setOpen(false)}
+                    aria-label="Close chat"
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25 cursor-pointer ml-0.5"
+                  >
+                    <BsX size={22} />
+                  </button>
+                </div>
+              </div>
+            </div>
 
-                      {/* Retry Button (Bot) */}
-                      {msg.sender === "bot" && index > 0 && messages[index - 1]?.sender === "user" && (
-                        <button
-                          onClick={() => handleRetryMessage(messages[index - 1].text)}
-                          title="Retry response"
-                          className="hover:text-blue-600 transition duration-150 flex items-center gap-0.5 cursor-pointer ml-1"
-                        >
-                          <BsArrowClockwise className="w-3 h-3" />
-                        </button>
-                      )}
+            {/* Toast Notification */}
+            {toastMessage && (
+              <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-gray-800/90 text-white text-xs px-3.5 py-1.5 rounded-full shadow-lg z-50 font-medium">
+                {toastMessage}
+              </div>
+            )}
+
+            {/* Clear History Confirmation Modal */}
+            {showClearConfirm && (
+              <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-2xl p-5 shadow-2xl max-w-[280px] w-full text-center space-y-3 border border-gray-100">
+                  <div className="w-11 h-11 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto text-lg">
+                    <BsTrash />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-800 text-sm">Clear Chat History?</h3>
+                    <p className="text-[11px] text-gray-500 mt-1">All saved messages for this session will be deleted.</p>
+                  </div>
+                  <div className="flex gap-2 justify-center pt-1">
+                    <button
+                      onClick={() => setShowClearConfirm(false)}
+                      className="px-3 py-1.5 text-xs rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium flex-1 transition cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleClearHistory}
+                      className="px-3 py-1.5 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium flex-1 shadow transition cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Apply / Register Lead Form Modal Overlay */}
+            {showLeadForm && (
+              <div className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm z-50 p-2 sm:p-4 overflow-y-auto flex items-center justify-center animate-in fade-in duration-200">
+                <div className="w-full max-w-sm my-auto">
+                  <LeadForm
+                    onClose={handleCloseLeadForm}
+                    onSkip={handleSkipLeadForm}
+                    onSuccess={(applicantName) => {
+                      setMessages((prev) => [
+                        ...prev,
+                        {
+                          sender: "bot",
+                          text: `🎉 Thank you for registering, ${applicantName}! Your details have been submitted successfully. Our team will contact you soon.`,
+                          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+                        },
+                      ]);
+                      setTimeout(() => {
+                        handleCloseLeadForm();
+                      }, 2000);
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* CHAT BODY */}
+            <div className="chat-scroll flex-1 overflow-y-auto bg-[#f7faff] px-4 py-4 space-y-3">
+
+              {/* WELCOME CARD & QUICK ACTION GRID */}
+              {messages.length <= 2 && (
+                <div className="mb-4 space-y-3">
+                  <div className="flex items-start gap-2">
+                    <AIBoyAvatar size="small" />
+                    <div className="max-w-[82%] rounded-2xl rounded-tl-md border border-slate-100 bg-white px-4 py-3 shadow-sm">
+                      <p className="text-[13px] font-semibold leading-5 text-slate-700">
+                        Hi there! 👋
+                      </p>
+                      <p className="mt-1 text-[12px] leading-5 text-slate-500">
+                        I'm your WeIntern AI Assistant. Ask me anything about internships, courses, certificates, fees or placement.
+                      </p>
                     </div>
+                  </div>
 
-                    {/* Right side: TTS Controls (Bot) + Timestamp */}
-                    <div className="flex items-center gap-2">
-                      {msg.sender === "bot" && (
-                        <div className="flex items-center gap-1.5">
-                          {((playingMessageIndex === index || pausedMessageIndexRef.current === index) || ((playingMessageIndex === -1 || pausedMessageIndexRef.current === -1) && index === messages.length - 1)) ? (
-                            <>
-                              {playbackState === "PLAYING" ? (
-                                <button
-                                  onClick={handlePauseMessage}
-                                  title="Pause response"
-                                  className="hover:text-blue-600 transition duration-200 cursor-pointer"
-                                >
-                                  <BsPauseFill className="w-4 h-4" />
-                                </button>
+                  <div className="grid grid-cols-2 gap-2 pl-11">
+                    <button
+                      type="button"
+                      onClick={() => quickReply("domains")}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md cursor-pointer"
+                    >
+                      <div className="text-base">📚</div>
+                      <div className="mt-1 text-[11px] font-bold text-slate-700">Internship</div>
+                      <div className="text-[10px] text-slate-400">Programs</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => quickReply("fees")}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md cursor-pointer"
+                    >
+                      <div className="text-base">💰</div>
+                      <div className="mt-1 text-[11px] font-bold text-slate-700">Fees & Payment</div>
+                      <div className="text-[10px] text-slate-400">Pricing info</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => quickReply("certificates")}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md cursor-pointer"
+                    >
+                      <div className="text-base">📜</div>
+                      <div className="mt-1 text-[11px] font-bold text-slate-700">Certificates</div>
+                      <div className="text-[10px] text-slate-400">Learn more</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => quickReply("contact")}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md cursor-pointer"
+                    >
+                      <div className="text-base">🎯</div>
+                      <div className="mt-1 text-[11px] font-bold text-slate-700">Placement</div>
+                      <div className="text-[10px] text-slate-400">Support</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => quickReply("apply")}
+                      className="col-span-2 rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-white px-3 py-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-500 hover:shadow-md cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-blue-700 text-lg shadow-sm text-white">
+                          🚀
+                        </div>
+                        <div>
+                          <div className="text-[12px] font-bold text-blue-700">Apply / Register</div>
+                          <div className="text-[10px] text-slate-400">Start your WeIntern journey</div>
+                        </div>
+                        <div className="ml-auto text-blue-600 font-bold text-sm">→</div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* MESSAGES LIST */}
+              <div className="space-y-3">
+                {messages.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={`flex items-end gap-2 ${
+                      msg.sender === "user" ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    {msg.sender === "bot" && <AIBoyAvatar size="small" />}
+                    {msg.sender === "user" && (
+                      <div className="order-2">
+                        <StudentAvatar />
+                      </div>
+                    )}
+
+                    <div
+                      className={`max-w-[76%] px-3.5 py-2.5 shadow-sm ${
+                        msg.sender === "user"
+                          ? "order-1 rounded-2xl rounded-br-md bg-gradient-to-r from-[#168de2] to-[#087fce] text-white"
+                          : "rounded-2xl rounded-bl-md border border-slate-100 bg-white text-slate-700"
+                      }`}
+                    >
+                      {editingIndex === index ? (
+                        <div className="space-y-2 min-w-[200px]">
+                          <textarea
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSaveEditedMessage(index);
+                              } else if (e.key === "Escape") {
+                                handleCancelEdit();
+                              }
+                            }}
+                            autoFocus
+                            rows={Math.max(2, editText.split("\n").length)}
+                            className="w-full bg-white text-gray-900 text-sm p-2 rounded-lg border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+                          />
+                          <div className="flex justify-end gap-1.5 pt-0.5">
+                            <button
+                              onClick={handleCancelEdit}
+                              className="px-2.5 py-1 text-[11px] rounded-md bg-blue-700/80 text-white hover:bg-blue-800 font-medium transition cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => handleSaveEditedMessage(index)}
+                              className="px-2.5 py-1 text-[11px] rounded-md bg-emerald-500 text-white hover:bg-emerald-600 font-semibold shadow transition cursor-pointer flex items-center gap-1"
+                            >
+                              <BsCheck2 className="w-3.5 h-3.5 font-bold" />
+                              Save
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className={`whitespace-pre-line text-[13px] leading-5 ${msg.sender === "user" ? "text-white" : "text-slate-700"}`}>
+                            {msg.text}
+                          </div>
+                          {msg.sender === "bot" && (leadStep > 0 || showLeadForm) && (msg.text.includes("registered") || msg.text.includes("Please enter your")) && (
+                            <div className="mt-2.5 pt-2 border-t border-gray-200 flex flex-wrap gap-2">
+                              <button
+                                type="button"
+                                onClick={handleSkipLeadForm}
+                                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold rounded-lg border border-slate-300 text-xs transition flex items-center gap-1 shadow-sm cursor-pointer"
+                              >
+                                ⏩ Skip Registration / Continue without Registration
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleCloseLeadForm}
+                                className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 font-bold rounded-lg border border-red-200 text-xs transition flex items-center gap-1 cursor-pointer"
+                              >
+                                ✖ Close
+                              </button>
+                            </div>
+                          )}
+                        </>
+                      )}
+
+                      {/* Action Bar & Footer */}
+                      <div
+                        className={`flex items-center justify-between gap-2 mt-2 pt-1.5 border-t text-[10px] ${
+                          msg.sender === "user" ? "border-white/20 text-blue-100" : "border-slate-100 text-slate-400"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleCopyMessage(index, msg.text)}
+                            title="Copy text"
+                            className="hover:opacity-80 transition duration-150 flex items-center gap-0.5 cursor-pointer"
+                          >
+                            {copiedIndex === index ? (
+                              <>
+                                <BsCheck2 className="w-3.5 h-3.5 text-emerald-400 font-bold" />
+                                <span className="text-[10px] text-emerald-400 font-semibold">Copied!</span>
+                              </>
+                            ) : (
+                              <BsCopy className="w-3 h-3" />
+                            )}
+                          </button>
+
+                          {msg.sender === "user" && (
+                            <button
+                              onClick={() => handleEditMessage(index, msg.text)}
+                              title="Edit message"
+                              className={`hover:opacity-80 transition duration-150 flex items-center gap-0.5 cursor-pointer ml-1 ${
+                                editingIndex === index ? "text-yellow-300 font-bold" : ""
+                              }`}
+                            >
+                              <BsPencilSquare className="w-3 h-3" />
+                            </button>
+                          )}
+
+                          {msg.sender === "bot" && index > 0 && messages[index - 1]?.sender === "user" && (
+                            <button
+                              onClick={() => handleRetryMessage(messages[index - 1].text)}
+                              title="Retry response"
+                              className="hover:text-blue-600 transition duration-150 flex items-center gap-0.5 cursor-pointer ml-1"
+                            >
+                              <BsArrowClockwise className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {msg.sender === "bot" && (
+                            <div className="flex items-center gap-1.5">
+                              {((playingMessageIndex === index || pausedMessageIndexRef.current === index) || ((playingMessageIndex === -1 || pausedMessageIndexRef.current === -1) && index === messages.length - 1)) ? (
+                                <>
+                                  {playbackState === "PLAYING" ? (
+                                    <button
+                                      onClick={handlePauseMessage}
+                                      title="Pause response"
+                                      className="hover:text-blue-600 transition duration-200 cursor-pointer"
+                                    >
+                                      <BsPauseFill className="w-4 h-4" />
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={() => playbackState === "PAUSED" ? handleResumeOrContinueMessage() : handlePlayMessage(index, msg.text)}
+                                      title="Resume response"
+                                      className="hover:text-blue-600 transition duration-200 cursor-pointer"
+                                    >
+                                      <BsPlayFill className="w-4 h-4" />
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={handleStopMessage}
+                                    title="Stop response"
+                                    className="hover:text-red-500 transition duration-200 cursor-pointer"
+                                  >
+                                    <BsStopFill className="w-4 h-4" />
+                                  </button>
+                                </>
                               ) : (
                                 <button
-                                  onClick={() => playbackState === "PAUSED" ? handleResumeOrContinueMessage() : handlePlayMessage(index, msg.text)}
-                                  title="Resume response"
+                                  onClick={() => handlePlayMessage(index, msg.text)}
+                                  title="Speak response"
                                   className="hover:text-blue-600 transition duration-200 cursor-pointer"
                                 >
                                   <BsPlayFill className="w-4 h-4" />
                                 </button>
                               )}
-                              <button
-                                onClick={handleStopMessage}
-                                title="Stop response"
-                                className="hover:text-red-500 transition duration-200 cursor-pointer"
-                              >
-                                <BsStopFill className="w-4 h-4" />
-                              </button>
-                            </>
-                          ) : (
-                            <button
-                              onClick={() => handlePlayMessage(index, msg.text)}
-                              title="Speak response"
-                              className="hover:text-blue-600 transition duration-200 cursor-pointer"
-                            >
-                              <BsPlayFill className="w-4 h-4" />
-                            </button>
+                            </div>
                           )}
+                          <span className="text-[9px]">{msg.time}</span>
                         </div>
-                      )}
-                      <span className="text-[9px]">{msg.time}</span>
+                      </div>
                     </div>
                   </div>
+                ))}
+
+                {/* Interim Transcript display for user speech */}
+                {voiceState === "LISTENING" && interimTranscript && (
+                  <div className="flex justify-end items-end gap-2">
+                    <StudentAvatar />
+                    <div className="bg-gray-200 text-gray-700 p-3 rounded-2xl rounded-br-md shadow-sm max-w-[76%] italic text-[13px]">
+                      🎤 {interimTranscript}...
+                    </div>
+                  </div>
+                )}
+
+                {/* TYPING INDICATOR */}
+                {isTyping && (
+                  <div className="flex items-end gap-2">
+                    <AIBoyAvatar size="small" />
+                    <div className="flex items-center gap-1 rounded-2xl rounded-bl-md border border-slate-100 bg-white px-4 py-3 shadow-sm">
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-blue-500" />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-blue-500 [animation-delay:0.15s]" />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-blue-500 [animation-delay:0.3s]" />
+                    </div>
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+            </div>
+
+            {/* Voice State Information Panel */}
+            {(voiceMode || playbackState !== "IDLE") && (
+              <div className="bg-white border-t border-slate-200 px-4 py-2 flex flex-col gap-1.5">
+                {voiceState === "LISTENING" && (
+                  <div className="flex justify-between items-center text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-100">
+                    <span className="flex items-center gap-1.5 font-medium animate-pulse">
+                      <span className="w-2 h-2 bg-red-500 rounded-full inline-block"></span>
+                      Listening... speak now
+                    </span>
+                    <button
+                      onClick={stopSpeechRecognition}
+                      className="text-[10px] text-gray-500 hover:text-gray-700 font-semibold underline cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
+
+                {voiceState === "SPEAKING" && (
+                  <div className="flex justify-between items-center text-xs text-blue-600 bg-blue-50 p-2 rounded-lg border border-blue-100">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">Bot is speaking...</span>
+                      <div className="voice-wave-container">
+                        <div className="voice-wave-bar"></div>
+                        <div className="voice-wave-bar"></div>
+                        <div className="voice-wave-bar"></div>
+                        <div className="voice-wave-bar"></div>
+                        <div className="voice-wave-bar"></div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handlePauseMessage}
+                        className="px-2 py-1 text-[10px] bg-blue-600 text-white rounded hover:bg-blue-700 font-semibold transition cursor-pointer"
+                      >
+                        Pause
+                      </button>
+                      <button
+                        onClick={handleStopMessage}
+                        className="px-2 py-1 text-[10px] bg-red-500 text-white rounded hover:bg-red-600 font-semibold transition cursor-pointer"
+                      >
+                        Stop
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {voiceState === "PAUSED" && (
+                  <div className="flex justify-between items-center text-xs text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200">
+                    <span className="font-medium flex items-center gap-1">
+                      ⏸️ Speech Paused
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleResumeOrContinueMessage}
+                        className="px-2 py-1 text-[10px] bg-amber-600 text-white rounded hover:bg-amber-700 font-semibold transition cursor-pointer"
+                      >
+                        Continue
+                      </button>
+                      <button
+                        onClick={handleStopMessage}
+                        className="px-2 py-1 text-[10px] bg-red-500 text-white rounded hover:bg-red-600 font-semibold transition cursor-pointer"
+                      >
+                        Stop
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {voiceState === "THINKING" && (
+                  <div className="flex items-center text-xs text-blue-600 bg-blue-50 p-2 rounded-lg border border-blue-100">
+                    <span className="font-medium animate-pulse">Thinking...</span>
+                  </div>
+                )}
+
+                {voiceState === "ERROR" && errorMessage && (
+                  <div className="text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-200 text-center font-semibold">
+                    ⚠️ {errorMessage}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Registration Active Sticky Bar */}
+            {(showLeadForm || leadStep > 0) && (
+              <div className="bg-amber-50 border-t border-b border-amber-200 p-2.5 px-4 flex items-center justify-between gap-2 text-xs shadow-sm z-30">
+                <span className="font-bold text-amber-900 flex items-center gap-1.5">
+                  📝 Registration in progress (Step {leadStep || 1} of 4)
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleSkipLeadForm}
+                    className="px-3 py-1 bg-amber-100 hover:bg-amber-200 text-amber-950 font-semibold rounded-lg transition border border-amber-300 flex items-center gap-1 text-[11px] cursor-pointer shadow-sm"
+                  >
+                    ⏩ Skip Registration
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCloseLeadForm}
+                    className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-800 font-bold rounded-lg transition border border-red-300 flex items-center gap-1 text-[11px] cursor-pointer shadow-sm"
+                  >
+                    ✖ Close
+                  </button>
                 </div>
               </div>
-            ))}
+            )}
 
-            {/* Target Screenshot 2 Quick Action Feature Cards Grid (Shown on initial greeting) */}
-            {messages.length === 1 && (
-              <div className="space-y-2 pt-1 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => quickReply("domains")}
-                    className="p-3 bg-white hover:bg-blue-50/50 border border-gray-150 rounded-2xl text-left shadow-xs transition duration-200 cursor-pointer group"
-                  >
-                    <div className="text-base mb-1">📚</div>
-                    <div className="font-bold text-gray-800 text-xs group-hover:text-blue-600">Internship</div>
-                    <div className="text-[10px] text-gray-400">Programs</div>
-                  </button>
-
-                  <button
-                    onClick={() => quickReply("fees")}
-                    className="p-3 bg-white hover:bg-blue-50/50 border border-gray-150 rounded-2xl text-left shadow-xs transition duration-200 cursor-pointer group"
-                  >
-                    <div className="text-base mb-1">💰</div>
-                    <div className="font-bold text-gray-800 text-xs group-hover:text-blue-600">Fees & Payment</div>
-                    <div className="text-[10px] text-gray-400">Pricing info</div>
-                  </button>
-
-                  <button
-                    onClick={() => quickReply("certificates")}
-                    className="p-3 bg-white hover:bg-blue-50/50 border border-gray-150 rounded-2xl text-left shadow-xs transition duration-200 cursor-pointer group"
-                  >
-                    <div className="text-base mb-1">📜</div>
-                    <div className="font-bold text-gray-800 text-xs group-hover:text-blue-600">Certificates</div>
-                    <div className="text-[10px] text-gray-400">Learn more</div>
-                  </button>
-
-                  <button
-                    onClick={() => quickReply("contact")}
-                    className="p-3 bg-white hover:bg-blue-50/50 border border-gray-150 rounded-2xl text-left shadow-xs transition duration-200 cursor-pointer group"
-                  >
-                    <div className="text-base mb-1">🎯</div>
-                    <div className="font-bold text-gray-800 text-xs group-hover:text-blue-600">Placement</div>
-                    <div className="text-[10px] text-gray-400">Support</div>
-                  </button>
-                </div>
-
-                {/* Full-width Apply Banner matching Screenshot 2 */}
+            {/* QUICK BUTTONS */}
+            <div className="border-t border-slate-200 bg-white px-3 py-2.5">
+              <div className="flex gap-2 overflow-x-auto no-scrollbar">
                 <button
+                  type="button"
                   onClick={() => quickReply("apply")}
-                  className="w-full p-3 bg-blue-50 hover:bg-blue-100/70 border border-blue-200/80 rounded-2xl flex items-center justify-between text-left shadow-xs transition duration-200 cursor-pointer group"
+                  className="shrink-0 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-semibold text-blue-700 transition hover:bg-blue-600 hover:text-white cursor-pointer"
                 >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm shadow-xs">
-                      🚀
-                    </div>
-                    <div>
-                      <div className="font-bold text-blue-900 text-xs group-hover:text-blue-700">Apply / Register</div>
-                      <div className="text-[10px] text-blue-600">Start your WeIntern journey</div>
-                    </div>
-                  </div>
-                  <span className="text-blue-600 font-bold text-sm group-hover:translate-x-0.5 transition-transform">→</span>
+                  🚀 Apply
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => quickReply("fees")}
+                  className="shrink-0 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-700 transition hover:bg-blue-600 hover:text-white cursor-pointer"
+                >
+                  💰 Fees
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => quickReply("domains")}
+                  className="shrink-0 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-700 transition hover:bg-blue-600 hover:text-white cursor-pointer"
+                >
+                  💻 Domains
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => quickReply("certificates")}
+                  className="shrink-0 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[11px] font-medium text-amber-700 transition hover:bg-amber-500 hover:text-white cursor-pointer"
+                >
+                  📜 Certificates
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => quickReply("contact")}
+                  className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-medium text-slate-700 transition hover:bg-slate-600 hover:text-white cursor-pointer"
+                >
+                  🎯 Contact
                 </button>
               </div>
-            )}
+            </div>
 
-            {/* Interim Transcript display for user speech */}
-            {voiceState === "LISTENING" && interimTranscript && (
-              <div className="flex justify-end">
-                <div className="bg-gray-200 text-gray-700 p-3 rounded-xl shadow max-w-[75%] italic text-sm rounded-br-none">
-                  🎤 {interimTranscript}...
-                </div>
-              </div>
-            )}
-
-            {isTyping && (
-              <div className="flex justify-start">
-                <img
-                  src="/weintern_avatar.png"
-                  alt="Bot Typing Avatar"
-                  className="w-8 h-8 rounded-full border border-blue-200 object-cover flex-shrink-0 self-start mt-0.5 shadow-xs mr-2"
+            {/* INPUT PANEL */}
+            <div className="border-t border-slate-200 bg-white px-3 py-3">
+              <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 transition focus-within:border-sky-400 focus-within:bg-white focus-within:shadow-sm">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  placeholder={voiceState === "LISTENING" ? "Listening to your voice..." : "Type your message..."}
+                  value={message}
+                  disabled={voiceState === "LISTENING"}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      sendMessage();
+                    }
+                  }}
+                  className="min-w-0 flex-1 bg-transparent px-3 py-2 text-[13px] text-slate-800 outline-none placeholder:text-slate-400 disabled:bg-gray-100 disabled:text-gray-500"
                 />
-                <div className="bg-white text-gray-400 p-3 rounded-2xl rounded-tl-xs shadow-xs border border-gray-150 text-sm italic flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"></span>
-                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
-                </div>
-              </div>
-            )}
 
-            <div ref={messagesEndRef}></div>
-
-          </div>
-
-          {/* Voice State Information Panel */}
-          {(voiceMode || playbackState !== "IDLE") && (
-            <div className="bg-white border-t px-4 py-2 flex flex-col gap-1.5">
-              {/* Listening panel */}
-              {voiceState === "LISTENING" && (
-                <div className="flex justify-between items-center text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-100">
-                  <span className="flex items-center gap-1.5 font-medium animate-pulse">
-                    <span className="w-2 h-2 bg-red-500 rounded-full inline-block"></span>
-                    Listening... speak now
-                  </span>
+                {/* Voice Input Mic Button */}
+                {isSpeechSupported && (
                   <button
-                    onClick={stopSpeechRecognition}
-                    className="text-[10px] text-gray-500 hover:text-gray-700 font-semibold underline"
+                    type="button"
+                    onClick={handleMicClick}
+                    title={voiceState === "LISTENING" ? "Stop recording" : "Tap to speak"}
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition cursor-pointer ${
+                      voiceState === "LISTENING"
+                        ? "text-red-500 bg-red-50 voice-listening-btn"
+                        : voiceState === "SPEAKING"
+                          ? "text-orange-500 bg-orange-50 animate-pulse"
+                          : voiceMode
+                            ? "text-blue-600 bg-blue-100/80 font-bold"
+                            : "text-blue-600 hover:bg-blue-50"
+                    }`}
                   >
-                    Cancel
+                    {voiceState === "LISTENING" ? <BsMicMuteFill size={18} /> : <BsMicFill size={18} />}
                   </button>
-                </div>
-              )}
+                )}
 
-              {/* Speaking panel */}
-              {voiceState === "SPEAKING" && (
-                <div className="flex justify-between items-center text-xs text-blue-600 bg-blue-50 p-2 rounded-lg border border-blue-100">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">Bot is speaking...</span>
-                    <div className="voice-wave-container">
-                      <div className="voice-wave-bar"></div>
-                      <div className="voice-wave-bar"></div>
-                      <div className="voice-wave-bar"></div>
-                      <div className="voice-wave-bar"></div>
-                      <div className="voice-wave-bar"></div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handlePauseMessage}
-                      className="px-2 py-1 text-[10px] bg-blue-600 text-white rounded hover:bg-blue-700 font-semibold transition"
-                    >
-                      Pause
-                    </button>
-                    <button
-                      onClick={handleStopMessage}
-                      className="px-2 py-1 text-[10px] bg-red-500 text-white rounded hover:bg-red-600 font-semibold transition"
-                    >
-                      Stop
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Paused panel */}
-              {voiceState === "PAUSED" && (
-                <div className="flex justify-between items-center text-xs text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200">
-                  <span className="font-medium flex items-center gap-1">
-                    ⏸️ Speech Paused
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handleResumeOrContinueMessage}
-                      className="px-2 py-1 text-[10px] bg-amber-600 text-white rounded hover:bg-amber-700 font-semibold transition"
-                    >
-                      Continue
-                    </button>
-                    <button
-                      onClick={handleStopMessage}
-                      className="px-2 py-1 text-[10px] bg-red-500 text-white rounded hover:bg-red-600 font-semibold transition"
-                    >
-                      Stop
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Thinking panel */}
-              {voiceState === "THINKING" && (
-                <div className="flex items-center text-xs text-blue-600 bg-blue-50 p-2 rounded-lg border border-blue-100">
-                  <span className="font-medium animate-pulse">Thinking...</span>
-                </div>
-              )}
-
-              {/* Error panel */}
-              {voiceState === "ERROR" && errorMessage && (
-                <div className="text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-200 text-center font-semibold">
-                  ⚠️ {errorMessage}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Registration Active Sticky Bar */}
-          {(showLeadForm || leadStep > 0) && (
-            <div className="bg-amber-50 border-t border-b border-amber-200 p-2.5 px-4 flex items-center justify-between gap-2 text-xs shadow-sm z-30">
-              <span className="font-bold text-amber-900 flex items-center gap-1.5">
-                📝 Registration in progress (Step {leadStep || 1} of 4)
-              </span>
-              <div className="flex items-center gap-2">
+                {/* Send Button */}
                 <button
                   type="button"
-                  onClick={handleSkipLeadForm}
-                  className="px-3 py-1 bg-amber-100 hover:bg-amber-200 text-amber-950 font-semibold rounded-lg transition border border-amber-300 flex items-center gap-1 text-[11px] cursor-pointer shadow-sm"
-                >
-                  ⏩ Skip Registration
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCloseLeadForm}
-                  className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-800 font-bold rounded-lg transition border border-red-300 flex items-center gap-1 text-[11px] cursor-pointer shadow-sm"
-                >
-                  ✖ Close
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Quick Replies Pills Bar */}
-          <div className="border-t p-2.5 px-3 flex overflow-x-auto gap-2 bg-white border-b border-gray-100 no-scrollbar scroll-smooth">
-            <button
-              onClick={() => quickReply("apply")}
-              className="flex-shrink-0 border border-blue-500 bg-blue-50 text-blue-700 font-semibold rounded-full px-3.5 py-1 text-xs hover:bg-blue-600 hover:text-white transition duration-200 touch-manipulation cursor-pointer shadow-2xs"
-            >
-              🚀 Apply / Register
-            </button>
-
-            <button
-              onClick={() => quickReply("fees")}
-              className="flex-shrink-0 border border-gray-200 bg-gray-50 text-gray-700 font-medium rounded-full px-3.5 py-1 text-xs hover:border-blue-500 hover:text-blue-600 transition duration-200 touch-manipulation cursor-pointer"
-            >
-              💰 Fees & EMI
-            </button>
-
-            <button
-              onClick={() => quickReply("domains")}
-              className="flex-shrink-0 border border-gray-200 bg-gray-50 text-gray-700 font-medium rounded-full px-3.5 py-1 text-xs hover:border-blue-500 hover:text-blue-600 transition duration-200 touch-manipulation cursor-pointer"
-            >
-              💻 Domains
-            </button>
-
-            <button
-              onClick={() => quickReply("certificates")}
-              className="flex-shrink-0 border border-gray-200 bg-gray-50 text-gray-700 font-medium rounded-full px-3.5 py-1 text-xs hover:border-blue-500 hover:text-blue-600 transition duration-200 touch-manipulation cursor-pointer"
-            >
-              📜 Certificates
-            </button>
-
-            <button
-              onClick={() => quickReply("contact")}
-              className="flex-shrink-0 border border-gray-200 bg-gray-50 text-gray-700 font-medium rounded-full px-3.5 py-1 text-xs hover:border-blue-500 hover:text-blue-600 transition duration-200 touch-manipulation cursor-pointer"
-            >
-              🎯 Contact
-            </button>
-          </div>
-
-          {/* Input Panel */}
-          <div className="p-3 bg-white border-t border-gray-100 flex flex-col gap-1">
-            <div className="flex items-center gap-2 bg-slate-50 border border-gray-200 rounded-2xl p-1.5 pl-3.5 focus-within:bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition">
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder={voiceState === "LISTENING" ? "Listening to your voice..." : "Type your message..."}
-                value={message}
-                disabled={voiceState === "LISTENING"}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    sendMessage();
-                  }
-                }}
-                className="flex-1 bg-transparent text-gray-900 placeholder-gray-400 text-sm outline-none disabled:bg-gray-100 disabled:text-gray-500"
-              />
-
-              {/* Voice Input Mic Button */}
-              {isSpeechSupported && (
-                <button
-                  onClick={handleMicClick}
-                  title={voiceState === "LISTENING" ? "Stop recording" : "Tap to speak"}
-                  className={`p-2 rounded-xl text-blue-600 hover:bg-blue-100/70 transition cursor-pointer ${
-                    voiceState === "LISTENING"
-                      ? "text-red-500 bg-red-50 voice-listening-btn"
-                      : voiceState === "SPEAKING"
-                        ? "text-orange-500 bg-orange-50 animate-pulse"
-                        : voiceMode
-                          ? "text-blue-600 bg-blue-100/80 font-bold"
-                          : "text-blue-600 hover:bg-blue-50"
+                  disabled={voiceState === "LISTENING" || !message.trim()}
+                  onClick={sendMessage}
+                  aria-label="Send message"
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-sm transition cursor-pointer ${
+                    voiceState === "LISTENING" || !message.trim()
+                      ? "cursor-not-allowed bg-slate-300"
+                      : "bg-gradient-to-br from-sky-400 to-blue-700 hover:scale-105 hover:shadow-md"
                   }`}
                 >
-                  {voiceState === "LISTENING" ? <BsMicMuteFill size={18} /> : <BsMicFill size={18} />}
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-[18px] w-[18px]"
+                    fill="currentColor"
+                  >
+                    <path d="M3.4 20.4 21.3 12 3.4 3.6l-.1 6.5 12.8 1.9-12.8 1.9.1 6.5.1 6.5Z" />
+                  </svg>
                 </button>
-              )}
+              </div>
 
-              {/* Send Button */}
-              <button
-                onClick={sendMessage}
-                disabled={voiceState === "LISTENING" || !message.trim()}
-                className="p-2.5 bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-700 hover:to-sky-600 text-white rounded-xl shadow-xs transition duration-200 disabled:opacity-40 flex items-center justify-center cursor-pointer"
-                title="Send message"
-              >
-                <IoSend size={16} />
-              </button>
+              {/* FOOTER */}
+              <div className="mt-2 flex items-center justify-center gap-1 text-[9px] text-slate-400">
+                <span className="font-black text-blue-600">W</span>
+                <span>Powered by WeIntern AI</span>
+              </div>
             </div>
 
-            {/* Footer Branding */}
-            <div className="text-[10px] text-gray-400 font-medium text-center pt-0.5 flex items-center justify-center gap-1">
-              <span className="w-3 h-3 rounded-full bg-blue-600 text-white text-[8px] font-bold flex items-center justify-center">W</span>
-              <span>Powered by WeIntern AI</span>
-            </div>
           </div>
-
-        </div>
+        </>
       )}
     </>
   );
