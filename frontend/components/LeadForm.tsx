@@ -183,8 +183,10 @@ export default function LeadForm({ onClose, onSuccess, onSkip }: LeadFormProps) 
             <option value="Java Programming">Java Programming</option>
             <option value="C/C++ Programming">C/C++ Programming</option>
             <option value="Cloud Computing & DevOps">Cloud Computing & DevOps</option>
+            <option value="DevOps Engineering">DevOps Engineering</option>
             <option value="UI/UX Design">UI/UX Design</option>
             <option value="Digital Marketing & SEO">Digital Marketing & SEO</option>
+            <option value="Video Editing & Content Creation">Video Editing & Content Creation</option>
             <option value="Full Stack Development">Full Stack Development</option>
             <option value="Data Science">Data Science</option>
             <option value="Artificial Intelligence & Machine Learning">AI & Machine Learning</option>

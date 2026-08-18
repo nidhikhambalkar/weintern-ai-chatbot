@@ -13,8 +13,10 @@ const REQUIRED_DOMAINS = [
   "Java Programming",
   "C/C++ Programming",
   "Cloud Computing & DevOps",
+  "DevOps Engineering",
   "UI/UX Design",
-  "Digital Marketing & SEO"
+  "Digital Marketing & SEO",
+  "Video Editing & Content Creation"
 ];
 
 async function runLeadFormTest() {
