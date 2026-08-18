@@ -19,6 +19,18 @@
       "created_at": "2026-08-18T11:02:11.718Z",
       "session_id": "session_1787050900866_y3pkrxv",
       "updated_at": "2026-08-18T11:03:00.628Z"
+    },
+    {
+      "session_id": "session_1787054633129_74lcsej",
+      "created_at": "2026-08-18T12:04:11.702Z"
+    },
+    {
+      "session_id": "test_id_1",
+      "created_at": "2026-08-18T12:08:36.639Z"
+    },
+    {
+      "session_id": "session_1787055082695_13lc260",
+      "created_at": "2026-08-18T12:11:36.687Z"
     }
   ],
   "messages": [
@@ -48,6 +60,159 @@
       "voice_metadata": null,
       "timestamp": "2026-08-18T10:33:56.411Z",
       "_id": "6a843514fa8d091702ee0295"
+    },
+    {
+      "id": 1,
+      "session_id": "session_1787054633129_74lcsej",
+      "sender": "user",
+      "message": "who are u",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:04:11.705Z"
+    },
+    {
+      "id": 2,
+      "session_id": "session_1787054633129_74lcsej",
+      "sender": "bot",
+      "message": "WeIntern is an EdTech platform dedicated to helping students and freshers gain practical industry experience through structured training, live projects, and professional mentorship.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:04:11.830Z"
+    },
+    {
+      "id": 3,
+      "session_id": "session_1787054633129_74lcsej",
+      "sender": "user",
+      "message": "who are you",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:04:58.458Z"
+    },
+    {
+      "id": 4,
+      "session_id": "session_1787054633129_74lcsej",
+      "sender": "bot",
+      "message": "WeIntern is an EdTech platform dedicated to helping students and freshers gain practical industry experience through structured training, live projects, and professional mentorship.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:04:58.579Z"
+    },
+    {
+      "id": 5,
+      "session_id": "test_id_1",
+      "sender": "user",
+      "message": "Who are you?",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:08:36.647Z"
+    },
+    {
+      "id": 6,
+      "session_id": "test_id_1",
+      "sender": "bot",
+      "message": "I’m the WeIntern AI Assistant. I can help you with information about WeIntern’s courses, internships, fees, benefits, certifications, eligibility, and other official WeIntern information.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:08:36.649Z"
+    },
+    {
+      "id": 7,
+      "session_id": "test_id_1",
+      "sender": "user",
+      "message": "What is WeIntern",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:08:36.664Z"
+    },
+    {
+      "id": 8,
+      "session_id": "test_id_1",
+      "sender": "bot",
+      "message": "WeIntern is an EdTech career development platform designed to help students, beginners, and freshers build real-world, industry-ready skills.\n\nKey Highlights:\n🚀 Learn → Build → Work → Earn Model — Combine structured domain training, hands-on live projects, team internship work, and performance-based stipend opportunities up to ₹10,000.\n📚 Comprehensive Programs — Offers industry-oriented training in Full Stack Web Development, Mobile App Development, AI & Automation, Data Science & Analytics, Python, Java, C/C++, UI/UX Design, Cloud Computing, and Digital Marketing.\n👨‍🏫 Mentor & Career Support — Dedicated guidance from experienced domain mentors, doubt resolution, resume building, and placement preparation.\n📜 Recognized Credentials — Official verified certificates backed by recognitions and associations including MSME (Government of India), NSDC, Skill India Mission, Ministry of Skill Development & Entrepreneurship, AICTE, Google Partner, AWS, and ISO 9001:2015 certification.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:08:36.666Z"
+    },
+    {
+      "id": 9,
+      "session_id": "session_1787054633129_74lcsej",
+      "sender": "user",
+      "message": "who are you",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:09:38.067Z"
+    },
+    {
+      "id": 10,
+      "session_id": "session_1787054633129_74lcsej",
+      "sender": "bot",
+      "message": "I’m the WeIntern AI Assistant. I can help you with information about WeIntern’s courses, internships, fees, benefits, certifications, eligibility, and other official WeIntern information.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:09:38.075Z"
+    },
+    {
+      "id": 11,
+      "session_id": "session_1787055082695_13lc260",
+      "sender": "user",
+      "message": "development course",
+      "source": "voice",
+      "voice_metadata": {
+        "duration": 3.6,
+        "confidence": 0.95
+      },
+      "timestamp": "2026-08-18T12:11:36.718Z"
+    },
+    {
+      "id": 12,
+      "session_id": "session_1787055082695_13lc260",
+      "sender": "bot",
+      "message": "Mobile App Development with Flutter is a 10-week program priced at ₹10,699. It covers Flutter, Dart, Firebase, REST APIs, Android/iOS publishing. You build 3 real client apps. Intermediate level. Certificate and stipend included.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:11:37.466Z"
+    },
+    {
+      "id": 13,
+      "session_id": "session_1787055082695_13lc260",
+      "sender": "user",
+      "message": "what is",
+      "source": "voice",
+      "voice_metadata": {
+        "duration": 1.4,
+        "confidence": 0.95
+      },
+      "timestamp": "2026-08-18T12:11:46.551Z"
+    },
+    {
+      "id": 14,
+      "session_id": "session_1787055082695_13lc260",
+      "sender": "bot",
+      "message": "I'm the WeIntern Assistant. I can answer questions only about WeIntern internships, courses, fees, certifications, placements, mentor support, and related topics.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:11:46.758Z"
+    },
+    {
+      "id": 15,
+      "session_id": "session_1787055082695_13lc260",
+      "sender": "user",
+      "message": "what is full",
+      "source": "voice",
+      "voice_metadata": {
+        "duration": 2.4,
+        "confidence": 0.95
+      },
+      "timestamp": "2026-08-18T12:11:54.487Z"
+    },
+    {
+      "id": 16,
+      "session_id": "session_1787055082695_13lc260",
+      "sender": "bot",
+      "message": "Yes, full source code and intellectual property rights are delivered based on project terms.",
+      "source": "text",
+      "voice_metadata": null,
+      "timestamp": "2026-08-18T12:11:54.810Z"
     }
   ],
   "leads": [
@@ -85,11 +250,11 @@
   "faqs": [],
   "autoId": {
     "sessions": 4,
-    "messages": 1,
+    "messages": 17,
     "leads": 2,
     "escalations": 1,
     "users": 1,
     "faqs": 1
   },
-  "lastSaved": "2026-08-18T11:03:01.602Z"
+  "lastSaved": "2026-08-18T12:11:54.811Z"
 }
