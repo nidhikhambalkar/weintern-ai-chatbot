@@ -126,7 +126,7 @@ function shouldUseKbFastPath(context = {}) {
     return false;
   }
 
-  return Number(topMatch.score || 0) >= 18;
+  return Number(topMatch.score || 0) >= 10;
 }
 
 function buildKbFastPayload(message, context) {

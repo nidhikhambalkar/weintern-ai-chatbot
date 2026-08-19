@@ -203,11 +203,24 @@ const pdfFaqItems: Array<{ question: string; answer: string }> = [
 	{ question: "Can I join WeIntern's community group (WhatsApp/Discord/LinkedIn)?", answer: "Yes, students and interns are typically invited to join a community group for updates, networking, and support." }
 ];
 
+const STOPWORDS = new Set([
+	"do", "you", "provide", "what", "is", "the", "are", "can", "i", "get", "how", "does", "weintern",
+	"for", "a", "an", "of", "in", "to", "on", "with", "by", "about", "tell", "me", "please", "will",
+	"have", "my", "your", "any", "all", "kya", "hai", "h", "hain", "kaise", "batao", "jaana", "ko", "me",
+	"par", "bhi", "hua", "karna", "karne", "chahiye", "chahie", "samjhao", "kaisa", "kitna", "kitne", "hindi",
+	"kya", "hota", "hoti", "hote", "ke", "ki", "ka", "se", "naam", "bataiye", "batao"
+]);
+
+function getCleanTokens(text: string): string[] {
+	const norm = (text || "").toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+	return norm.split(" ").filter(w => w.length > 1 && !STOPWORDS.has(w));
+}
+
 function getOfflineFallbackResponse(message: string) {
 	const raw = (message || "").trim();
 	const normRaw = raw.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ");
 
-	// 1. Exact normalized match search across all 160 PDF Q&As
+	// 1. Exact normalized match search across all PDF Q&As
 	const exactMatch = pdfFaqItems.find(item => {
 		const normQ = item.question.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ");
 		return normQ === normRaw;
@@ -221,16 +234,16 @@ function getOfflineFallbackResponse(message: string) {
 		};
 	}
 
-	// 2. Keyword-overlap scoring across all 160 PDF Q&As
-	const queryTokens = normRaw.split(" ").filter(t => t.length > 2);
+	// 2. Stopword-filtered content token scoring across all PDF Q&As
+	const queryTokens = getCleanTokens(raw);
 	let bestItem: { question: string; answer: string } | null = null;
 	let maxScore = 0;
 
 	for (const item of pdfFaqItems) {
-		const normQ = item.question.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ");
+		const qTokens = getCleanTokens(item.question);
 		let score = 0;
 		for (const token of queryTokens) {
-			if (normQ.includes(token)) {
+			if (qTokens.includes(token)) {
 				score += 10;
 			}
 		}
