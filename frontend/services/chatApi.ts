@@ -255,13 +255,13 @@ function getOfflineFallbackResponse(message: string) {
 	};
 }
 
-export async function sendChat(message: string, source: string = 'text', session_id?: string, voiceMetadata?: any) {
+export async function sendChat(message: string, source: string = 'text', session_id?: string, voiceMetadata?: any, requestId?: string) {
 	try {
 		const url = buildUrl('/api/chat');
 		const res = await safeFetch(url, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ message, source, session_id, voice_metadata: voiceMetadata }),
+			body: JSON.stringify({ message, source, session_id, voice_metadata: voiceMetadata, request_id: requestId }),
 		});
 		const data = await handleJsonResponse(res);
 		const answerText = data?.data?.answer || data?.reply || data?.response || data?.message || "";
