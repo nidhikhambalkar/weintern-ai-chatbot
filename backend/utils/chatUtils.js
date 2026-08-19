@@ -102,6 +102,10 @@ function normalizeSpokenText(text) {
   normalized = normalized.replace(/\bsartifiket\b/gi, "certificate");
   normalized = normalized.replace(/\bintrn\b/gi, "internship");
   normalized = normalized.replace(/\b(kaam|kam)\b/gi, "work");
+  normalized = normalized.replace(/\b(jenyuin|jenuin|jenuine)\b/gi, "genuine");
+  normalized = normalized.replace(/\b(kors|cource|corse)\b/gi, "course");
+  normalized = normalized.replace(/\b(rikorded|rikॉrded|recoded)\b/gi, "recorded");
+  normalized = normalized.replace(/\b(seshns|seshon|seshons)\b/gi, "sessions");
 
   return normalized;
 }
@@ -134,7 +138,11 @@ function buildKbFastPayload(message, context) {
 
   return {
     success: true,
+    message: "Success",
     reply: topMatch.answer,
+    data: {
+      answer: topMatch.answer,
+    },
     mode: "kb-fast",
     escalation: false,
     recommendedAction: "Continue with the guided answer.",

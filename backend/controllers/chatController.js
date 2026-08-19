@@ -186,7 +186,11 @@ exports.chat = async (req, res) => {
       }
       return res.json({
         success: true,
+        message: "Success",
         reply: replyText,
+        data: {
+          answer: replyText,
+        },
         mode: intent.type,
         escalation: false,
         recommendedAction:
@@ -210,7 +214,11 @@ exports.chat = async (req, res) => {
 
     return res.json({
       success: true,
+      message: "Success",
       reply: replyText,
+      data: {
+        answer: replyText,
+      },
       mode: modelResult.mode,
       escalation: escalation.length > 0 ? escalation : false,
       recommendedAction: escalation.length > 0 ? "Please contact support or raise a human escalation request." : "Continue with the guided answer.",

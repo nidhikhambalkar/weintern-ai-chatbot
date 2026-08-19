@@ -1,11 +1,11 @@
 /**
- * Automated API Test Script for Backend Intern 2 Database Module
+ * Automated API Test Script for Backend Database Module
  */
 
 const http = require('http');
 
 const options = {
-  hostname: 'localhost',
+  hostname: '127.0.0.1',
   port: process.env.PORT || 5001,
   path: '/',
   method: 'GET',
@@ -54,7 +54,7 @@ async function runTests() {
 
     // 2. Create Lead
     const lead = await makeRequest('/api/leads', 'POST', {
-      name: 'Alice intern',
+      name: 'Alice Intern',
       email: 'alice@example.com',
       phone: '9876543210',
       preferred_domain: 'Web Development',
@@ -77,24 +77,36 @@ async function runTests() {
     const history = await makeRequest('/api/history?session_id=sess-test-01');
     console.log('5. GET /api/history:', history.statusCode, 'Messages Count:', history.body.count);
 
-    // 6. Create Escalation
+    // 6. Get Sessions
+    const sessions = await makeRequest('/api/sessions');
+    console.log('6. GET /api/sessions:', sessions.statusCode, 'Sessions Count:', sessions.body.count);
+
+    // 7. Create Escalation
     const esc = await makeRequest('/api/escalate', 'POST', {
       session_id: 'sess-test-01',
       issue: 'User requested manual callback regarding certificate validity.',
     });
-    console.log('6. POST /api/escalate:', esc.statusCode, esc.body);
+    console.log('7. POST /api/escalate:', esc.statusCode, esc.body);
 
-    // 7. Admin Get Escalations
+    // 8. Admin Get Escalations
     const escList = await makeRequest('/api/admin/escalations');
-    console.log('7. GET /api/admin/escalations:', escList.statusCode, 'Count:', escList.body.count);
+    console.log('8. GET /api/admin/escalations:', escList.statusCode, 'Count:', escList.body.count);
 
-    // 8. Admin Dashboard Summary
+    // 9. Update Escalation Status
+    if (esc.body.data && esc.body.data.id) {
+      const updatedEsc = await makeRequest(`/api/escalations/${esc.body.data.id}`, 'PATCH', {
+        status: 'in_progress',
+      });
+      console.log('9. PATCH /api/escalations/:id:', updatedEsc.statusCode, updatedEsc.body);
+    }
+
+    // 10. Admin Dashboard Summary
     const summary = await makeRequest('/api/admin/summary');
-    console.log('8. GET /api/admin/summary:', summary.statusCode, summary.body);
+    console.log('10. GET /api/admin/summary:', summary.statusCode, summary.body);
 
     console.log('--- All Tests Completed Successfully! ---');
   } catch (err) {
-    console.error('Test execution failed:', err);
+    console.error('Test execution failed:', err.message);
   }
 }
 

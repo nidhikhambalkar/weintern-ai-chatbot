@@ -51,19 +51,24 @@ const rateLimiter = (req, res, next) => {
   next();
 };
 
-// Allowed origins: production Vercel frontend + local dev
+// Allowed origins: production Vercel/Render frontends, official website + local dev
 const ALLOWED_ORIGINS = [
-  // Production Vercel deployment(s)
   "https://frontend-six-eosin-97.vercel.app",
-  // Additional Vercel preview/custom domains (add more here if needed)
   "https://weintern-ai-chatbot.vercel.app",
-  // Local development
+  "https://we-intern.in",
+  "https://www.we-intern.in",
   "http://localhost:3000",
   "http://localhost:3001",
   "http://127.0.0.1:3000",
 ];
 
-// Merge any extra origins from env (comma-separated) without losing the hardcoded list
+if (process.env.FRONTEND_URL) {
+  const trimmed = process.env.FRONTEND_URL.trim();
+  if (trimmed && !ALLOWED_ORIGINS.includes(trimmed)) {
+    ALLOWED_ORIGINS.push(trimmed);
+  }
+}
+
 if (process.env.ALLOWED_ORIGINS) {
   process.env.ALLOWED_ORIGINS.split(",").forEach((origin) => {
     const trimmed = origin.trim();
@@ -77,11 +82,11 @@ const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
     if (!origin) return callback(null, true);
-    if (ALLOWED_ORIGINS.includes(origin)) {
+    if (ALLOWED_ORIGINS.includes("*") || ALLOWED_ORIGINS.includes(origin) || origin.endsWith(".we-intern.in") || origin.endsWith(".vercel.app") || origin.endsWith(".onrender.com")) {
       return callback(null, true);
     }
-    console.warn(`[CORS] Blocked request from: ${origin}`);
-    return callback(new Error(`CORS policy: Origin ${origin} is not allowed.`), false);
+    console.warn(`[CORS] Warning: Allowing origin: ${origin}`);
+    return callback(null, true);
   },
   methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],

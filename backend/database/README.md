@@ -1,7 +1,7 @@
-# WeIntern AI Chatbot - Database & Backend APIs (MongoDB Version)
+# WeIntern AI Chatbot - Database & Backend APIs (Dual-Persistence Architecture)
 
 Welcome! This folder contains the backend database and API code built for the **WeIntern AI Chatbot**.
-It has been designed with a **simple, beginner-friendly layout** using **MongoDB & Mongoose**.
+It features a **Dual-Persistence Architecture** using **MongoDB (Mongoose)** alongside a persistent local storage engine (**`db_storage.json`**).
 
 ---
 
@@ -9,22 +9,31 @@ It has been designed with a **simple, beginner-friendly layout** using **MongoDB
 
 | File Name | Purpose & Why It Exists |
 | :--- | :--- |
-| **`db.js`** | Connects our Node.js app to MongoDB using Mongoose. Includes in-memory fallback for testing without MongoDB running. |
-| **`server.js`** | The main Express web server containing all API routes (`/api/leads`, `/api/history`, `/api/escalate`, `/api/admin/*`). |
-| **`.env.example`** | Environment configuration template containing `MONGODB_URI`. |
-| **`package.json`** | Lists required Node.js packages (`express`, `mongodb`, `mongoose`, `cors`, `dotenv`). |
-| **`test_api.js`** | 1-click test script to test all backend API endpoints. |
+| **`db.js`** | Database Manager. Connects to MongoDB via Mongoose and maintains automatic local file persistence (`db_storage.json`). Dual-persists write operations and provides unified fallback collection handlers so no data is ever lost. |
+| **`server.js`** | Express web server providing database API endpoints (`/api/leads`, `/api/history`, `/api/sessions`, `/api/escalate`, `/api/admin/*`). Features non-blocking server startup. |
+| **`schema.sql`** | SQL table definitions for PostgreSQL setups (`sessions`, `messages`, `leads`, `escalations`, `users`, `faqs`). |
+| **`db_storage.json`** | Auto-generated persistent disk storage file for local database backup and offline fallback. |
+| **`package.json`** | Lists required dependencies (`express`, `mongodb`, `mongoose`, `cors`, `dotenv`). |
+| **`test_api.js`** | Automated API test script verifying all backend database routes. |
 
 ---
 
-## 🚀 How to Run the Server
+## 🚀 Dual Persistence & Reliability Features
+
+1. **MongoDB Mode**: When MongoDB is connected, data is stored in MongoDB collections AND synced into `db_storage.json`.
+2. **Local Persistent Mode**: If MongoDB is unavailable, data is saved directly to `db_storage.json` on disk using array proxy mutation interceptors. Data persists across server reboots.
+3. **Automatic Re-syncing**: Upon MongoDB connection, any locally accumulated records are automatically synced to MongoDB collections.
+
+---
+
+## 🛠️ How to Run the Database Server
 
 1. **Install dependencies**:
    ```bash
    npm install
    ```
 
-2. **Start the backend server**:
+2. **Start the backend database server**:
    ```bash
    npm start
    # or for development:

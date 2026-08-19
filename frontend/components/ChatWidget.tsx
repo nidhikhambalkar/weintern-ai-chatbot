@@ -297,8 +297,7 @@ export default function ChatWidget() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
-  // Dedicated interrupt-only recognition that runs concurrently with TTS
-  const interruptRecRef = useRef<any>(null);
+  const isCommandOnlyModeRef = useRef<boolean>(false); // when true, recognition only monitors for pause/resume/stop commands without sending to chat
   const synthesisRef = useRef<any>(null);
   const selectedVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
   const isTtsSpeakingRef = useRef<boolean>(false);
@@ -306,11 +305,6 @@ export default function ChatWidget() {
   const activeTextRef = useRef<string>("");
   const currentCharIndexRef = useRef<number>(0);
   const pausedCharIndexRef = useRef<number>(0);
-  const sentenceQueueRef = useRef<string[]>([]);
-  const currentSentenceIndexRef = useRef<number>(0);
-  const sentenceCharOffsetRef = useRef<number>(0);
-  const currentPausedTextRef = useRef<string>("");
-  const currentSpeakCharIndexRef = useRef<number>(0);
   const isVoicePausedRef = useRef<boolean>(false);
   const isCancelledByCommandRef = useRef<boolean>(false);
   const pausedMessageIndexRef = useRef<number | null>(null);
@@ -321,16 +315,18 @@ export default function ChatWidget() {
   const latestInterimTranscriptRef = useRef<string>("");
   const abortControllerRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  // ── Pause/Resume position tracking (Chrome workaround) ──────────────────
+  // ── Pause/Resume position tracking ──────────────────────────────────────
   const boundaryCharIndexRef = useRef<number>(0);          // charIndex from last onboundary event
   const pausedTextRemainderRef = useRef<string>("");        // text substring saved on pause
   const pausedMessageIndexForResumeRef = useRef<number | null>(null); // msg index for resume
-  const interruptListenerActiveRef = useRef<boolean>(false); // is interrupt listener running
-  const speechAccumulatorRef = useRef<string>("");          // accumulates speech segments across continuous listening/pauses
+  const speechAccumulatorRef = useRef<string>("");          // accumulates speech segments across continuous listening
   const isVoiceSessionActiveRef = useRef<boolean>(false);    // tracks if user is in an active recording session
   const playbackStateRef = useRef<"IDLE" | "PLAYING" | "PAUSED">("IDLE");
   const voiceStateRef = useRef<"IDLE" | "LISTENING" | "THINKING" | "PROCESSING" | "SPEAKING" | "PAUSED" | "ERROR">("IDLE");
   const lastExecutedCommandRef = useRef<{ command: string; time: number } | null>(null);
+  const isProcessingRef = useRef<boolean>(false);           // mutex lock against concurrent request processing
+  const lastProcessedTranscriptRef = useRef<{ text: string; time: number } | null>(null); // deduplicates duplicate input
+  const hasFinalizedSpeechRef = useRef<boolean>(false);     // flag to ensure single finalization per turn
 
   const updatePlaybackState = (newState: "IDLE" | "PLAYING" | "PAUSED") => {
     playbackStateRef.current = newState;
@@ -341,8 +337,6 @@ export default function ChatWidget() {
     voiceStateRef.current = newState;
     setVoiceState(newState as any);
   };
-
-  const isInterruptListeningRef = useRef<boolean>(false);
 
   useEffect(() => {
     isSpeakerMutedRef.current = isSpeakerMuted;
@@ -505,10 +499,140 @@ export default function ChatWidget() {
       if (SpeechRecognition) {
         setIsSpeechSupported(true);
         const rec = new SpeechRecognition();
-        rec.continuous = true;       // Allow continuous listening across pauses & multi-sentence speech
+        rec.continuous = false;       // Single-utterance per mic tap for 100% reliable cross-device performance (iOS Safari, Android Chrome, Edge)
         rec.interimResults = true;
         rec.maxAlternatives = 3;
         rec.lang = "en-IN";
+
+        rec.onstart = () => {
+          isListeningRef.current = true;
+          hasFinalizedSpeechRef.current = false;
+          if (playbackStateRef.current === "IDLE" && voiceStateRef.current !== "THINKING") {
+            updateVoiceState("LISTENING");
+          }
+        };
+
+        rec.onresult = (event: any) => {
+          let newFinal = "";
+          let interim = "";
+          let alternatives: string[] = [];
+
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i]?.[0]?.transcript) {
+              for (let j = 0; j < event.results[i].length; j++) {
+                if (event.results[i][j]?.transcript) {
+                  alternatives.push(event.results[i][j].transcript);
+                }
+              }
+              if (event.results[i].isFinal) {
+                newFinal += event.results[i][0].transcript + " ";
+              } else {
+                interim += event.results[i][0].transcript;
+              }
+            }
+          }
+
+          // Voice command intercept checks
+          if (interim && detectAndExecuteVoiceCommand(interim, alternatives)) {
+            return;
+          }
+          if (newFinal && detectAndExecuteVoiceCommand(newFinal, alternatives)) {
+            return;
+          }
+
+          if (playbackStateRef.current !== "IDLE") {
+            return;
+          }
+
+          if (newFinal) {
+            speechAccumulatorRef.current = (speechAccumulatorRef.current + " " + newFinal).replace(/\s+/g, " ").trim();
+          }
+
+          const currentDisplay = (speechAccumulatorRef.current + " " + interim).replace(/\s+/g, " ").trim();
+          latestInterimTranscriptRef.current = interim;
+
+          if (currentDisplay && detectAndExecuteVoiceCommand(currentDisplay, alternatives)) {
+            return;
+          }
+
+          setInterimTranscript(currentDisplay);
+
+          if (playbackStateRef.current === "IDLE" && voiceStateRef.current !== "THINKING") {
+            if (silenceTimerRef.current) {
+              clearTimeout(silenceTimerRef.current);
+              silenceTimerRef.current = null;
+            }
+
+            if (currentDisplay.length > 0) {
+              const silenceDuration = interim ? 2500 : 1800;
+              silenceTimerRef.current = setTimeout(() => {
+                console.log("⚡ Silence timeout reached. Finalizing speech input...");
+                finalizeSpeechAndProcess();
+              }, silenceDuration);
+            }
+          }
+        };
+
+        rec.onerror = (event: any) => {
+          console.warn("STT Error:", event.error);
+          isListeningRef.current = false;
+          isVoiceSessionActiveRef.current = false;
+
+          if (silenceTimerRef.current) {
+            clearTimeout(silenceTimerRef.current);
+            silenceTimerRef.current = null;
+          }
+
+          if (event.error === "no-speech" || event.error === "aborted") {
+            if (!hasFinalizedSpeechRef.current && (speechAccumulatorRef.current || latestInterimTranscriptRef.current)) {
+              finalizeSpeechAndProcess();
+              return;
+            }
+            setInterimTranscript("");
+            latestInterimTranscriptRef.current = "";
+            speechAccumulatorRef.current = "";
+            if (playbackStateRef.current === "IDLE") {
+              updateVoiceState("IDLE");
+            }
+            return;
+          }
+
+          setInterimTranscript("");
+          latestInterimTranscriptRef.current = "";
+          speechAccumulatorRef.current = "";
+
+          updateVoiceState("ERROR");
+          if (event.error === "not-allowed") {
+            setErrorMessage("Mic permission denied. Please allow mic access.");
+          } else {
+            setErrorMessage(`Microphone error: ${event.error}`);
+          }
+          setTimeout(() => {
+            if (voiceStateRef.current === "ERROR") updateVoiceState("IDLE");
+          }, 2000);
+        };
+
+        rec.onend = () => {
+          isListeningRef.current = false;
+
+          if (silenceTimerRef.current) {
+            clearTimeout(silenceTimerRef.current);
+            silenceTimerRef.current = null;
+          }
+
+          if (!hasFinalizedSpeechRef.current && (speechAccumulatorRef.current || latestInterimTranscriptRef.current)) {
+            finalizeSpeechAndProcess();
+          } else {
+            isVoiceSessionActiveRef.current = false;
+            setInterimTranscript("");
+            latestInterimTranscriptRef.current = "";
+            speechAccumulatorRef.current = "";
+            if (playbackStateRef.current === "IDLE" && voiceStateRef.current === "LISTENING") {
+              updateVoiceState("IDLE");
+            }
+          }
+        };
+
         recognitionRef.current = rec;
       }
       synthesisRef.current = window.speechSynthesis;
@@ -902,93 +1026,6 @@ export default function ChatWidget() {
     return false;
   };
 
-  const startInterruptRecognition = () => {
-    if (isInterruptListeningRef.current) return;
-    const intRec = interruptRecRef.current;
-    if (!intRec) return;
-
-    intRec.onstart = () => {
-      isInterruptListeningRef.current = true;
-      console.log("[INTERRUPT REC STARTED]");
-    };
-
-    intRec.onresult = (event: any) => {
-      let text = "";
-      let alternatives: string[] = [];
-
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i]?.[0]?.transcript) {
-          for (let j = 0; j < event.results[i].length; j++) {
-            if (event.results[i][j]?.transcript) {
-              alternatives.push(event.results[i][j].transcript);
-            }
-          }
-          text += event.results[i][0].transcript;
-        }
-      }
-
-      if (text.trim()) {
-        const isExecuted = detectAndExecuteVoiceCommand(text.trim(), alternatives);
-        if (isExecuted) {
-          console.log("[INTERRUPT COMMAND EXECUTED]:", text);
-        }
-      }
-    };
-
-    intRec.onerror = (event: any) => {
-      if (event.error !== "no-speech" && event.error !== "aborted") {
-        isInterruptListeningRef.current = false;
-      }
-    };
-
-    intRec.onend = () => {
-      isInterruptListeningRef.current = false;
-      if (
-        (voiceStateRef.current === "SPEAKING" || voiceStateRef.current === "PAUSED") &&
-        (voiceModeRef.current || isTtsSpeakingRef.current || isVoicePausedRef.current)
-      ) {
-        setTimeout(() => {
-          if (
-            (voiceStateRef.current === "SPEAKING" || voiceStateRef.current === "PAUSED") &&
-            !isInterruptListeningRef.current
-          ) {
-            try {
-              intRec.start();
-              isInterruptListeningRef.current = true;
-            } catch (_) {}
-          }
-        }, 100);
-      }
-    };
-
-    try {
-      intRec.start();
-      isInterruptListeningRef.current = true;
-    } catch (e: any) {
-      if (e?.name !== "InvalidStateError") {
-        console.error("Interrupt SpeechRecognition start exception:", e);
-      }
-    }
-  };
-
-  const stopInterruptRecognition = () => {
-    isInterruptListeningRef.current = false;
-    if (interruptRecRef.current) {
-      try {
-        interruptRecRef.current.stop();
-      } catch (e) {}
-    }
-  };
-
-  useEffect(() => {
-    voiceStateRef.current = voiceState;
-    if (voiceState === "SPEAKING" || voiceState === "PAUSED") {
-      startInterruptRecognition();
-    } else {
-      stopInterruptRecognition();
-    }
-  }, [voiceState]);
-
   const handleResumeOrContinueMessage = () => {
     const synth = synthesisRef.current || (typeof window !== "undefined" ? window.speechSynthesis : null);
     if (!synth) return;
@@ -1012,6 +1049,8 @@ export default function ChatWidget() {
 
     console.log("[TTS RESUME] Re-speaking from saved position:", textToResume.substring(0, 40));
 
+    try { synth.cancel(); } catch (e) {}
+
     const utterance = new SpeechSynthesisUtterance(textToResume);
     const activeVoice = selectedVoiceRef.current || initSpeechVoices();
     if (activeVoice) {
@@ -1021,7 +1060,7 @@ export default function ChatWidget() {
       utterance.lang = "en-IN";
     }
     utterance.rate = 1.0;
-    utterance.pitch = 1.05;
+    utterance.pitch = 1.0;
     utterance.volume = 1.0;
 
     activeUtteranceRef.current = utterance;
@@ -1031,7 +1070,7 @@ export default function ChatWidget() {
 
     utterance.onboundary = (e: any) => {
       if (activeUtteranceRef.current !== utterance) return;
-      if (e.name === "word" || e.name === "sentence") {
+      if (e.name === "word" || e.name === "sentence" || typeof e.charIndex === "number") {
         boundaryCharIndexRef.current = e.charIndex;
         currentCharIndexRef.current = e.charIndex;
       }
@@ -1043,10 +1082,6 @@ export default function ChatWidget() {
       setPlayingMessageIndex(resumeIndex);
       updatePlaybackState("PLAYING");
       updateVoiceState("SPEAKING");
-
-      if (!isListeningRef.current) {
-        startSpeechRecognition();
-      }
     };
 
     utterance.onend = () => {
@@ -1060,10 +1095,6 @@ export default function ChatWidget() {
       setPlayingMessageIndex(null);
       updatePlaybackState("IDLE");
       updateVoiceState("IDLE");
-
-      if (voiceModeRef.current && !isSpeakerMutedRef.current) {
-        setTimeout(() => { if (!isListeningRef.current) startSpeechRecognition(); }, 400);
-      }
     };
 
     utterance.onerror = (e: any) => {
@@ -1082,26 +1113,13 @@ export default function ChatWidget() {
     synth.speak(utterance);
   };
 
-  // Speaks response using Web Speech Synthesis (TTS)
-  const speakResponse = (text: string) => {
-    if (isSpeakerMutedRef.current) {
-      console.log("Speaker is muted. Skipping TTS output.");
-      return;
-    }
-    if (isVoicePausedRef.current) {
-      console.log("Voice reading paused by user.");
-      return;
-    }
-    handlePlayMessage(-1, text);
-  };
-
   const handlePlayMessage = (index: number, text: string) => {
     const synth = synthesisRef.current || (typeof window !== "undefined" ? window.speechSynthesis : null);
     if (!synth) return;
 
     isVoicePausedRef.current = false;
 
-    // Cancel any prior speech before starting a NEW message
+    // Cancel any prior speech before starting a message
     try { synth.cancel(); } catch (e) {}
 
     const cleanText = cleanTextForSpeech(text);
@@ -1110,7 +1128,7 @@ export default function ChatWidget() {
     pausedTextRemainderRef.current = "";
     pausedMessageIndexForResumeRef.current = index;
 
-    console.log("[TTS PLAY]", { index, textPreview: cleanText.substring(0, 35) });
+    console.log("[TTS PLAY EXPLICIT]", { index, textPreview: cleanText.substring(0, 35) });
 
     if (!cleanText) {
       isTtsSpeakingRef.current = false;
@@ -1137,7 +1155,7 @@ export default function ChatWidget() {
       utterance.lang = "en-IN";
     }
     utterance.rate = 1.0;
-    utterance.pitch = 1.05;
+    utterance.pitch = 1.0;
     utterance.volume = 1.0;
 
     activeUtteranceRef.current = utterance;
@@ -1162,11 +1180,6 @@ export default function ChatWidget() {
       setPlayingMessageIndex(index);
       updatePlaybackState("PLAYING");
       updateVoiceState("SPEAKING");
-
-      // Start continuous recognition so user can interrupt bot with voice commands while speaking
-      if (!isListeningRef.current) {
-        startSpeechRecognition();
-      }
     };
 
     utterance.onpause = () => {
@@ -1197,10 +1210,6 @@ export default function ChatWidget() {
       setPlayingMessageIndex(null);
       updatePlaybackState("IDLE");
       updateVoiceState("IDLE");
-
-      if (voiceModeRef.current && !isSpeakerMutedRef.current) {
-        setTimeout(() => { if (!isListeningRef.current) startSpeechRecognition(); }, 400);
-      }
     };
 
     utterance.onerror = (e: any) => {
@@ -1255,11 +1264,6 @@ export default function ChatWidget() {
 
     updatePlaybackState("PAUSED");
     updateVoiceState("PAUSED");
-
-    // Ensure recognition stays active while PAUSED so user can say "continue" or "resume" out loud
-    if (!isListeningRef.current) {
-      startSpeechRecognition();
-    }
   };
 
   const handleStopMessage = () => {
@@ -1290,17 +1294,29 @@ export default function ChatWidget() {
     updatePlaybackState("IDLE");
     updateVoiceState("IDLE");
     setIsTyping(false);
+    isCommandOnlyModeRef.current = false;
   };
 
   // Helper function to finalize complete accumulated speech and send it to chat
   const finalizeSpeechAndProcess = () => {
+    if (hasFinalizedSpeechRef.current) {
+      return;
+    }
+    hasFinalizedSpeechRef.current = true;
+
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = null;
     }
 
-    const fullText = (speechAccumulatorRef.current + " " + latestInterimTranscriptRef.current).replace(/\s+/g, " ").trim();
     isVoiceSessionActiveRef.current = false;
+    isListeningRef.current = false;
+
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch (e) {}
+    }
+
+    const fullText = (speechAccumulatorRef.current + " " + latestInterimTranscriptRef.current).replace(/\s+/g, " ").trim();
 
     setInterimTranscript("");
     latestInterimTranscriptRef.current = "";
@@ -1325,6 +1341,10 @@ export default function ChatWidget() {
     if (isListeningRef.current) {
       return;
     }
+    if (isProcessingRef.current) {
+      console.warn("[STT START ABORT] Request is currently processing.");
+      return;
+    }
 
     const rec = recognitionRef.current;
     if (!rec) {
@@ -1333,127 +1353,22 @@ export default function ChatWidget() {
       return;
     }
 
+    // Stop TTS if it was playing or paused
+    if (playbackStateRef.current !== "IDLE" || isTtsSpeakingRef.current) {
+      handleStopMessage();
+    }
+
     isVoiceSessionActiveRef.current = true;
+    hasFinalizedSpeechRef.current = false;
+    speechAccumulatorRef.current = "";
+    latestInterimTranscriptRef.current = "";
+    setInterimTranscript("");
     setErrorMessage("");
 
-    rec.onstart = () => {
-      isListeningRef.current = true;
-      if (playbackStateRef.current === "IDLE" && voiceStateRef.current !== "PROCESSING") {
-        updateVoiceState("LISTENING");
-      }
-    };
-
-    rec.onresult = (event: any) => {
-      let newFinal = "";
-      let interim = "";
-
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          newFinal += event.results[i][0].transcript + " ";
-        } else {
-        }
-      }
-
-      // Priority 1: Instant Voice Command Intercept on Interim result
-      if (interim && detectAndExecuteVoiceCommand(interim)) {
-        return;
-      }
-
-      // Priority 1: Instant Voice Command Intercept on Final result chunk
-      if (newFinal && detectAndExecuteVoiceCommand(newFinal)) {
-        return;
-      }
-
-      if (newFinal) {
-        speechAccumulatorRef.current = (speechAccumulatorRef.current + " " + newFinal).replace(/\s+/g, " ").trim();
-      }
-
-      const currentDisplay = (speechAccumulatorRef.current + " " + interim).replace(/\s+/g, " ").trim();
-      latestInterimTranscriptRef.current = interim;
-
-      // Priority 1: Instant Voice Command Intercept on Combined current display
-      if (currentDisplay && detectAndExecuteVoiceCommand(currentDisplay)) {
-        return;
-      }
-
-      setInterimTranscript(currentDisplay);
-
-      // Only run silence timer for auto-finalizing speech when TTS is IDLE (user asking a question)
-      if (playbackStateRef.current === "IDLE" && voiceStateRef.current !== "PROCESSING") {
-        if (silenceTimerRef.current) {
-          clearTimeout(silenceTimerRef.current);
-        }
-        if (currentDisplay.length > 0) {
-          silenceTimerRef.current = setTimeout(() => {
-            console.log("⚡ Natural end of speech detected (2.2s silence). Finalizing sentence...");
-            finalizeSpeechAndProcess();
-          }, 2200);
-        }
-      }
-    };
-
-    rec.onerror = (event: any) => {
-      if (event.error === "no-speech" || event.error === "aborted") {
-        if (isVoiceSessionActiveRef.current || voiceModeRef.current || playbackStateRef.current !== "IDLE") {
-          setTimeout(() => {
-            if (!isListeningRef.current && recognitionRef.current) {
-              try { recognitionRef.current.start(); } catch (_) {}
-            }
-          }, 100);
-          return;
-        }
-        isListeningRef.current = false;
-        if (playbackStateRef.current === "IDLE") updateVoiceState("IDLE");
-        return;
-      }
-      console.error("STT Error:", event.error);
-      isListeningRef.current = false;
-      isVoiceSessionActiveRef.current = false;
-      if (silenceTimerRef.current) {
-        clearTimeout(silenceTimerRef.current);
-        silenceTimerRef.current = null;
-      }
-      updateVoiceState("ERROR");
-      if (event.error === "not-allowed") {
-        setErrorMessage("Mic permission denied. Please allow mic access.");
-      } else {
-        setErrorMessage(`Microphone error: ${event.error}`);
-      }
-      setTimeout(() => {
-        if (voiceStateRef.current === "ERROR") updateVoiceState("IDLE");
-      }, 1500);
-    };
-
-    rec.onend = () => {
-      isListeningRef.current = false;
-      if (isVoiceSessionActiveRef.current || voiceModeRef.current || playbackStateRef.current === "PLAYING" || playbackStateRef.current === "PAUSED") {
-        setTimeout(() => {
-          if (!isListeningRef.current && recognitionRef.current) {
-            try {
-              recognitionRef.current.start();
-              isListeningRef.current = true;
-            } catch (e: any) {
-              if (e?.name !== "InvalidStateError") {
-                console.error("Auto-restart exception:", e);
-              }
-            }
-          }
-        }, 50);
-      } else {
-        if (silenceTimerRef.current) {
-          clearTimeout(silenceTimerRef.current);
-          silenceTimerRef.current = null;
-        }
-        if (playbackStateRef.current === "IDLE") {
-          updateVoiceState("IDLE");
-        }
-      }
-    };
-
     try {
-      speechAccumulatorRef.current = "";
       rec.start();
       isListeningRef.current = true;
+      updateVoiceState("LISTENING");
     } catch (e: any) {
       if (e?.name !== "InvalidStateError") {
         console.error("SpeechRecognition start exception:", e);
@@ -1464,49 +1379,95 @@ export default function ChatWidget() {
   const stopSpeechRecognition = () => {
     isVoiceSessionActiveRef.current = false;
     isListeningRef.current = false;
+    hasFinalizedSpeechRef.current = true;
+
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = null;
     }
+
+    setInterimTranscript("");
+    latestInterimTranscriptRef.current = "";
+    speechAccumulatorRef.current = "";
+
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
       } catch (e) {}
     }
-    if (playbackStateRef.current === "IDLE") {
+
+    if (playbackStateRef.current === "IDLE" && voiceStateRef.current !== "THINKING") {
       updateVoiceState("IDLE");
     }
   };
 
   const handleMicClick = () => {
-    console.log("[TTS MIC]");
-    if (isVoiceSessionActiveRef.current || voiceState === "LISTENING") {
-      // Manually clicking mic while listening stops session and processes captured speech immediately
-      finalizeSpeechAndProcess();
-    } else {
-      // Stop any active TTS immediately so mic can listen cleanly
+    console.log("[TTS MIC CLICK]");
+    // If bot is currently speaking or paused, clicking mic interrupts TTS and starts listening for user speech
+    if (playbackStateRef.current !== "IDLE" || isTtsSpeakingRef.current) {
       handleStopMessage();
-      if (!voiceModeRef.current) {
-        setVoiceMode(true);
-        voiceModeRef.current = true;
+      startSpeechRecognition();
+      return;
+    }
+
+    // If currently recording user's speech, toggle off or finalize
+    if (isListeningRef.current) {
+      if (speechAccumulatorRef.current || latestInterimTranscriptRef.current) {
+        finalizeSpeechAndProcess();
+      } else {
+        stopSpeechRecognition();
       }
+    } else {
+      // Turn microphone ON for user query input
       startSpeechRecognition();
     }
   };
 
   // Main message processing function (shared by Text and Voice)
   const processMessage = async (userMessage: string, source: "text" | "voice" = "text") => {
-    // Immediate voice control intercept (Stop / Pause speaking out loud)
-    if (detectAndExecuteVoiceCommand(userMessage)) {
-      setVoiceState("IDLE");
+    if (!userMessage || !userMessage.trim()) return;
+    const cleanMsg = userMessage.trim();
+
+    // Prevent concurrent duplicate processing
+    if (isProcessingRef.current) {
+      console.warn("[processMessage ABORT] Request already in-flight. Dropping concurrent call.");
       return;
     }
 
+    // Deduplication check: drop identical transcript sent within 3000ms
+    const now = Date.now();
+    if (
+      lastProcessedTranscriptRef.current &&
+      lastProcessedTranscriptRef.current.text === cleanMsg &&
+      now - lastProcessedTranscriptRef.current.time < 3000
+    ) {
+      console.warn("[processMessage DEDUP] Identical message submitted within 3s. Dropping duplicate:", cleanMsg);
+      return;
+    }
+
+    // Immediate voice control intercept (Stop / Pause speaking out loud)
+    if (detectAndExecuteVoiceCommand(cleanMsg)) {
+      updateVoiceState("IDLE");
+      return;
+    }
+
+    isProcessingRef.current = true;
+    lastProcessedTranscriptRef.current = { text: cleanMsg, time: now };
+    const requestId = "req_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
+
+    // Ensure mic recording is disabled while server is processing
+    stopSpeechRecognition();
+    setIsTyping(true);
+    updateVoiceState("THINKING");
+
     if (!showLeadForm) {
-      const lowerMsg = userMessage.toLowerCase().trim();
+      const lowerMsg = cleanMsg.toLowerCase().trim();
       const explicitRegisterRegex = /^(apply|register|enroll|signup|apply\s+now|register\s+now|enroll\s+now|i\s+want\s+to\s+apply|i\s+want\s+to\s+register|i\s+want\s+to\s+enroll|enroll\s+me|register\s+me|start\s+registration|start\s+my\s+registration)$/i;
       if (explicitRegisterRegex.test(lowerMsg)) {
         startLeadForm();
+        isProcessingRef.current = false;
+        setIsTyping(false);
+        updateVoiceState("IDLE");
         return;
       }
     }
@@ -1516,7 +1477,7 @@ export default function ChatWidget() {
       if (leadStep === 1) {
         setLeadData((prev) => ({
           ...prev,
-          name: userMessage,
+          name: cleanMsg,
         }));
         setLeadStep(2);
         const botReply = "Please enter your Email Address.";
@@ -1525,7 +1486,7 @@ export default function ChatWidget() {
           ...prev,
           {
             sender: "user",
-            text: userMessage,
+            text: cleanMsg,
             time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           },
           {
@@ -1535,8 +1496,9 @@ export default function ChatWidget() {
           },
         ]);
 
-        // Bot MUST NOT AUTO-SPEAK on new answers. Remain silent until user clicks Play.
-        setVoiceState("IDLE");
+        updateVoiceState("IDLE");
+        setIsTyping(false);
+        isProcessingRef.current = false;
         return;
       }
 
@@ -1544,13 +1506,13 @@ export default function ChatWidget() {
       if (leadStep === 2) {
         // Basic email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(userMessage.trim())) {
+        if (!emailRegex.test(cleanMsg)) {
           const errorReply = "That doesn't look like a valid email. Please enter a valid email address.";
           setMessages((prev) => [
             ...prev,
             {
               sender: "user",
-              text: userMessage,
+              text: cleanMsg,
               time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             },
             {
@@ -1559,13 +1521,15 @@ export default function ChatWidget() {
               time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             },
           ]);
-          setVoiceState("IDLE");
+          updateVoiceState("IDLE");
+          setIsTyping(false);
+          isProcessingRef.current = false;
           return;
         }
 
         setLeadData((prev) => ({
           ...prev,
-          email: userMessage.trim(),
+          email: cleanMsg,
         }));
         setLeadStep(3);
         const botReply = "Please enter your Phone Number.";
@@ -1574,7 +1538,7 @@ export default function ChatWidget() {
           ...prev,
           {
             sender: "user",
-            text: userMessage,
+            text: cleanMsg,
             time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           },
           {
@@ -1584,21 +1548,22 @@ export default function ChatWidget() {
           },
         ]);
 
-        setVoiceState("IDLE");
+        updateVoiceState("IDLE");
+        setIsTyping(false);
+        isProcessingRef.current = false;
         return;
       }
 
       // STEP 3 - Phone Number
       if (leadStep === 3) {
-        // Basic phone validation (digits and optional plus, min 10 digits)
-        const phoneDigits = userMessage.replace(/\D/g, "");
+        const phoneDigits = cleanMsg.replace(/\D/g, "");
         if (phoneDigits.length < 10) {
           const errorReply = "That doesn't look like a valid phone number. Please enter at least 10 digits.";
           setMessages((prev) => [
             ...prev,
             {
               sender: "user",
-              text: userMessage,
+              text: cleanMsg,
               time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             },
             {
@@ -1607,13 +1572,15 @@ export default function ChatWidget() {
               time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             },
           ]);
-          setVoiceState("IDLE");
+          updateVoiceState("IDLE");
+          setIsTyping(false);
+          isProcessingRef.current = false;
           return;
         }
 
         setLeadData((prev) => ({
           ...prev,
-          phone: userMessage,
+          phone: cleanMsg,
         }));
         setLeadStep(4);
         const botReply = "Please enter your Interested Domain.\n\nExample: Full Stack Development, Data Science, AI/ML, UI/UX Design, Digital Marketing";
@@ -1622,7 +1589,7 @@ export default function ChatWidget() {
           ...prev,
           {
             sender: "user",
-            text: userMessage,
+            text: cleanMsg,
             time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           },
           {
@@ -1632,19 +1599,21 @@ export default function ChatWidget() {
           },
         ]);
 
-        setVoiceState("IDLE");
+        updateVoiceState("IDLE");
+        setIsTyping(false);
+        isProcessingRef.current = false;
         return;
       }
 
       // STEP 4 - Domain & Save to Database
       if (leadStep === 4) {
-        setVoiceState("THINKING");
+        updateVoiceState("THINKING");
         try {
           const payload = {
             name: leadData.name,
             email: leadData.email,
             phone: leadData.phone,
-            preferred_domain: userMessage,
+            preferred_domain: cleanMsg,
           };
 
           const res = await saveLead(payload);
@@ -1657,7 +1626,7 @@ export default function ChatWidget() {
             ...prev,
             {
               sender: "user",
-              text: userMessage,
+              text: cleanMsg,
               time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             },
             {
@@ -1671,7 +1640,7 @@ export default function ChatWidget() {
           setLeadStep(0);
           setLeadData({ name: "", email: "", phone: "", domain: "" });
 
-          setVoiceState("IDLE");
+          updateVoiceState("IDLE");
         } catch (error) {
           console.error("Lead saving error:", error);
           const errorReply = "Sorry, there was an issue saving your application. Please try submitting again.";
@@ -1683,7 +1652,10 @@ export default function ChatWidget() {
               time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             },
           ]);
-          setVoiceState("IDLE");
+          updateVoiceState("IDLE");
+        } finally {
+          setIsTyping(false);
+          isProcessingRef.current = false;
         }
         return;
       }
@@ -1694,21 +1666,14 @@ export default function ChatWidget() {
       ...prev,
       {
         sender: "user",
-        text: userMessage,
+        text: cleanMsg,
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       },
     ]);
 
-    setIsTyping(true);
-    setVoiceState("THINKING");
-
-    // Ensure mic recording is disabled while Ollama is processing
-    stopSpeechRecognition();
-    stopInterruptRecognition();
-
     try {
-      const voiceMetadata = source === "voice" ? { duration: parseFloat((userMessage.length / 5).toFixed(1)), confidence: 0.95 } : null;
-      const data = await sendChat(userMessage, source, sessionId, voiceMetadata);
+      const voiceMetadata = source === "voice" ? { duration: parseFloat((cleanMsg.length / 5).toFixed(1)), confidence: 0.95 } : null;
+      const data = await sendChat(cleanMsg, source, sessionId, voiceMetadata, requestId);
 
       if (!data.success) {
         throw new Error(data.message || "Failed to get response");
@@ -1720,7 +1685,7 @@ export default function ChatWidget() {
       if (data.escalation) {
         let escalationTicketId = "";
         try {
-          const escalateData = await createEscalation(sessionId, `User requested human support. Trigger phrase: "${userMessage}"`);
+          const escalateData = await createEscalation(sessionId, `User requested human support. Trigger phrase: "${cleanMsg}"`);
           if (escalateData.success && escalateData.data) {
             escalationTicketId = escalateData.data.id || escalateData.data.session_id || "";
           }
@@ -1742,11 +1707,8 @@ export default function ChatWidget() {
           },
         ]);
 
-        if ((source === "voice" || voiceModeRef.current) && !isSpeakerMutedRef.current) {
-          speakResponse(escalationMessage);
-        } else {
-          setVoiceState("IDLE");
-        }
+        updateVoiceState("IDLE");
+        updatePlaybackState("IDLE");
       } else {
         setMessages((prev) => [
           ...prev,
@@ -1757,11 +1719,8 @@ export default function ChatWidget() {
           },
         ]);
 
-        if ((source === "voice" || voiceModeRef.current) && !isSpeakerMutedRef.current) {
-          speakResponse(botReply);
-        } else {
-          setVoiceState("IDLE");
-        }
+        updateVoiceState("IDLE");
+        updatePlaybackState("IDLE");
       }
     } catch (error) {
       console.error("Chat API Error:", error);
@@ -1777,11 +1736,14 @@ export default function ChatWidget() {
         },
       ]);
 
-      setVoiceState("ERROR");
+      updateVoiceState("ERROR");
       setErrorMessage("Network issue. Reverted to text chat fallback.");
-      setTimeout(() => setVoiceState("IDLE"), 4000);
+      setTimeout(() => {
+        if (voiceStateRef.current === "ERROR") updateVoiceState("IDLE");
+      }, 3000);
     } finally {
       setIsTyping(false);
+      isProcessingRef.current = false;
     }
   };
 
@@ -1797,7 +1759,7 @@ export default function ChatWidget() {
     setMessages((prev) => [...prev.slice(0, targetIdx), updatedUserMsg]);
 
     setIsTyping(true);
-    setVoiceState("THINKING");
+    updateVoiceState("THINKING");
 
     try {
       const data = await sendChat(updatedText, "text", sessionId, null);
@@ -1816,11 +1778,8 @@ export default function ChatWidget() {
         },
       ]);
 
-      if (voiceMode && !isSpeakerMuted) {
-        speakResponse(botReply);
-      } else {
-        setVoiceState("IDLE");
-      }
+      updateVoiceState("IDLE");
+      updatePlaybackState("IDLE");
     } catch (error) {
       console.error("Chat Edit API Error:", error);
       const errorMessageText = error instanceof Error ? error.message : String(error);
@@ -1834,8 +1793,10 @@ export default function ChatWidget() {
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         },
       ]);
+      updateVoiceState("IDLE");
     } finally {
       setIsTyping(false);
+      isProcessingRef.current = false;
     }
   };
 
@@ -1846,545 +1807,804 @@ export default function ChatWidget() {
     await processMessage(userMessage, "text");
   };
 
+/* =========================================================
+   AI BOY AVATAR
+========================================================= */
+
+function AIBoyAvatar({
+  size = "small",
+}: {
+  size?: "small" | "header" | "launcher";
+}) {
+  const sizes = {
+    small: "h-9 w-9",
+    header: "h-12 w-12",
+    launcher: "h-[68px] w-[68px]",
+  };
+
+  return (
+    <div
+      className={`relative shrink-0 overflow-hidden rounded-full ${sizes[size]}`}
+    >
+      <div className="absolute inset-0 rounded-full bg-sky-200/50" />
+      <img
+        src="/weintern_avatar.png"
+        alt="WeIntern AI Assistant"
+        draggable={false}
+        className={
+          size === "small"
+            ? "absolute left-[-42%] top-[-3%] h-[132%] w-[184%] max-w-none object-contain"
+            : size === "header"
+              ? "absolute left-[-40%] top-[-3%] h-[132%] w-[180%] max-w-none object-contain"
+              : "absolute left-[-39%] top-[-3%] h-[132%] w-[180%] max-w-none object-contain"
+        }
+      />
+    </div>
+  );
+}
+
+/* =========================================================
+   STUDENT AVATAR
+========================================================= */
+
+function StudentAvatar() {
+  return (
+    <div className="student-pop flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-100 shadow-sm">
+      <span className="text-[21px]" aria-hidden="true">
+        👩🏻‍🎓
+      </span>
+    </div>
+  );
+}
+
   return (
     <>
-      {/* Floating Button */}
-      <button
-        onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-xl hover:bg-blue-700 transition duration-300 z-50 flex items-center justify-center hover:scale-105 active:scale-95"
-      >
-        <BsChatDotsFill size={24} />
-      </button>
+      <style jsx global>{`
+        @keyframes boyFloat {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-9px); }
+        }
+        @keyframes boyFloatBig {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-12px) rotate(-1deg); }
+        }
+        @keyframes bubbleFloat {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-4px); }
+        }
+        @keyframes pulseOnline {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.15); opacity: 0.75; }
+        }
+        @keyframes studentPop {
+          from { transform: scale(0.75); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes sparkle {
+          0%, 100% { opacity: 0.4; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1.15); }
+        }
+        .boy-launcher { animation: boyFloat 3s ease-in-out infinite; }
+        .boy-outside { animation: boyFloatBig 3.2s ease-in-out infinite; }
+        .ask-bubble { animation: bubbleFloat 3s ease-in-out infinite; }
+        .online-dot { animation: pulseOnline 2s ease-in-out infinite; }
+        .student-pop { animation: studentPop 0.25s ease-out; }
+        .sparkle { animation: sparkle 2s ease-in-out infinite; }
+        .chat-scroll::-webkit-scrollbar { width: 5px; }
+        .chat-scroll::-webkit-scrollbar-track { background: transparent; }
+        .chat-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+      `}</style>
 
-      {/* Chat Window */}
-      {open && (
-        <div className="fixed bottom-0 right-0 w-full h-[100dvh] sm:bottom-24 sm:right-6 sm:w-[380px] sm:max-w-[calc(100vw-2rem)] sm:h-[550px] sm:max-h-[calc(100vh-7rem)] bg-white sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-150 z-50">
-
-          {/* Header */}
-          <div className="bg-blue-600 text-white p-4 flex justify-between items-center shadow-md">
-            <div>
-              <h2 className="font-bold flex items-center gap-1.5 text-sm md:text-base">
-                🤖 WeIntern AI Assistant
-              </h2>
-              <p className="text-[10px] opacity-90 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 bg-green-400 rounded-full inline-block animate-pulse"></span>
-                Online {voiceMode && "• Voice Mode Active"}
-              </p>
-            </div>
-
-            <div className="flex gap-2 items-center">
-              {/* Clear History */}
-              <button
-                onClick={() => setShowClearConfirm(true)}
-                title="Clear chat history"
-                className="hover:text-red-200 transition-colors p-1"
-              >
-                <BsTrash size={18} />
-              </button>
-
-              {/* Speaker Output Toggle */}
-              <button
-                onClick={() => {
-                  if (isSpeakerMuted) {
-                    handleUnmute();
-                  } else {
-                    handleMute();
-                  }
-                }}
-                title={isSpeakerMuted ? "Unmute bot output" : "Mute bot output"}
-                className="hover:text-blue-200 transition-colors p-1"
-              >
-                {isSpeakerMuted ? <BsVolumeMuteFill size={20} /> : <BsVolumeUpFill size={20} />}
-              </button>
-
-              {/* Voice Mode (STT) Toggle */}
-              <button
-                onClick={() => {
-                  const mode = !voiceMode;
-                  setVoiceMode(mode);
-                  voiceModeRef.current = mode;
-                  if (mode) {
-                    startSpeechRecognition();
-                  } else {
-                    stopSpeechRecognition();
-                    if (synthesisRef.current) {
-                      synthesisRef.current.cancel();
-                    }
-                    setVoiceState("IDLE");
-                  }
-                }}
-                title={voiceMode ? "Disable Voice Mode" : "Enable Voice Mode"}
-                className={`hover:text-blue-200 transition-colors p-1 ${voiceMode ? "text-yellow-300 font-bold" : "text-white"}`}
-              >
-                {voiceMode ? <BsMicFill size={20} /> : <BsMicMuteFill size={20} />}
-              </button>
-
-              <button onClick={() => setOpen(false)} className="hover:text-blue-200 transition-colors p-1">
-                <BsX size={28} />
-              </button>
+      {/* CLOSED LAUNCHER STATE */}
+      {!open && (
+        <>
+          {/* ASK ME ANYTHING BUBBLE */}
+          <div className="ask-bubble fixed bottom-[105px] right-5 z-[9998]">
+            <div className="relative rounded-2xl border border-blue-100 bg-white px-4 py-2.5 shadow-[0_12px_35px_rgba(15,23,42,0.15)]">
+              <div className="text-[12px] font-bold text-slate-700">
+                💡 Ask me anything!
+              </div>
+              <div className="absolute -bottom-1.5 right-5 h-3 w-3 rotate-45 border-r border-b border-blue-100 bg-white" />
             </div>
           </div>
 
-          {/* Toast Notification */}
-          {toastMessage && (
-            <div className="absolute top-16 left-1/2 -translate-x-1/2 bg-gray-800/90 text-white text-xs px-3.5 py-1.5 rounded-full shadow-lg z-50 font-medium">
-              {toastMessage}
+          {/* LAUNCHER BUTTON */}
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            aria-label="Open WeIntern AI Assistant"
+            className="fixed bottom-3 right-3 sm:bottom-5 sm:right-5 z-[9999] cursor-pointer touch-manipulation"
+          >
+            <div className="boy-launcher relative flex h-16 w-16 sm:h-[76px] sm:w-[76px] items-center justify-center rounded-full border-[3px] border-white bg-gradient-to-br from-sky-400 via-blue-500 to-blue-800 shadow-[0_12px_40px_rgba(14,116,244,0.4)]">
+              <AIBoyAvatar size="launcher" />
+              <span className="online-dot absolute bottom-0 right-0 h-4 w-4 sm:h-5 sm:w-5 rounded-full border-2 sm:border-[3px] border-white bg-green-500" />
             </div>
-          )}
+          </button>
+        </>
+      )}
 
-          {/* Clear History Confirmation Modal */}
-          {showClearConfirm && (
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-2xl p-5 shadow-2xl max-w-[280px] w-full text-center space-y-3 border border-gray-100">
-                <div className="w-11 h-11 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto text-lg">
-                  <BsTrash />
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-800 text-sm">Clear Chat History?</h3>
-                  <p className="text-[11px] text-gray-500 mt-1">All saved messages for this session will be deleted.</p>
-                </div>
-                <div className="flex gap-2 justify-center pt-1">
-                  <button
-                    onClick={() => setShowClearConfirm(false)}
-                    className="px-3 py-1.5 text-xs rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium flex-1 transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleClearHistory}
-                    className="px-3 py-1.5 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium flex-1 shadow transition"
-                  >
-                    Clear
-                  </button>
-                </div>
-              </div>
+      {/* OPEN CHAT STATE */}
+      {open && (
+        <>
+          {/* FULL BODY BOY MASCOT OUTSIDE CHAT */}
+          <div className="boy-outside pointer-events-none fixed bottom-5 right-[430px] z-[9997] hidden lg:block">
+            <div className="relative h-[440px] w-[270px]">
+              <div className="absolute bottom-0 left-1/2 h-24 w-36 -translate-x-1/2 rounded-full bg-sky-300/30 blur-2xl" />
+              <img
+                src="/weintern_mascot.png"
+                alt="WeIntern AI Assistant"
+                draggable={false}
+                className="absolute inset-0 h-full w-full object-contain filter drop-shadow-[0_25px_30px_rgba(15,23,42,0.25)]"
+              />
+              <span className="sparkle absolute right-2 top-8 text-2xl">✨</span>
+              <span className="sparkle absolute left-0 top-28 text-xl" style={{ animationDelay: "0.5s" }}>✨</span>
             </div>
-          )}
+          </div>
 
-          {/* Apply / Register Lead Form Modal Overlay */}
-          {showLeadForm && (
-            <div className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm z-50 p-2 sm:p-4 overflow-y-auto flex items-center justify-center animate-in fade-in duration-200">
-              <div className="w-full max-w-sm my-auto">
-                <LeadForm
-                  onClose={handleCloseLeadForm}
-                  onSkip={handleSkipLeadForm}
-                  onSuccess={(applicantName) => {
-                    setMessages((prev) => [
-                      ...prev,
-                      {
-                        sender: "bot",
-                        text: `🎉 Thank you for registering, ${applicantName}! Your details have been submitted successfully. Our team will contact you soon.`,
-                        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-                      },
-                    ]);
-                    setTimeout(() => {
-                      handleCloseLeadForm();
-                    }, 2000);
-                  }}
-                />
-              </div>
-            </div>
-          )}
+          {/* CHAT WINDOW CONTAINER */}
+          <div className="fixed inset-0 sm:inset-auto sm:bottom-5 sm:right-5 z-[9999] flex h-[100dvh] sm:h-[min(720px,calc(100vh-40px))] w-full sm:w-[410px] max-w-full sm:max-w-[calc(100vw-24px)] flex-col overflow-hidden rounded-none sm:rounded-[28px] border-0 sm:border border-slate-200 bg-white shadow-2xl sm:shadow-[0_25px_90px_rgba(15,23,42,0.30)]">
 
-          {/* Messages */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50 flex flex-col">
+            {/* HEADER */}
+            <div className="relative shrink-0 overflow-hidden bg-gradient-to-br from-[#0784dc] via-[#087fce] to-[#0759a5] px-3.5 sm:px-5 py-3.5 sm:py-4 text-white">
+              <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-white/10 blur-3xl pointer-events-none" />
+              <div className="absolute -left-20 bottom-[-80px] h-44 w-44 rounded-full bg-cyan-200/10 blur-3xl pointer-events-none" />
 
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
-              >
-                {msg.sender === "bot" && (
-                  <div className="mr-2 text-2xl self-end mb-1">🤖</div>
-                )}
+              <div className="relative flex items-center justify-between gap-2">
+                {/* LEFT */}
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                  <div className="relative flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white shadow-lg">
+                    <img
+                      src="/weintern_avatar.png"
+                      alt="WeIntern AI Assistant"
+                      draggable={false}
+                      className="absolute left-[-40%] top-[-3%] h-[132%] w-[180%] max-w-none object-contain"
+                    />
+                    <span className="absolute bottom-0 right-0 h-3 w-3 sm:h-3.5 sm:w-3.5 rounded-full border-2 border-white bg-green-500" />
+                  </div>
 
-                <div
-                  className={`p-3 rounded-xl shadow max-w-[75%] ${msg.sender === "user"
-                      ? "bg-blue-600 text-white rounded-br-none"
-                      : "bg-white text-gray-900 border border-gray-100 rounded-bl-none"
-                    }`}
-                >
-                  {editingIndex === index ? (
-                    <div className="space-y-2 min-w-[200px]">
-                      <textarea
-                        value={editText}
-                        onChange={(e) => setEditText(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            handleSaveEditedMessage(index);
-                          } else if (e.key === "Escape") {
-                            handleCancelEdit();
-                          }
-                        }}
-                        autoFocus
-                        rows={Math.max(2, editText.split("\n").length)}
-                        className="w-full bg-white text-gray-900 text-sm p-2 rounded-lg border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
-                      />
-                      <div className="flex justify-end gap-1.5 pt-0.5">
-                        <button
-                          onClick={handleCancelEdit}
-                          className="px-2.5 py-1 text-[11px] rounded-md bg-blue-700/80 text-white hover:bg-blue-800 font-medium transition cursor-pointer"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={() => handleSaveEditedMessage(index)}
-                          className="px-2.5 py-1 text-[11px] rounded-md bg-emerald-500 text-white hover:bg-emerald-600 font-semibold shadow transition cursor-pointer flex items-center gap-1"
-                        >
-                          <BsCheck2 className="w-3.5 h-3.5 font-bold" />
-                          Save
-                        </button>
-                      </div>
+                  <div className="min-w-0">
+                    <h2 className="text-sm sm:text-[16px] font-bold tracking-tight text-white truncate">
+                      WeIntern AI Assistant ✨
+                    </h2>
+                    <div className="mt-0.5 flex items-center gap-1 text-[10px] sm:text-[11px] text-white/85 truncate">
+                      <span className="h-1.5 w-1.5 rounded-full bg-green-300 shrink-0" />
+                      <span className="truncate">Here to help 24/7 {voiceMode && "• Voice Mode"}</span>
                     </div>
-                  ) : (
-                    <>
-                      <div className="whitespace-pre-line text-sm leading-relaxed">{msg.text}</div>
-                      {msg.sender === "bot" && (leadStep > 0 || showLeadForm) && (msg.text.includes("registered") || msg.text.includes("Please enter your")) && (
-                        <div className="mt-2.5 pt-2 border-t border-gray-200 flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            onClick={handleSkipLeadForm}
-                            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold rounded-lg border border-slate-300 text-xs transition flex items-center gap-1 shadow-sm cursor-pointer"
-                          >
-                            ⏩ Skip Registration / Continue without Registration
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleCloseLeadForm}
-                            className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 font-bold rounded-lg border border-red-200 text-xs transition flex items-center gap-1 cursor-pointer"
-                          >
-                            ✖ Close
-                          </button>
+                  </div>
+                </div>
+
+                {/* RIGHT HEADER CONTROLS */}
+                <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                  {/* Clear History */}
+                  <button
+                    type="button"
+                    onClick={() => setShowClearConfirm(true)}
+                    title="Clear chat history"
+                    aria-label="Clear chat history"
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 cursor-pointer min-h-[32px] min-w-[32px]"
+                  >
+                    <BsTrash size={14} />
+                  </button>
+
+                  {/* Speaker Output Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (isSpeakerMuted) {
+                        handleUnmute();
+                      } else {
+                        handleMute();
+                      }
+                    }}
+                    title={isSpeakerMuted ? "Unmute bot output" : "Mute bot output"}
+                    aria-label={isSpeakerMuted ? "Unmute bot output" : "Mute bot output"}
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 cursor-pointer min-h-[32px] min-w-[32px]"
+                  >
+                    {isSpeakerMuted ? <BsVolumeMuteFill size={15} /> : <BsVolumeUpFill size={15} />}
+                  </button>
+
+                  {/* Voice Mode Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const mode = !voiceMode;
+                      setVoiceMode(mode);
+                      voiceModeRef.current = mode;
+                      if (mode) {
+                        startSpeechRecognition();
+                      } else {
+                        stopSpeechRecognition();
+                        if (synthesisRef.current) {
+                          synthesisRef.current.cancel();
+                        }
+                        setVoiceState("IDLE");
+                      }
+                    }}
+                    title={voiceMode ? "Disable Voice Mode" : "Enable Voice Mode"}
+                    aria-label={voiceMode ? "Disable Voice Mode" : "Enable Voice Mode"}
+                    className={`flex h-8 w-8 items-center justify-center rounded-full transition cursor-pointer min-h-[32px] min-w-[32px] ${
+                      voiceMode ? "bg-amber-400 text-gray-900 font-bold shadow-md" : "bg-white/10 hover:bg-white/20 text-white"
+                    }`}
+                  >
+                    {voiceMode ? <BsMicFill size={15} /> : <BsMicMuteFill size={15} />}
+                  </button>
+
+                  {/* CLOSE */}
+                  <button
+                    type="button"
+                    onClick={() => setOpen(false)}
+                    aria-label="Close chat window"
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25 cursor-pointer ml-0.5 min-h-[32px] min-w-[32px]"
+                  >
+                    <BsX size={22} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Toast Notification */}
+            {toastMessage && (
+              <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-gray-800/90 text-white text-xs px-3.5 py-1.5 rounded-full shadow-lg z-50 font-medium">
+                {toastMessage}
+              </div>
+            )}
+
+            {/* Clear History Confirmation Modal */}
+            {showClearConfirm && (
+              <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-2xl p-5 shadow-2xl max-w-[280px] w-full text-center space-y-3 border border-gray-100">
+                  <div className="w-11 h-11 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto text-lg">
+                    <BsTrash />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-800 text-sm">Clear Chat History?</h3>
+                    <p className="text-[11px] text-gray-500 mt-1">All saved messages for this session will be deleted.</p>
+                  </div>
+                  <div className="flex gap-2 justify-center pt-1">
+                    <button
+                      onClick={() => setShowClearConfirm(false)}
+                      className="px-3 py-1.5 text-xs rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium flex-1 transition cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleClearHistory}
+                      className="px-3 py-1.5 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium flex-1 shadow transition cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Apply / Register Lead Form Modal Overlay */}
+            {showLeadForm && (
+              <div className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm z-50 p-2 sm:p-4 overflow-y-auto flex items-center justify-center animate-in fade-in duration-200">
+                <div className="w-full max-w-sm my-auto">
+                  <LeadForm
+                    onClose={handleCloseLeadForm}
+                    onSkip={handleSkipLeadForm}
+                    onSuccess={(applicantName) => {
+                      setMessages((prev) => [
+                        ...prev,
+                        {
+                          sender: "bot",
+                          text: `🎉 Thank you for registering, ${applicantName}! Your details have been submitted successfully. Our team will contact you soon.`,
+                          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+                        },
+                      ]);
+                      setTimeout(() => {
+                        handleCloseLeadForm();
+                      }, 2000);
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* CHAT BODY */}
+            <div className="chat-scroll flex-1 overflow-y-auto bg-[#f7faff] px-4 py-4 space-y-3">
+
+              {/* WELCOME CARD & QUICK ACTION GRID */}
+              {messages.length <= 2 && (
+                <div className="mb-4 space-y-3">
+                  <div className="flex items-start gap-2">
+                    <AIBoyAvatar size="small" />
+                    <div className="max-w-[82%] rounded-2xl rounded-tl-md border border-slate-100 bg-white px-4 py-3 shadow-sm">
+                      <p className="text-[13px] font-semibold leading-5 text-slate-700">
+                        Hi there! 👋
+                      </p>
+                      <p className="mt-1 text-[12px] leading-5 text-slate-500">
+                        I'm your WeIntern AI Assistant. Ask me anything about internships, courses, certificates, fees or placement.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 pl-11">
+                    <button
+                      type="button"
+                      onClick={() => quickReply("domains")}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md cursor-pointer"
+                    >
+                      <div className="text-base">📚</div>
+                      <div className="mt-1 text-[11px] font-bold text-slate-700">Internship</div>
+                      <div className="text-[10px] text-slate-400">Programs</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => quickReply("fees")}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md cursor-pointer"
+                    >
+                      <div className="text-base">💰</div>
+                      <div className="mt-1 text-[11px] font-bold text-slate-700">Fees & Payment</div>
+                      <div className="text-[10px] text-slate-400">Pricing info</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => quickReply("certificates")}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md cursor-pointer"
+                    >
+                      <div className="text-base">📜</div>
+                      <div className="mt-1 text-[11px] font-bold text-slate-700">Certificates</div>
+                      <div className="text-[10px] text-slate-400">Learn more</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => quickReply("contact")}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md cursor-pointer"
+                    >
+                      <div className="text-base">🎯</div>
+                      <div className="mt-1 text-[11px] font-bold text-slate-700">Placement</div>
+                      <div className="text-[10px] text-slate-400">Support</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => quickReply("apply")}
+                      className="col-span-2 rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-white px-3 py-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-500 hover:shadow-md cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-blue-700 text-lg shadow-sm text-white">
+                          🚀
                         </div>
-                      )}
-                    </>
-                  )}
+                        <div>
+                          <div className="text-[12px] font-bold text-blue-700">Apply / Register</div>
+                          <div className="text-[10px] text-slate-400">Start your WeIntern journey</div>
+                        </div>
+                        <div className="ml-auto text-blue-600 font-bold text-sm">→</div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
 
-                  {/* Action Bar & Footer */}
+              {/* MESSAGES LIST */}
+              <div className="space-y-3">
+                {messages.map((msg, index) => (
                   <div
-                    className={`flex items-center justify-between gap-2 mt-2 pt-1.5 border-t text-[11px] ${
-                      msg.sender === "user" ? "border-blue-500 text-blue-100" : "border-gray-100 text-gray-400"
+                    key={index}
+                    className={`flex items-end gap-2 ${
+                      msg.sender === "user" ? "justify-end" : "justify-start"
                     }`}
                   >
-                    {/* Action Buttons: Copy, Edit, Retry */}
-                    <div className="flex items-center gap-2">
-                      {/* Copy Button */}
-                      <button
-                        onClick={() => handleCopyMessage(index, msg.text)}
-                        title="Copy text"
-                        className="hover:opacity-80 transition duration-150 flex items-center gap-0.5 cursor-pointer"
+                    {msg.sender === "bot" && <AIBoyAvatar size="small" />}
+                    {msg.sender === "user" && (
+                      <div className="order-2">
+                        <StudentAvatar />
+                      </div>
+                    )}
+
+                    <div
+                      className={`max-w-[85%] sm:max-w-[78%] px-3.5 py-2.5 shadow-sm break-words-anywhere ${
+                        msg.sender === "user"
+                          ? "order-1 rounded-2xl rounded-br-md bg-gradient-to-r from-[#168de2] to-[#087fce] text-white"
+                          : "rounded-2xl rounded-bl-md border border-slate-100 bg-white text-slate-700"
+                      }`}
+                    >
+                      {editingIndex === index ? (
+                        <div className="space-y-2 min-w-[200px]">
+                          <textarea
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSaveEditedMessage(index);
+                              } else if (e.key === "Escape") {
+                                handleCancelEdit();
+                              }
+                            }}
+                            autoFocus
+                            rows={Math.max(2, editText.split("\n").length)}
+                            className="w-full bg-white text-gray-900 text-sm p-2 rounded-lg border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+                          />
+                          <div className="flex justify-end gap-1.5 pt-0.5">
+                            <button
+                              onClick={handleCancelEdit}
+                              className="px-2.5 py-1 text-[11px] rounded-md bg-blue-700/80 text-white hover:bg-blue-800 font-medium transition cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => handleSaveEditedMessage(index)}
+                              className="px-2.5 py-1 text-[11px] rounded-md bg-emerald-500 text-white hover:bg-emerald-600 font-semibold shadow transition cursor-pointer flex items-center gap-1"
+                            >
+                              <BsCheck2 className="w-3.5 h-3.5 font-bold" />
+                              Save
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className={`whitespace-pre-line text-[13px] leading-5 ${msg.sender === "user" ? "text-white" : "text-slate-700"}`}>
+                            {msg.text}
+                          </div>
+                          {msg.sender === "bot" && (leadStep > 0 || showLeadForm) && (msg.text.includes("registered") || msg.text.includes("Please enter your")) && (
+                            <div className="mt-2.5 pt-2 border-t border-gray-200 flex flex-wrap gap-2">
+                              <button
+                                type="button"
+                                onClick={handleSkipLeadForm}
+                                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold rounded-lg border border-slate-300 text-xs transition flex items-center gap-1 shadow-sm cursor-pointer"
+                              >
+                                ⏩ Skip Registration / Continue without Registration
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleCloseLeadForm}
+                                className="px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 font-bold rounded-lg border border-red-200 text-xs transition flex items-center gap-1 cursor-pointer"
+                              >
+                                ✖ Close
+                              </button>
+                            </div>
+                          )}
+                        </>
+                      )}
+
+                      {/* Action Bar & Footer */}
+                      <div
+                        className={`flex items-center justify-between gap-2 mt-2 pt-1.5 border-t text-[10px] ${
+                          msg.sender === "user" ? "border-white/20 text-blue-100" : "border-slate-100 text-slate-400"
+                        }`}
                       >
-                        {copiedIndex === index ? (
-                          <>
-                            <BsCheck2 className="w-3.5 h-3.5 text-green-400 font-bold" />
-                            <span className="text-[10px] text-green-400 font-semibold">Copied!</span>
-                          </>
-                        ) : (
-                          <BsCopy className="w-3 h-3" />
-                        )}
-                      </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleCopyMessage(index, msg.text)}
+                            title="Copy text"
+                            className="hover:opacity-80 transition duration-150 flex items-center gap-0.5 cursor-pointer"
+                          >
+                            {copiedIndex === index ? (
+                              <>
+                                <BsCheck2 className="w-3.5 h-3.5 text-emerald-400 font-bold" />
+                                <span className="text-[10px] text-emerald-400 font-semibold">Copied!</span>
+                              </>
+                            ) : (
+                              <BsCopy className="w-3 h-3" />
+                            )}
+                          </button>
 
-                      {/* Edit Button (User) */}
-                      {msg.sender === "user" && (
-                        <button
-                          onClick={() => handleEditMessage(index, msg.text)}
-                          title="Edit message"
-                          className={`hover:opacity-80 transition duration-150 flex items-center gap-0.5 cursor-pointer ml-1 ${
-                            editingIndex === index ? "text-yellow-300 font-bold" : ""
-                          }`}
-                        >
-                          <BsPencilSquare className="w-3 h-3" />
-                        </button>
-                      )}
+                          {msg.sender === "user" && (
+                            <button
+                              onClick={() => handleEditMessage(index, msg.text)}
+                              title="Edit message"
+                              className={`hover:opacity-80 transition duration-150 flex items-center gap-0.5 cursor-pointer ml-1 ${
+                                editingIndex === index ? "text-yellow-300 font-bold" : ""
+                              }`}
+                            >
+                              <BsPencilSquare className="w-3 h-3" />
+                            </button>
+                          )}
 
-                      {/* Retry Button (Bot) */}
-                      {msg.sender === "bot" && index > 0 && messages[index - 1]?.sender === "user" && (
-                        <button
-                          onClick={() => handleRetryMessage(messages[index - 1].text)}
-                          title="Retry response"
-                          className="hover:text-blue-600 transition duration-150 flex items-center gap-0.5 cursor-pointer ml-1"
-                        >
-                          <BsArrowClockwise className="w-3 h-3" />
-                        </button>
-                      )}
-                    </div>
+                          {msg.sender === "bot" && index > 0 && messages[index - 1]?.sender === "user" && (
+                            <button
+                              onClick={() => handleRetryMessage(messages[index - 1].text)}
+                              title="Retry response"
+                              className="hover:text-blue-600 transition duration-150 flex items-center gap-0.5 cursor-pointer ml-1"
+                            >
+                              <BsArrowClockwise className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
 
-                    {/* Right side: TTS Controls (Bot) + Timestamp */}
-                    <div className="flex items-center gap-2">
-                      {msg.sender === "bot" && (
-                        <div className="flex items-center gap-1.5">
-                          {((playingMessageIndex === index || pausedMessageIndexRef.current === index) || ((playingMessageIndex === -1 || pausedMessageIndexRef.current === -1) && index === messages.length - 1)) ? (
-                            <>
-                              {playbackState === "PLAYING" ? (
-                                <button
-                                  onClick={handlePauseMessage}
-                                  title="Pause response"
-                                  className="hover:text-blue-600 transition duration-200 cursor-pointer"
-                                >
-                                  <BsPauseFill className="w-4 h-4" />
-                                </button>
+                        <div className="flex items-center gap-2">
+                          {msg.sender === "bot" && (
+                            <div className="flex items-center gap-1.5">
+                              {((playingMessageIndex === index || pausedMessageIndexRef.current === index) || ((playingMessageIndex === -1 || pausedMessageIndexRef.current === -1) && index === messages.length - 1)) ? (
+                                <>
+                                  {playbackState === "PLAYING" ? (
+                                    <button
+                                      onClick={handlePauseMessage}
+                                      title="Pause response"
+                                      className="hover:text-blue-600 transition duration-200 cursor-pointer"
+                                    >
+                                      <BsPauseFill className="w-4 h-4" />
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={() => playbackState === "PAUSED" ? handleResumeOrContinueMessage() : handlePlayMessage(index, msg.text)}
+                                      title="Resume response"
+                                      className="hover:text-blue-600 transition duration-200 cursor-pointer"
+                                    >
+                                      <BsPlayFill className="w-4 h-4" />
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={handleStopMessage}
+                                    title="Stop response"
+                                    className="hover:text-red-500 transition duration-200 cursor-pointer"
+                                  >
+                                    <BsStopFill className="w-4 h-4" />
+                                  </button>
+                                </>
                               ) : (
                                 <button
-                                  onClick={() => playbackState === "PAUSED" ? handleResumeOrContinueMessage() : handlePlayMessage(index, msg.text)}
-                                  title="Resume response"
+                                  onClick={() => handlePlayMessage(index, msg.text)}
+                                  title="Speak response"
                                   className="hover:text-blue-600 transition duration-200 cursor-pointer"
                                 >
                                   <BsPlayFill className="w-4 h-4" />
                                 </button>
                               )}
-                              <button
-                                onClick={handleStopMessage}
-                                title="Stop response"
-                                className="hover:text-red-500 transition duration-200 cursor-pointer"
-                              >
-                                <BsStopFill className="w-4 h-4" />
-                              </button>
-                            </>
-                          ) : (
-                            <button
-                              onClick={() => handlePlayMessage(index, msg.text)}
-                              title="Speak response"
-                              className="hover:text-blue-600 transition duration-200 cursor-pointer"
-                            >
-                              <BsPlayFill className="w-4 h-4" />
-                            </button>
+                            </div>
                           )}
+                          <span className="text-[9px]">{msg.time}</span>
                         </div>
-                      )}
-                      <span className="text-[9px]">{msg.time}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                ))}
 
-            {/* Interim Transcript display for user speech */}
-            {voiceState === "LISTENING" && interimTranscript && (
-              <div className="flex justify-end">
-                <div className="bg-gray-200 text-gray-700 p-3 rounded-xl shadow max-w-[75%] italic text-sm rounded-br-none">
-                  🎤 {interimTranscript}...
-                </div>
+                {/* Interim Transcript display for user speech */}
+                {voiceState === "LISTENING" && interimTranscript && (
+                  <div className="flex justify-end items-end gap-2">
+                    <StudentAvatar />
+                    <div className="bg-gray-200 text-gray-700 p-3 rounded-2xl rounded-br-md shadow-sm max-w-[76%] italic text-[13px]">
+                      🎤 {interimTranscript}...
+                    </div>
+                  </div>
+                )}
+
+                {/* TYPING INDICATOR */}
+                {isTyping && (
+                  <div className="flex items-end gap-2">
+                    <AIBoyAvatar size="small" />
+                    <div className="flex items-center gap-1 rounded-2xl rounded-bl-md border border-slate-100 bg-white px-4 py-3 shadow-sm">
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-blue-500" />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-blue-500 [animation-delay:0.15s]" />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-blue-500 [animation-delay:0.3s]" />
+                    </div>
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+            </div>
+
+            {/* Voice State Information Panel */}
+            {(voiceMode || playbackState !== "IDLE") && (
+              <div className="bg-white border-t border-slate-200 px-4 py-2 flex flex-col gap-1.5">
+                {voiceState === "LISTENING" && (
+                  <div className="flex justify-between items-center text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-100">
+                    <span className="flex items-center gap-1.5 font-medium animate-pulse">
+                      <span className="w-2 h-2 bg-red-500 rounded-full inline-block"></span>
+                      Listening... speak now
+                    </span>
+                    <button
+                      onClick={stopSpeechRecognition}
+                      className="text-[10px] text-gray-500 hover:text-gray-700 font-semibold underline cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
+
+                {voiceState === "SPEAKING" && (
+                  <div className="flex justify-between items-center text-xs text-blue-600 bg-blue-50 p-2 rounded-lg border border-blue-100">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">Bot is speaking...</span>
+                      <div className="voice-wave-container">
+                        <div className="voice-wave-bar"></div>
+                        <div className="voice-wave-bar"></div>
+                        <div className="voice-wave-bar"></div>
+                        <div className="voice-wave-bar"></div>
+                        <div className="voice-wave-bar"></div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handlePauseMessage}
+                        className="px-2 py-1 text-[10px] bg-blue-600 text-white rounded hover:bg-blue-700 font-semibold transition cursor-pointer"
+                      >
+                        Pause
+                      </button>
+                      <button
+                        onClick={handleStopMessage}
+                        className="px-2 py-1 text-[10px] bg-red-500 text-white rounded hover:bg-red-600 font-semibold transition cursor-pointer"
+                      >
+                        Stop
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {voiceState === "PAUSED" && (
+                  <div className="flex justify-between items-center text-xs text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200">
+                    <span className="font-medium flex items-center gap-1">
+                      ⏸️ Speech Paused
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleResumeOrContinueMessage}
+                        className="px-2 py-1 text-[10px] bg-amber-600 text-white rounded hover:bg-amber-700 font-semibold transition cursor-pointer"
+                      >
+                        Continue
+                      </button>
+                      <button
+                        onClick={handleStopMessage}
+                        className="px-2 py-1 text-[10px] bg-red-500 text-white rounded hover:bg-red-600 font-semibold transition cursor-pointer"
+                      >
+                        Stop
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {voiceState === "THINKING" && (
+                  <div className="flex items-center text-xs text-blue-600 bg-blue-50 p-2 rounded-lg border border-blue-100">
+                    <span className="font-medium animate-pulse">Thinking...</span>
+                  </div>
+                )}
+
+                {voiceState === "ERROR" && errorMessage && (
+                  <div className="text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-200 text-center font-semibold">
+                    ⚠️ {errorMessage}
+                  </div>
+                )}
               </div>
             )}
 
-            {isTyping && (
-              <div className="flex justify-start">
-                <div className="mr-2 text-2xl self-end mb-1">🤖</div>
-                <div className="bg-white text-gray-400 p-3 rounded-xl shadow border border-gray-100 rounded-bl-none text-sm italic flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></span>
-                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:0.4s]"></span>
-                </div>
-              </div>
-            )}
-
-            <div ref={messagesEndRef}></div>
-
-          </div>
-
-          {/* Voice State Information Panel — shown when voice mode is on OR when TTS is actively playing */}
-          {(voiceMode || playbackState !== "IDLE") && (
-            <div className="bg-white border-t px-4 py-2 flex flex-col gap-1.5">
-              {/* Listening panel */}
-              {voiceState === "LISTENING" && (
-                <div className="flex justify-between items-center text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-100">
-                  <span className="flex items-center gap-1.5 font-medium animate-pulse">
-                    <span className="w-2 h-2 bg-red-500 rounded-full inline-block"></span>
-                    Listening... speak now
-                  </span>
+            {/* Registration Active Sticky Bar */}
+            {(showLeadForm || leadStep > 0) && (
+              <div className="bg-amber-50 border-t border-b border-amber-200 p-2.5 px-4 flex items-center justify-between gap-2 text-xs shadow-sm z-30">
+                <span className="font-bold text-amber-900 flex items-center gap-1.5">
+                  📝 Registration in progress (Step {leadStep || 1} of 4)
+                </span>
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={stopSpeechRecognition}
-                    className="text-[10px] text-gray-500 hover:text-gray-700 font-semibold underline"
+                    type="button"
+                    onClick={handleSkipLeadForm}
+                    className="px-3 py-1 bg-amber-100 hover:bg-amber-200 text-amber-950 font-semibold rounded-lg transition border border-amber-300 flex items-center gap-1 text-[11px] cursor-pointer shadow-sm"
                   >
-                    Cancel
+                    ⏩ Skip Registration
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCloseLeadForm}
+                    className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-800 font-bold rounded-lg transition border border-red-300 flex items-center gap-1 text-[11px] cursor-pointer shadow-sm"
+                  >
+                    ✖ Close
                   </button>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Speaking panel */}
-              {voiceState === "SPEAKING" && (
-                <div className="flex justify-between items-center text-xs text-blue-600 bg-blue-50 p-2 rounded-lg border border-blue-100">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">Bot is speaking...</span>
-                    <div className="voice-wave-container">
-                      <div className="voice-wave-bar"></div>
-                      <div className="voice-wave-bar"></div>
-                      <div className="voice-wave-bar"></div>
-                      <div className="voice-wave-bar"></div>
-                      <div className="voice-wave-bar"></div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handlePauseMessage}
-                      className="px-2 py-1 text-[10px] bg-blue-600 text-white rounded hover:bg-blue-700 font-semibold transition"
-                    >
-                      Pause
-                    </button>
-                    <button
-                      onClick={handleStopMessage}
-                      className="px-2 py-1 text-[10px] bg-red-500 text-white rounded hover:bg-red-600 font-semibold transition"
-                    >
-                      Stop
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Paused panel */}
-              {voiceState === "PAUSED" && (
-                <div className="flex justify-between items-center text-xs text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200">
-                  <span className="font-medium flex items-center gap-1">
-                    ⏸️ Speech Paused
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handleResumeOrContinueMessage}
-                      className="px-2 py-1 text-[10px] bg-amber-600 text-white rounded hover:bg-amber-700 font-semibold transition"
-                    >
-                      Continue
-                    </button>
-                    <button
-                      onClick={handleStopMessage}
-                      className="px-2 py-1 text-[10px] bg-red-500 text-white rounded hover:bg-red-600 font-semibold transition"
-                    >
-                      Stop
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Thinking panel */}
-              {voiceState === "THINKING" && (
-                <div className="flex items-center text-xs text-blue-600 bg-blue-50 p-2 rounded-lg border border-blue-100">
-                  <span className="font-medium animate-pulse">Thinking...</span>
-                </div>
-              )}
-
-              {/* Error panel */}
-              {voiceState === "ERROR" && errorMessage && (
-                <div className="text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-200 text-center font-semibold">
-                  ⚠️ {errorMessage}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Registration Active Sticky Bar */}
-          {(showLeadForm || leadStep > 0) && (
-            <div className="bg-amber-50 border-t border-b border-amber-200 p-2.5 px-4 flex items-center justify-between gap-2 text-xs shadow-sm z-30">
-              <span className="font-bold text-amber-900 flex items-center gap-1.5">
-                📝 Registration in progress (Step {leadStep || 1} of 4)
-              </span>
-              <div className="flex items-center gap-2">
+            {/* QUICK BUTTONS */}
+            <div className="border-t border-slate-200 bg-white px-3 py-2.5">
+              <div className="flex gap-2 overflow-x-auto no-scrollbar">
                 <button
                   type="button"
-                  onClick={handleSkipLeadForm}
-                  className="px-3 py-1 bg-amber-100 hover:bg-amber-200 text-amber-950 font-semibold rounded-lg transition border border-amber-300 flex items-center gap-1 text-[11px] cursor-pointer shadow-sm"
+                  onClick={() => quickReply("apply")}
+                  className="shrink-0 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-semibold text-blue-700 transition hover:bg-blue-600 hover:text-white cursor-pointer"
                 >
-                  ⏩ Skip Registration
+                  🚀 Apply
                 </button>
+
                 <button
                   type="button"
-                  onClick={handleCloseLeadForm}
-                  className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-800 font-bold rounded-lg transition border border-red-300 flex items-center gap-1 text-[11px] cursor-pointer shadow-sm"
+                  onClick={() => quickReply("fees")}
+                  className="shrink-0 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-700 transition hover:bg-blue-600 hover:text-white cursor-pointer"
                 >
-                  ✖ Close
+                  💰 Fees
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => quickReply("domains")}
+                  className="shrink-0 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-medium text-blue-700 transition hover:bg-blue-600 hover:text-white cursor-pointer"
+                >
+                  💻 Domains
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => quickReply("certificates")}
+                  className="shrink-0 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[11px] font-medium text-amber-700 transition hover:bg-amber-500 hover:text-white cursor-pointer"
+                >
+                  📜 Certificates
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => quickReply("contact")}
+                  className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-medium text-slate-700 transition hover:bg-slate-600 hover:text-white cursor-pointer"
+                >
+                  🎯 Contact
                 </button>
               </div>
             </div>
-          )}
 
-          {/* Quick Replies */}
-          <div className="border-t p-3 flex overflow-x-auto gap-2 bg-white border-b border-gray-100 no-scrollbar scroll-smooth">
+            {/* INPUT PANEL */}
+            <div className="border-t border-slate-200 bg-white px-3 py-3">
+              <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 transition focus-within:border-sky-400 focus-within:bg-white focus-within:shadow-sm">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  placeholder={voiceState === "LISTENING" ? "Listening to your voice..." : "Type your message..."}
+                  value={message}
+                  disabled={voiceState === "LISTENING"}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      sendMessage();
+                    }
+                  }}
+                  className="min-w-0 flex-1 bg-transparent px-3 py-2 text-[13px] text-slate-800 outline-none placeholder:text-slate-400 disabled:bg-gray-100 disabled:text-gray-500"
+                />
 
-            <button
-              onClick={() => quickReply("apply")}
-              className="flex-shrink-0 border border-blue-600 bg-blue-50 text-blue-700 font-medium rounded-full px-3 py-1 text-xs hover:bg-blue-600 hover:text-white transition duration-200 touch-manipulation cursor-pointer"
-            >
-              ✨ Apply / Register
-            </button>
+                {/* Voice Input Mic Button */}
+                {isSpeechSupported && (
+                  <button
+                    type="button"
+                    onClick={handleMicClick}
+                    title={voiceState === "LISTENING" ? "Stop recording" : "Tap to speak"}
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition cursor-pointer ${
+                      voiceState === "LISTENING"
+                        ? "text-red-500 bg-red-50 voice-listening-btn"
+                        : voiceState === "SPEAKING"
+                          ? "text-orange-500 bg-orange-50 animate-pulse"
+                          : voiceMode
+                            ? "text-blue-600 bg-blue-100/80 font-bold"
+                            : "text-blue-600 hover:bg-blue-50"
+                    }`}
+                  >
+                    {voiceState === "LISTENING" ? <BsMicMuteFill size={18} /> : <BsMicFill size={18} />}
+                  </button>
+                )}
 
-            <button
-              onClick={() => quickReply("fees")}
-              className="flex-shrink-0 border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200 touch-manipulation cursor-pointer"
-            >
-              Fees & EMI
-            </button>
+                {/* Send Button */}
+                <button
+                  type="button"
+                  disabled={voiceState === "LISTENING" || !message.trim()}
+                  onClick={sendMessage}
+                  aria-label="Send message"
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-sm transition cursor-pointer ${
+                    voiceState === "LISTENING" || !message.trim()
+                      ? "cursor-not-allowed bg-slate-300"
+                      : "bg-gradient-to-br from-sky-400 to-blue-700 hover:scale-105 hover:shadow-md"
+                  }`}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-[18px] w-[18px]"
+                    fill="currentColor"
+                  >
+                    <path d="M3.4 20.4 21.3 12 3.4 3.6l-.1 6.5 12.8 1.9-12.8 1.9.1 6.5.1 6.5Z" />
+                  </svg>
+                </button>
+              </div>
 
-            <button
-              onClick={() => quickReply("domains")}
-              className="flex-shrink-0 border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200 touch-manipulation cursor-pointer"
-            >
-              Domains
-            </button>
-
-            <button
-              onClick={() => quickReply("certificates")}
-              className="flex-shrink-0 border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200 touch-manipulation cursor-pointer"
-            >
-              Certificates
-            </button>
-
-            <button
-              onClick={() => quickReply("contact")}
-              className="flex-shrink-0 border border-gray-300 text-gray-600 rounded-full px-3 py-1 text-xs hover:border-blue-600 hover:text-blue-600 transition duration-200 touch-manipulation cursor-pointer"
-            >
-              Contact
-            </button>
-
-          </div>
-
-          {/* Input Panel */}
-          <div className="border-t p-3 flex gap-2 bg-white items-center">
-
-            <input
-              ref={inputRef}
-              type="text"
-              placeholder={voiceState === "LISTENING" ? "Listening to your voice..." : "Type your message..."}
-              value={message}
-              disabled={voiceState === "LISTENING"}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  sendMessage();
-                }
-              }}
-              className="flex-1 border border-gray-300 rounded-lg px-3.5 py-2.5 text-black text-base md:text-sm placeholder-gray-400 outline-none focus:border-blue-600 disabled:bg-gray-100 disabled:text-gray-500"
-            />
-
-            {/* Voice Input Mic Button — always visible when speech is supported */}
-            {isSpeechSupported && (
-              <button
-                onClick={handleMicClick}
-                title={voiceState === "LISTENING" ? "Stop recording" : "Tap to speak"}
-                className={`p-3 rounded-lg text-white transition duration-200 touch-manipulation ${
-                  voiceState === "LISTENING"
-                    ? "bg-red-500 hover:bg-red-600 voice-listening-btn"
-                    : voiceState === "SPEAKING"
-                      ? "bg-orange-500 hover:bg-orange-600 animate-pulse"
-                      : voiceMode
-                        ? "bg-blue-600 hover:bg-blue-700 ring-2 ring-blue-300"
-                        : "bg-blue-500 hover:bg-blue-600"
-                }`}
-              >
-                {voiceState === "LISTENING" ? <BsMicMuteFill size={18} /> : <BsMicFill size={18} />}
-              </button>
-            )}
-
-            <button
-              onClick={sendMessage}
-              disabled={voiceState === "LISTENING" || !message.trim()}
-              className="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-50 flex items-center justify-center touch-manipulation"
-            >
-              <IoSend size={18} />
-            </button>
+              {/* FOOTER */}
+              <div className="mt-2 flex items-center justify-center gap-1 text-[9px] text-slate-400">
+                <span className="font-black text-blue-600">W</span>
+                <span>Powered by WeIntern AI</span>
+              </div>
+            </div>
 
           </div>
-
-        </div>
+        </>
       )}
     </>
   );

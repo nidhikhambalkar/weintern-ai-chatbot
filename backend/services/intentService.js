@@ -21,19 +21,51 @@ function getGreetingResponse(rawText) {
     return "Namaste! 👋 Main WeIntern AI Assistant hoon. Main aapko WeIntern ke baare mein, courses, internships, fees, certificates, placement aur bahut kuch bata sakta hoon. Aaj main aapki kya madad kar sakta hoon?";
   }
 
-  // 3. English / Default Greeting Response
+// 3. English / Default Greeting Response
   return "Hi! 👋 I'm the WeIntern AI Assistant. I can tell you all about WeIntern — what it is, how it works, programs, courses, fees, certificates, mentorship, placement, and more. How can I help you today?";
+}
+
+function getBotIdentityResponse(rawText) {
+  const text = String(rawText).trim();
+  const lower = text.toLowerCase();
+
+  // 1. Marathi
+  const isMarathi = /कोण\s*आहात|कोण\s*आहेस|स्वतःबद्दल|काय\s*करू\s*शकता/.test(text) || /\b(tu\s*kon\s*ahes|tumhi\s*kon\s*ahat|kon\s*ahes|swatabaddal)\b/.test(lower);
+  if (isMarathi) {
+    return "मी WeIntern AI Assistant आहे. मी तुम्हाला WeIntern चे courses, internships, fees, benefits, certificates, eligibility आणि इतर अधिकृत माहितीमध्ये मदत करू शकतो.";
+  }
+
+  // 2. Hindi / Hinglish
+  const isHindi = /कौन\s*हो|कौन\s*हैं|अपने\s*बारे\s*में|क्या\s*कर\s*सकते\s*हो/.test(text) || /\b(aap\s*kaun\s*ho|tum\s*kaun\s*ho|ap\s*kaun\s*ho|tum\s*kon\s*ho|kaun\s*ho|apne\s*bare\s*mein)\b/.test(lower);
+  if (isHindi) {
+    return "मैं WeIntern AI Assistant हूँ। मैं आपको WeIntern के courses, internships, fees, benefits, certificates, eligibility और अन्य आधिकारिक जानकारी में मदद कर सकता हूँ।";
+  }
+
+  // 3. English / Default
+  return "I’m the WeIntern AI Assistant. I can help you with information about WeIntern’s courses, internships, fees, benefits, certifications, eligibility, and other official WeIntern information.";
 }
 
 function detectIntent(message = "") {
   const rawText = String(message).trim();
 
   // ── Normalize WeIntern name variants before any keyword matching ─────────
-  // This ensures "we intern", "weinterm", "weintrn", "vington", "v intern" etc. all hit the
-  // correct intent branch instead of falling to out-of-domain.
   const WEINTERN_VARIANT_RE = /\b(v\s*intern|v-intern|w\s+intern|w-intern|wee\s+intern|wee\s+intrn|we\s+intern|we-intern|we\s+interne|we\s+interm|we\s+intrn|we\s+intrm|we\s+intent|we\s+entered|we\s+entered\s+in|way\s+intern|vee\s+intern|vee\s+intrn|vee\s+internship|v\s+internship|be\s+intern|beintern|weinternship|weinterm|weintern|weintrn|weintarn|weinternn|weimterm|weintrm|vington|vingten|vinturn|winturn|wintern|wenitern|weinturm|weinturn|weentern|weentrn|weintearn|wigton|vinemtn|vinton)\b/gi;
   const normalizedRaw = rawText.replace(WEINTERN_VARIANT_RE, "WeIntern");
   const lower = normalizedRaw.toLowerCase();
+
+  // ── Bot Identity Intent ("Who are you?", "Introduce yourself", "What can you do?", etc.) ──
+  // MUST NOT trigger generic company overview unless user asks about the company itself ("What is WeIntern?")
+  const isExplicitCompanyQuery = /\b(what\s+is\s+weintern|what\s+is\s+weintern\s+company|who\s+is\s+weintern(\s+company)?|who\s+are\s+weintern(\s+company)?|tell\s+me\s+about\s+weintern(\s+company)?|about\s+weintern\s+company)\b/i.test(lower);
+
+  const botIdentityRegex = /^(who are you|who are you exactly|what are you|introduce yourself|tell me about yourself|what can you do|are you a chatbot|are you a bot|are you weintern chatbot|are you a weintern chatbot|what is this chatbot|what is this bot|what do you do|how can you help me|who made you|who built you|what is your name|your name|aap kaun ho|tum kaun ho|tu kon ahes|ap kaun ho|tum kon ho|who r u|what r u|tell about yourself|about yourself)\b/i;
+  const hasBotIdentityKeywords = /\b(who are you|introduce yourself|tell me about yourself|what can you do|are you a chatbot|are you a bot|what is this chatbot|what is this bot|what do you do|aap kaun ho|tum kaun ho|tu kon ahes)\b/i.test(lower);
+
+  if ((botIdentityRegex.test(lower) || hasBotIdentityKeywords) && !isExplicitCompanyQuery) {
+    return {
+      type: "bot_identity",
+      response: getBotIdentityResponse(rawText),
+    };
+  }
 
   const latinGreetingRegex = /^(hi+|hello+|hey+|hlo|good\s*morning|good\s*afternoon|good\s*evening|yo|sup|namaste|namaskar|pranam|ram\s*ram|satsriakal|adab|kaise\s*ho|kasa\s*kay|kase\s*ahat|nmste|nmskar|prnam|kse\s*ahat|ksa\s*kay)\b/i;
   const devanagariGreetingRegex = /^(नमस्ते|नमस्कार|प्रणाम|राम\s*राम|सत\s*श्री\s*अकाल|आदाब|कैसे\s*हो|कसा\s*काय|कसे\s*आहात|कसा\s*आहेस|कशी\s*आहेस)/;
@@ -137,6 +169,28 @@ function detectIntent(message = "") {
     "seminars",
     "hackathon",
     "hackathons",
+    "trust",
+    "trustworthy",
+    "genuine",
+    "credibility",
+    "credible",
+    "recognition",
+    "recognitions",
+    "recognize",
+    "recognized",
+    "accreditation",
+    "msme",
+    "nsdc",
+    "aicte",
+    "iso",
+    "associations",
+    "affiliations",
+    "credentials",
+    "legit",
+    "legitimate",
+    "info",
+    "information",
+    "explain",
     "support",
     "contact",
     "eligibility",

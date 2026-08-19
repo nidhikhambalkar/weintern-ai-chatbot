@@ -1,17 +1,28 @@
 // ==============================================================================
 // FILE: server.js
-// PURPOSE: Main Express Web Server and API Endpoint Handler (MongoDB version).
-// WHY WE CREATED THIS FILE:
-// 1. Receives requests from the Next.js frontend (e.g. chat messages, lead forms).
-// 2. Contains all backend routes cleanly organized in one file so beginners can follow along easily.
-// 3. Connects to database (db.js) using MongoDB to store and retrieve data.
+// PURPOSE: Express Web Server for WeIntern Chatbot Database APIs.
+// FEATURES:
+// 1. Non-blocking Server Startup: Listens on PORT immediately while database connects.
+// 2. High-Availability Endpoints: /api/leads, /api/history, /api/escalate, /api/summary, /api/sessions.
+// 3. Reliable Data Storage: Works seamlessly with MongoDB and persistent local file storage (db_storage.json).
 // ==============================================================================
 
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const { ObjectId } = require('mongodb');
-const { initDatabase, getIsDbConnected, getCollection, inMemoryDb } = require('./db');
+const {
+  initDatabase,
+  getIsDbConnected,
+  getCollection,
+  query,
+  saveLead,
+  saveMessage,
+  saveEscalation,
+  getHistory,
+  getLeads,
+  getEscalations,
+} = require('./db');
 
 dotenv.config();
 
@@ -22,14 +33,15 @@ app.use(cors());
 app.use(express.json());
 
 // ==============================================================================
-// SECTION 1: HEALTH CHECK ENDPOINT
+// SECTION 1: HEALTH CHECK & ROOT
 // ==============================================================================
+
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'online',
     service: 'WeIntern AI Chatbot Database Server',
-    db_status: getIsDbConnected() ? 'MongoDB' : 'In-Memory Fallback',
-    timestamp: new Date().toISOString()
+    db_status: getIsDbConnected() ? 'MongoDB' : 'Persistent Local Storage (db_storage.json)',
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -38,10 +50,10 @@ app.get('/', (req, res) => {
 });
 
 // ==============================================================================
-// SECTION 2: LEAD MANAGEMENT ENDPOINTS (PRD Section 13 & 15)
+// SECTION 2: LEAD MANAGEMENT ENDPOINTS
 // ==============================================================================
 
-// ENDPOINT 1: POST /api/leads -> Save a new student lead
+// POST /api/leads -> Save a new student lead
 app.post('/api/leads', async (req, res) => {
   try {
     const { name, email, phone, preferred_domain, domain } = req.body;
@@ -50,60 +62,51 @@ app.post('/api/leads', async (req, res) => {
     if (!name || !email || !phone || !targetDomain) {
       return res.status(400).json({
         success: false,
-        error: 'Please fill in all fields: name, email, phone, and preferred_domain.'
+        error: 'Please fill in all fields: name, email, phone, and preferred_domain.',
       });
     }
 
-    const newLead = {
-      name: name.trim(),
-      email: email.trim(),
-      phone: phone.trim(),
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide a valid email address.',
+      });
+    }
+
+    const result = await saveLead({
+      name,
+      email,
+      phone,
       preferred_domain: targetDomain,
-      created_at: new Date()
-    };
-
-    if (getIsDbConnected()) {
-      const collection = getCollection('leads');
-      const result = await collection.insertOne(newLead);
-      return res.status(201).json({
-        success: true,
-        message: 'Lead captured successfully in MongoDB!',
-        data: { ...newLead, _id: result.insertedId }
-      });
-    }
-
-    newLead.id = inMemoryDb.autoId.leads++;
-    inMemoryDb.leads.push(newLead);
+    });
 
     return res.status(201).json({
       success: true,
-      message: 'Lead captured successfully!',
-      data: newLead
+      message: 'Lead captured successfully in database!',
+      data: {
+        id: result.insertedId,
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        preferred_domain: targetDomain,
+      },
     });
-
   } catch (error) {
     console.error('Error saving lead:', error.message);
     return res.status(500).json({ success: false, error: 'Failed to save lead.' });
   }
 });
 
-// ENDPOINT 2: GET /api/leads & GET /api/admin/leads -> Retrieve all captured leads
+// GET /api/leads & GET /api/admin/leads -> Retrieve all leads
 app.get(['/api/leads', '/api/admin/leads'], async (req, res) => {
   try {
-    if (getIsDbConnected()) {
-      const collection = getCollection('leads');
-      const result = await collection.find({}).sort({ created_at: -1 }).toArray();
-      return res.status(200).json({
-        success: true,
-        count: result.length,
-        data: result
-      });
-    }
-
+    const leads = await getLeads();
+    const sortedLeads = Array.isArray(leads) ? [...leads].reverse() : [];
     return res.status(200).json({
       success: true,
-      count: inMemoryDb.leads.length,
-      data: [...inMemoryDb.leads].reverse()
+      count: sortedLeads.length,
+      data: sortedLeads,
     });
   } catch (error) {
     console.error('Error fetching leads:', error.message);
@@ -112,10 +115,10 @@ app.get(['/api/leads', '/api/admin/leads'], async (req, res) => {
 });
 
 // ==============================================================================
-// SECTION 3: CONVERSATION HISTORY ENDPOINTS (PRD Section 13 & 15)
+// SECTION 3: CONVERSATION HISTORY & SESSIONS ENDPOINTS
 // ==============================================================================
 
-// ENDPOINT 3: GET /api/history -> Get chat history for a session_id
+// GET /api/history -> Get chat history for a session_id
 app.get('/api/history', async (req, res) => {
   try {
     const sessionId = req.query.session_id || req.query.sessionId;
@@ -123,98 +126,105 @@ app.get('/api/history', async (req, res) => {
     if (!sessionId) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required query parameter: session_id'
+        error: 'Missing required query parameter: session_id',
       });
     }
 
-    if (getIsDbConnected()) {
-      const collection = getCollection('messages');
-      const result = await collection.find({ session_id: sessionId }).sort({ timestamp: 1 }).toArray();
-      return res.status(200).json({
-        success: true,
-        session_id: sessionId,
-        count: result.length,
-        data: result
-      });
-    }
-
-    const filteredMessages = inMemoryDb.messages.filter(m => m.session_id === sessionId);
+    const messages = await getHistory(sessionId);
     return res.status(200).json({
       success: true,
       session_id: sessionId,
-      count: filteredMessages.length,
-      data: filteredMessages
+      count: messages.length,
+      data: messages,
     });
-
   } catch (error) {
     console.error('Error fetching history:', error.message);
     return res.status(500).json({ success: false, error: 'Failed to fetch chat history.' });
   }
 });
 
-// ENDPOINT 4: POST /api/history -> Save a single chat message (user or bot)
+// POST /api/history -> Save a single chat message (user or bot)
 app.post('/api/history', async (req, res) => {
   try {
-    const { session_id, sender, message } = req.body;
+    const { session_id, sender, message, source, voice_metadata } = req.body;
 
     if (!session_id || !sender || !message) {
       return res.status(400).json({
         success: false,
-        error: 'Please provide session_id, sender, and message.'
+        error: 'Please provide session_id, sender, and message.',
       });
     }
 
-    if (getIsDbConnected()) {
-      const sessionCollection = getCollection('sessions');
-      const messageCollection = getCollection('messages');
-
-      if (sessionCollection) {
-        await sessionCollection.updateOne(
-          { session_id },
-          { $setOnInsert: { session_id, created_at: new Date() } },
-          { upsert: true }
-        );
-      }
-
-      const doc = {
-        session_id,
-        sender,
-        message,
-        timestamp: new Date()
-      };
-      const result = await messageCollection.insertOne(doc);
-
-      return res.status(201).json({
-        success: true,
-        data: { ...doc, _id: result.insertedId }
-      });
-    }
-
-    const newMsg = {
-      id: inMemoryDb.autoId.messages++,
+    const result = await saveMessage({
       session_id,
       sender,
       message,
-      timestamp: new Date().toISOString()
-    };
-    inMemoryDb.messages.push(newMsg);
+      source,
+      voice_metadata,
+    });
 
     return res.status(201).json({
       success: true,
-      data: newMsg
+      message: 'Message saved successfully in database!',
+      data: {
+        id: result.insertedId,
+        session_id,
+        sender,
+        message,
+        source: source || 'text',
+      },
     });
-
   } catch (error) {
     console.error('Error saving message:', error.message);
     return res.status(500).json({ success: false, error: 'Failed to save message.' });
   }
 });
 
+// DELETE /api/history -> Clear chat history for a session_id
+app.delete('/api/history', async (req, res) => {
+  try {
+    const sessionId = req.query.session_id || req.query.sessionId || req.body?.session_id;
+
+    if (!sessionId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required parameter: session_id',
+      });
+    }
+
+    await query('messages', 'deleteMany', [{ session_id: sessionId }]);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Chat history cleared successfully from database.',
+      session_id: sessionId,
+    });
+  } catch (error) {
+    console.error('Error clearing history:', error.message);
+    return res.status(500).json({ success: false, error: 'Failed to clear chat history.' });
+  }
+});
+
+// GET /api/sessions & GET /api/admin/sessions -> Get list of active sessions
+app.get(['/api/sessions', '/api/admin/sessions'], async (req, res) => {
+  try {
+    const sessions = await query('sessions', 'find', [{}]);
+    return res.status(200).json({
+      success: true,
+      count: sessions.length,
+      data: sessions,
+    });
+  } catch (error) {
+    console.error('Error fetching sessions:', error.message);
+    return res.status(500).json({ success: false, error: 'Failed to fetch sessions.' });
+  }
+});
+
 // ==============================================================================
-// SECTION 4: HUMAN ESCALATION ENDPOINTS (PRD Section 13 & 15)
+// SECTION 4: HUMAN ESCALATION ENDPOINTS
 // ==============================================================================
 
-// ENDPOINT 5: POST /api/escalate & POST /api/escalations -> Create support escalation ticket
+// POST /api/escalate & POST /api/escalations -> Create support escalation ticket
 app.post(['/api/escalate', '/api/escalations'], async (req, res) => {
   try {
     const { session_id, issue } = req.body;
@@ -222,62 +232,40 @@ app.post(['/api/escalate', '/api/escalations'], async (req, res) => {
     if (!session_id || !issue) {
       return res.status(400).json({
         success: false,
-        error: 'Please provide session_id and issue description.'
+        error: 'Please provide session_id and issue description.',
       });
     }
 
-    const doc = {
+    const result = await saveEscalation({
       session_id,
-      issue: issue.trim(),
-      status: 'pending',
-      created_at: new Date()
-    };
-
-    if (getIsDbConnected()) {
-      const collection = getCollection('escalations');
-      const result = await collection.insertOne(doc);
-      return res.status(201).json({
-        success: true,
-        message: 'Escalation ticket created successfully!',
-        data: { ...doc, _id: result.insertedId }
-      });
-    }
-
-    const newEscalation = {
-      id: inMemoryDb.autoId.escalations++,
-      ...doc
-    };
-    inMemoryDb.escalations.push(newEscalation);
+      issue,
+    });
 
     return res.status(201).json({
       success: true,
-      message: 'Escalation ticket created successfully!',
-      data: newEscalation
+      message: 'Escalation ticket created successfully in database!',
+      data: {
+        id: result.insertedId,
+        session_id,
+        issue: issue.trim(),
+        status: 'pending',
+      },
     });
-
   } catch (error) {
     console.error('Error creating escalation:', error.message);
     return res.status(500).json({ success: false, error: 'Failed to create escalation ticket.' });
   }
 });
 
-// ENDPOINT 6: GET /api/escalations & GET /api/admin/escalations -> View support escalation tickets
+// GET /api/escalations & GET /api/admin/escalations -> View escalation tickets
 app.get(['/api/escalations', '/api/admin/escalations'], async (req, res) => {
   try {
-    if (getIsDbConnected()) {
-      const collection = getCollection('escalations');
-      const result = await collection.find({}).sort({ created_at: -1 }).toArray();
-      return res.status(200).json({
-        success: true,
-        count: result.length,
-        data: result
-      });
-    }
-
+    const escalations = await getEscalations();
+    const sortedEscalations = Array.isArray(escalations) ? [...escalations].reverse() : [];
     return res.status(200).json({
       success: true,
-      count: inMemoryDb.escalations.length,
-      data: [...inMemoryDb.escalations].reverse()
+      count: sortedEscalations.length,
+      data: sortedEscalations,
     });
   } catch (error) {
     console.error('Error fetching escalations:', error.message);
@@ -285,7 +273,7 @@ app.get(['/api/escalations', '/api/admin/escalations'], async (req, res) => {
   }
 });
 
-// ENDPOINT 7: PATCH /api/escalations/:id & PATCH /api/admin/escalations/:id -> Update escalation status
+// PATCH /api/escalations/:id & PATCH /api/admin/escalations/:id -> Update ticket status
 app.patch(['/api/escalations/:id', '/api/admin/escalations/:id'], async (req, res) => {
   try {
     const { id } = req.params;
@@ -295,75 +283,55 @@ app.patch(['/api/escalations/:id', '/api/admin/escalations/:id'], async (req, re
     if (!status || !allowed.includes(status)) {
       return res.status(400).json({
         success: false,
-        error: `Invalid status. Must be one of: ${allowed.join(', ')}`
+        error: `Invalid status. Must be one of: ${allowed.join(', ')}`,
       });
     }
 
-    if (getIsDbConnected()) {
-      const collection = getCollection('escalations');
-      let filter = {};
-      try {
-        filter = { _id: new ObjectId(id) };
-      } catch (err) {
-        filter = { id: Number(id) };
-      }
-
-      const result = await collection.findOneAndUpdate(
-        filter,
-        { $set: { status } },
-        { returnDocument: 'after' }
-      );
-
-      if (!result) {
-        return res.status(404).json({ success: false, error: 'Ticket not found.' });
-      }
-      return res.status(200).json({ success: true, data: result });
+    const collection = getCollection('escalations');
+    let filter = {};
+    try {
+      filter = { _id: new ObjectId(id) };
+    } catch (_) {
+      filter = { id: Number(id) };
     }
 
-    const ticket = inMemoryDb.escalations.find(e => e.id === Number(id));
+    const updated = await collection.findOneAndUpdate(
+      filter,
+      { $set: { status, updated_at: new Date() } },
+      { returnDocument: 'after' }
+    );
+
+    const ticket = updated ? (updated.value || updated) : null;
     if (!ticket) {
       return res.status(404).json({ success: false, error: 'Ticket not found.' });
     }
-    ticket.status = status;
-    return res.status(200).json({ success: true, data: ticket });
 
+    return res.status(200).json({ success: true, data: ticket });
   } catch (error) {
     console.error('Error updating escalation:', error.message);
     return res.status(500).json({ success: false, error: 'Failed to update ticket.' });
   }
 });
 
-// ENDPOINT 8: GET /api/summary & GET /api/admin/summary -> Overview statistics
+// GET /api/summary & GET /api/admin/summary -> Overview statistics
 app.get(['/api/summary', '/api/admin/summary'], async (req, res) => {
   try {
-    let leadsCount = 0;
-    let escalationsCount = 0;
-    let pendingCount = 0;
+    const leads = await getLeads();
+    const escalations = await getEscalations();
 
-    if (getIsDbConnected()) {
-      const leadsCollection = getCollection('leads');
-      const escalationsCollection = getCollection('escalations');
-
-      if (leadsCollection) {
-        leadsCount = await leadsCollection.countDocuments({});
-      }
-      if (escalationsCollection) {
-        escalationsCount = await escalationsCollection.countDocuments({});
-        pendingCount = await escalationsCollection.countDocuments({ status: 'pending' });
-      }
-    } else {
-      leadsCount = inMemoryDb.leads.length;
-      escalationsCount = inMemoryDb.escalations.length;
-      pendingCount = inMemoryDb.escalations.filter(e => e.status === 'pending').length;
-    }
+    const totalLeads = Array.isArray(leads) ? leads.length : 0;
+    const totalEscalations = Array.isArray(escalations) ? escalations.length : 0;
+    const pendingEscalations = Array.isArray(escalations)
+      ? escalations.filter((e) => e.status === 'pending').length
+      : 0;
 
     return res.status(200).json({
       success: true,
       summary: {
-        total_leads: leadsCount,
-        total_escalations: escalationsCount,
-        pending_escalations: pendingCount,
-      }
+        total_leads: totalLeads,
+        total_escalations: totalEscalations,
+        pending_escalations: pendingEscalations,
+      },
     });
   } catch (error) {
     console.error('Error fetching summary:', error.message);
@@ -372,17 +340,15 @@ app.get(['/api/summary', '/api/admin/summary'], async (req, res) => {
 });
 
 // ==============================================================================
-// SECTION 5: START SERVER FUNCTION
+// SECTION 5: START SERVER
 // ==============================================================================
-const start = async () => {
-  await initDatabase();
 
-  app.listen(PORT, () => {
-    console.log(`====================================================`);
-    console.log(`🚀 [Server] WeIntern Database Backend live on port ${PORT}`);
-    console.log(`📡 [Health Check] http://localhost:${PORT}/health`);
-    console.log(`====================================================`);
-  });
-};
+app.listen(PORT, () => {
+  console.log(`====================================================`);
+  console.log(`🚀 [Server] WeIntern Database Backend live on port ${PORT}`);
+  console.log(`📡 [Health Check] http://localhost:${PORT}/health`);
+  console.log(`====================================================`);
 
-start();
+  // Initialize MongoDB connection asynchronously in background
+  initDatabase().catch((err) => console.warn('⚠️ Background initDatabase notice:', err.message));
+});

@@ -1,8 +1,48 @@
 [
   {
     "category": "faq",
+    "question": "Who are you?",
+    "answer": "I’m the WeIntern AI Assistant. I can help you with information about WeIntern’s courses, internships, fees, benefits, certifications, eligibility, and other official WeIntern information."
+  },
+  {
+    "category": "faq",
+    "question": "Who are you exactly?",
+    "answer": "I’m the WeIntern AI Assistant. I can help you with information about WeIntern’s courses, internships, fees, benefits, certifications, eligibility, and other official WeIntern information."
+  },
+  {
+    "category": "faq",
+    "question": "What are you?",
+    "answer": "I’m the WeIntern AI Assistant. I can help you with information about WeIntern’s courses, internships, fees, benefits, certifications, eligibility, and other official WeIntern information."
+  },
+  {
+    "category": "faq",
+    "question": "Introduce yourself",
+    "answer": "I’m the WeIntern AI Assistant. I can help you with information about WeIntern’s courses, internships, fees, benefits, certifications, eligibility, and other official WeIntern information."
+  },
+  {
+    "category": "faq",
+    "question": "Tell me about yourself",
+    "answer": "I’m the WeIntern AI Assistant. I can help you with information about WeIntern’s courses, internships, fees, benefits, certifications, eligibility, and other official WeIntern information."
+  },
+  {
+    "category": "faq",
+    "question": "What can you do?",
+    "answer": "I’m the WeIntern AI Assistant. I can help you with information about WeIntern’s courses, internships, fees, benefits, certifications, eligibility, and other official WeIntern information."
+  },
+  {
+    "category": "faq",
+    "question": "Are you a WeIntern chatbot?",
+    "answer": "I’m the WeIntern AI Assistant. I can help you with information about WeIntern’s courses, internships, fees, benefits, certifications, eligibility, and other official WeIntern information."
+  },
+  {
+    "category": "faq",
+    "question": "What is this chatbot?",
+    "answer": "I’m the WeIntern AI Assistant. I can help you with information about WeIntern’s courses, internships, fees, benefits, certifications, eligibility, and other official WeIntern information."
+  },
+  {
+    "category": "faq",
     "question": "What is WeIntern?",
-    "answer": "WeIntern is an EdTech platform where students don't wait for opportunities — they build them. WeIntern provides industry-focused internship programs with live projects, mentor support, verified certificates, and stipend opportunities across multiple domains."
+    "answer": "WeIntern is an EdTech career development platform designed to help students, beginners, and freshers build real-world, industry-ready skills.\n\nKey Highlights:\n🚀 Learn → Build → Work → Earn Model — Combine structured domain training, hands-on live projects, team internship work, and performance-based stipend opportunities up to ₹10,000.\n📚 Comprehensive Programs — Offers industry-oriented training in Full Stack Web Development, Mobile App Development, AI & Automation, Data Science & Analytics, Python, Java, C/C++, UI/UX Design, Cloud Computing, and Digital Marketing.\n👨‍🏫 Mentor & Career Support — Dedicated guidance from experienced domain mentors, doubt resolution, resume building, and placement preparation.\n📜 Recognized Credentials — Official verified certificates backed by recognitions and associations including MSME (Government of India), NSDC, Skill India Mission, Ministry of Skill Development & Entrepreneurship, AICTE, Google Partner, AWS, and ISO 9001:2015 certification."
   },
   {
     "category": "faq",
@@ -17,7 +57,7 @@
   {
     "category": "faq",
     "question": "Is WeIntern genuine?",
-    "answer": "Yes. WeIntern is a legitimate EdTech platform. Students can verify program details through the official website we-intern.in or contact the support team through the official communication channels."
+    "answer": "WeIntern has recognitions, certifications, and industry associations across government, skill development, education, and technology, including the Ministry of MSME, Government of India; NSDC; Skill India Mission; Ministry of Skill Development & Entrepreneurship; AICTE; Google Partner; AWS; and ISO 9001:2015 certification. These credentials and associations demonstrate its focus on structured skill development, industry-relevant learning, and professional standards."
   },
   {
     "category": "faq",
@@ -92,12 +132,7 @@
   {
     "category": "faq",
     "question": "WeIntern kya hai?",
-    "answer": "WeIntern ek EdTech platform hai jahan students internship programs ke through real-world projects, mentor support aur practical skills develop karte hain."
-  },
-  {
-    "category": "faq",
-    "question": "WeIntern genuine hai kya?",
-    "answer": "Haan, WeIntern ek legitimate EdTech platform hai. Students official website aur support channels ke through program details verify kar sakte hain."
+    "answer": "WeIntern is an EdTech career development platform designed to help students, beginners, and freshers build real-world, industry-ready skills.\n\nKey Highlights:\n🚀 Learn → Build → Work → Earn Model — Combine structured domain training, hands-on live projects, team internship work, and performance-based stipend opportunities up to ₹10,000.\n📚 Comprehensive Programs — Offers industry-oriented training in Full Stack Web Development, Mobile App Development, AI & Automation, Data Science & Analytics, Python, Java, C/C++, UI/UX Design, Cloud Computing, and Digital Marketing.\n👨‍🏫 Mentor & Career Support — Dedicated guidance from experienced domain mentors, doubt resolution, resume building, and placement preparation.\n📜 Recognized Credentials — Official verified certificates backed by recognitions and associations including MSME (Government of India), NSDC, Skill India Mission, Ministry of Skill Development & Entrepreneurship, AICTE, Google Partner, AWS, and ISO 9001:2015 certification."
   },
   {
     "category": "faq",
@@ -713,5 +748,90 @@
     "category": "events",
     "question": "What events does WeIntern conduct?",
     "answer": "WeIntern periodically conducts webinars, workshops, hackathons, and career development sessions for students and interns."
+  },
+  {
+    "category": "fees",
+    "question": "How to make payment?",
+    "answer": "WeIntern accepts program fee payments online through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), Debit Cards, Credit Cards, and Net Banking. EMI options are available for the 6-Month Program (₹6,599) in a 30:40:30 ratio (30% at enrollment, 40% midpoint, 30% at end). For direct bank transfer details or payment queries, contact support at +91 74149 74582 (WhatsApp) or contact@we-intern.in."
+  },
+  {
+    "category": "fees",
+    "question": "How do I pay?",
+    "answer": "WeIntern accepts program fee payments online through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), Debit Cards, Credit Cards, and Net Banking. EMI options are available for the 6-Month Program (₹6,599) in a 30:40:30 ratio (30% at enrollment, 40% midpoint, 30% at end). For direct bank transfer details or payment queries, contact support at +91 74149 74582 (WhatsApp) or contact@we-intern.in."
+  },
+  {
+    "category": "fees",
+    "question": "Payment kaise kare?",
+    "answer": "WeIntern accepts program fee payments online through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), Debit Cards, Credit Cards, and Net Banking. EMI options are available for the 6-Month Program (₹6,599) in a 30:40:30 ratio (30% at enrollment, 40% midpoint, 30% at end). For direct bank transfer details or payment queries, contact support at +91 74149 74582 (WhatsApp) or contact@we-intern.in."
+  },
+  {
+    "category": "fees",
+    "question": "How can I pay fees?",
+    "answer": "WeIntern accepts program fee payments online through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), Debit Cards, Credit Cards, and Net Banking. EMI options are available for the 6-Month Program (₹6,599) in a 30:40:30 ratio (30% at enrollment, 40% midpoint, 30% at end). For direct bank transfer details or payment queries, contact support at +91 74149 74582 (WhatsApp) or contact@we-intern.in."
+  },
+  {
+    "category": "fees",
+    "question": "What payment options are available?",
+    "answer": "WeIntern accepts program fee payments online through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), Debit Cards, Credit Cards, and Net Banking. EMI options are available for the 6-Month Program (₹6,599) in a 30:40:30 ratio (30% at enrollment, 40% midpoint, 30% at end). For direct bank transfer details or payment queries, contact support at +91 74149 74582 (WhatsApp) or contact@we-intern.in."
+  },
+  {
+    "category": "fees",
+    "question": "What payment methods are accepted?",
+    "answer": "WeIntern accepts program fee payments online through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), Debit Cards, Credit Cards, and Net Banking. EMI options are available for the 6-Month Program (₹6,599) in a 30:40:30 ratio (30% at enrollment, 40% midpoint, 30% at end). For direct bank transfer details or payment queries, contact support at +91 74149 74582 (WhatsApp) or contact@we-intern.in."
+  },
+  {
+    "category": "fees",
+    "question": "Can I pay via Razorpay?",
+    "answer": "WeIntern accepts program fee payments online through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), Debit Cards, Credit Cards, and Net Banking. EMI options are available for the 6-Month Program (₹6,599) in a 30:40:30 ratio (30% at enrollment, 40% midpoint, 30% at end). For direct bank transfer details or payment queries, contact support at +91 74149 74582 (WhatsApp) or contact@we-intern.in."
+  },
+  {
+    "category": "fees",
+    "question": "Can I pay via Bank transfer?",
+    "answer": "WeIntern accepts program fee payments online through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), Debit Cards, Credit Cards, and Net Banking. EMI options are available for the 6-Month Program (₹6,599) in a 30:40:30 ratio (30% at enrollment, 40% midpoint, 30% at end). For direct bank transfer details or payment queries, contact support at +91 74149 74582 (WhatsApp) or contact@we-intern.in."
+  },
+  {
+    "category": "fees",
+    "question": "Is EMI available for fee payment?",
+    "answer": "WeIntern accepts program fee payments online through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), Debit Cards, Credit Cards, and Net Banking. EMI options are available for the 6-Month Program (₹6,599) in a 30:40:30 ratio (30% at enrollment, 40% midpoint, 30% at end). For direct bank transfer details or payment queries, contact support at +91 74149 74582 (WhatsApp) or contact@we-intern.in."
+  },
+  {
+    "category": "fees",
+    "question": "How to pay internship fee?",
+    "answer": "WeIntern accepts program fee payments online through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), Debit Cards, Credit Cards, and Net Banking. EMI options are available for the 6-Month Program (₹6,599) in a 30:40:30 ratio (30% at enrollment, 40% midpoint, 30% at end). For direct bank transfer details or payment queries, contact support at +91 74149 74582 (WhatsApp) or contact@we-intern.in."
+  },
+  {
+    "category": "fees",
+    "question": "Fee payment options",
+    "answer": "WeIntern accepts program fee payments online through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), Debit Cards, Credit Cards, and Net Banking. EMI options are available for the 6-Month Program (₹6,599) in a 30:40:30 ratio (30% at enrollment, 40% midpoint, 30% at end). For direct bank transfer details or payment queries, contact support at +91 74149 74582 (WhatsApp) or contact@we-intern.in."
+  },
+  {
+    "category": "fees",
+    "question": "Razorpay payment",
+    "answer": "WeIntern accepts program fee payments online through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), Debit Cards, Credit Cards, and Net Banking. EMI options are available for the 6-Month Program (₹6,599) in a 30:40:30 ratio (30% at enrollment, 40% midpoint, 30% at end). For direct bank transfer details or payment queries, contact support at +91 74149 74582 (WhatsApp) or contact@we-intern.in."
+  },
+  {
+    "category": "fees",
+    "question": "Bank transfer details for payment",
+    "answer": "WeIntern accepts program fee payments online through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), Debit Cards, Credit Cards, and Net Banking. EMI options are available for the 6-Month Program (₹6,599) in a 30:40:30 ratio (30% at enrollment, 40% midpoint, 30% at end). For direct bank transfer details or payment queries, contact support at +91 74149 74582 (WhatsApp) or contact@we-intern.in."
+  },
+  {
+    "category": "fees",
+    "question": "UPI payment options",
+    "answer": "WeIntern accepts program fee payments online through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), Debit Cards, Credit Cards, and Net Banking. EMI options are available for the 6-Month Program (₹6,599) in a 30:40:30 ratio (30% at enrollment, 40% midpoint, 30% at end). For direct bank transfer details or payment queries, contact support at +91 74149 74582 (WhatsApp) or contact@we-intern.in."
+  },
+  {
+    "category": "fees",
+    "question": "GPay PhonePe Paytm payment",
+    "answer": "WeIntern accepts program fee payments online through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), Debit Cards, Credit Cards, and Net Banking. EMI options are available for the 6-Month Program (₹6,599) in a 30:40:30 ratio (30% at enrollment, 40% midpoint, 30% at end). For direct bank transfer details or payment queries, contact support at +91 74149 74582 (WhatsApp) or contact@we-intern.in."
+  },
+  {
+    "category": "fees",
+    "question": "fees kaise de?",
+    "answer": "WeIntern accepts program fee payments online through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), Debit Cards, Credit Cards, and Net Banking. EMI options are available for the 6-Month Program (₹6,599) in a 30:40:30 ratio (30% at enrollment, 40% midpoint, 30% at end). For direct bank transfer details or payment queries, contact support at +91 74149 74582 (WhatsApp) or contact@we-intern.in."
+  },
+  {
+    "category": "fees",
+    "question": "fees kaise pay kare?",
+    "answer": "WeIntern accepts program fee payments online through Razorpay, which supports UPI (Google Pay, PhonePe, Paytm, BHIM), Debit Cards, Credit Cards, and Net Banking. EMI options are available for the 6-Month Program (₹6,599) in a 30:40:30 ratio (30% at enrollment, 40% midpoint, 30% at end). For direct bank transfer details or payment queries, contact support at +91 74149 74582 (WhatsApp) or contact@we-intern.in."
   }
 ]

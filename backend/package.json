@@ -7,6 +7,7 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "seed:kb": "node scripts/seedFaqKnowledgeBase.js",
+    "seed:mongo": "node scripts/seedMongoKnowledgeBase.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -19,7 +20,9 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "mongodb": "^6.21.0",
-    "mongoose": "^8.24.3"
+    "mongoose": "^8.24.3",
+    "nodemailer": "^9.0.5",
+    "razorpay": "^2.9.8"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

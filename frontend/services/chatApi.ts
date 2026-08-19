@@ -255,15 +255,20 @@ function getOfflineFallbackResponse(message: string) {
 	};
 }
 
-export async function sendChat(message: string, source: string = 'text', session_id?: string, voiceMetadata?: any) {
+export async function sendChat(message: string, source: string = 'text', session_id?: string, voiceMetadata?: any, requestId?: string) {
 	try {
 		const url = buildUrl('/api/chat');
 		const res = await safeFetch(url, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ message, source, session_id, voice_metadata: voiceMetadata }),
+			body: JSON.stringify({ message, source, session_id, voice_metadata: voiceMetadata, request_id: requestId }),
 		});
-		return await handleJsonResponse(res);
+		const data = await handleJsonResponse(res);
+		const answerText = data?.data?.answer || data?.reply || data?.response || data?.message || "";
+		return {
+			...data,
+			reply: answerText,
+		};
 	} catch (err: any) {
 		console.warn("[chatApi] Backend connection issue, utilizing offline fallback response:", err.message);
 		return getOfflineFallbackResponse(message);
@@ -282,6 +287,17 @@ export async function saveLead(lead: Record<string, unknown>) {
 	} catch (err: any) {
 		console.warn('[chatApi] Backend offline, saving lead locally:', err.message);
 		return { success: true, message: "Lead submitted successfully (offline mode)." };
+	}
+}
+
+export async function getLeads() {
+	try {
+		const url = buildUrl('/api/leads');
+		const res = await safeFetch(url);
+		return await handleJsonResponse(res);
+	} catch (err: any) {
+		console.warn('[chatApi] Failed to fetch leads:', err.message);
+		return { success: false, data: [], error: err.message };
 	}
 }
 
@@ -339,5 +355,6 @@ export async function createEscalation(session_id: string, issue: string) {
 	}
 }
 
-export default { sendChat, saveLead, getHistory, saveHistory, clearHistory, createEscalation };
+export default { sendChat, saveLead, getLeads, getHistory, saveHistory, clearHistory, createEscalation };
+
 

@@ -103,6 +103,20 @@ const TYPO_MAP = {
   cource: "course",
   coures: "course",
   crouse: "course",
+  kors: "course",
+  kee: "ki",
+  kitnee: "kitni",
+
+  // Voice speech transliterations
+  jenyuin: "genuine",
+  jenuin: "genuine",
+  jenuine: "genuine",
+  "rikॉrded": "recorded",
+  rikorded: "recorded",
+  recoded: "recorded",
+  seshns: "sessions",
+  seshon: "session",
+  seshons: "sessions",
 
   // Fees typos
   feez: "fees",
@@ -385,6 +399,116 @@ function searchKnowledgeBase(message = "") {
         if (hitCount > 0 && faq.contentTokens.length > 0) {
           score = (hitCount / Math.max(queryContentTokens.length, 1)) * 50;
         }
+      }
+    }
+
+    // ── Bot Identity Intent Booster vs Company Overview ────────────────────────
+    const isBotIdentityQuery = /\b(who\s+are\s+you|who\s+are\s+you\s+exactly|what\s+are\s+you|introduce\s+yourself|tell\s+me\s+about\s+yourself|what\s+can\s+you\s+do|are\s+you\s+a\s+(weintern\s+)?chatbot|are\s+you\s+a\s+(weintern\s+)?bot|what\s+is\s+this\s+chatbot|what\s+is\s+this\s+bot|what\s+do\s+you\s+do|how\s+can\s+you\s+help\s+me|who\s+made\s+you|who\s+built\s+you|what\s+is\s+your\s+name|aap\s+kaun\s+ho|tum\s+kaun\s+ho|tu\s+kon\s+ahes|ap\s+kaun\s+ho|tum\s+kon\s+ho|who\s+r\s+u|what\s+r\s+u)\b/i.test(queryClean);
+    const isExplicitCompanyQuery = /\b(what\s+is\s+weintern|what\s+is\s+weintern\s+company|who\s+is\s+weintern(\s+company)?|who\s+are\s+weintern(\s+company)?|tell\s+me\s+about\s+weintern(\s+company)?|about\s+weintern\s+company)\b/i.test(queryClean);
+
+    if (isBotIdentityQuery && !isExplicitCompanyQuery) {
+      if (faq.question.toLowerCase().includes("who are you") || faq.question.toLowerCase().includes("what is this chatbot") || faq.question.toLowerCase().includes("tell me about yourself") || faq.question.toLowerCase().includes("introduce yourself") || faq.question.toLowerCase().includes("what can you do") || faq.question.toLowerCase().includes("are you a weintern chatbot")) {
+        score += 20000;
+      }
+      if (faq.question.toLowerCase().includes("what is weintern") || faq.question.toLowerCase().includes("who are weintern") || faq.question.toLowerCase().includes("who is weintern") || faq.question.toLowerCase().includes("tell me about weintern") || faq.question.toLowerCase().includes("introduce weintern")) {
+        score -= 15000;
+      }
+    }
+
+    // Overview Domain Booster
+    const isOverviewQuery = /\b(weintern info|info about weintern|what is weintern|what is weintern company|weintern company|tell me about weintern|weintern kya hai|explain weintern|give me information about weintern|weintern ke baare|what does weintern do)\b/i.test(queryClean);
+    if (isOverviewQuery && (faq.question.toLowerCase().includes("what is weintern") || faq.answer.includes("Learn → Build → Work → Earn"))) {
+      score += 10000;
+    }
+
+    // Trust & Recognition Domain Booster
+    const isTrustQuery = /\b(msme|nsdc|aicte|iso|trust|trustworthy|credible|credibility|legit|legitimate|recognition|recognitions|recognized|affiliated|affiliations|credentials)\b/i.test(queryClean);
+    if (isTrustQuery && faq.answer.includes("Ministry of MSME")) {
+      score += 10000;
+    }
+
+    // ── Student Fee Payment Intent Booster ──────────────────────────────────────
+    const isPaymentQuery = /\b(how\s+to\s+(make\s+)?payment|how\s+(do\s+i|can\s+i)\s+pay|payment\s+kaise|fees\s+kaise|pay\s+fees|fees\s+pay|payment\s+options|payment\s+methods|razorpay|bank\s+transfer|upi|gpay|phonepe|paytm|emi|installment|installments|how\s+to\s+pay)\b/i.test(queryClean);
+
+    if (isPaymentQuery) {
+      const isClientIntegrationQuery = /\b(integrate|integration|client|custom\s+website|develop|software|build\s+website|stripe)\b/i.test(queryClean);
+      
+      if (!isClientIntegrationQuery) {
+        // Suppress IT Service WeNexa Payment Integration FAQs
+        if (faq.question.toLowerCase().includes("integrate payment") || faq.question.toLowerCase().includes("stripe integration")) {
+          score -= 8000;
+        }
+
+        // Boost Official Student Payment FAQs
+        const isOfficialPaymentFaq = (faq.answer.includes("Razorpay") || faq.question.toLowerCase().includes("payment") || faq.question.toLowerCase().includes("pay") || faq.question.toLowerCase().includes("emi")) && (faq.category === "fees" || faq.category === "faq" || faq.category === "internship");
+        if (isOfficialPaymentFaq) {
+          score += 10000;
+        }
+      }
+    }
+
+    // ── Domain + Tech-Stack / Tools Intent Booster ────────────────────────
+    const isTechStackQuery = /\b(technologies|technology|tech\s*stack|tools|tool|software|framework|frameworks|languages|what\s+will\s+i\s+learn|kya\s+sikhoge|kya\s+technologies|kaunse\s+tools|kya\s+kya\s+seekhenge|use\s+hota)\b/i.test(queryClean);
+
+    if (isTechStackQuery) {
+      // 1. UI/UX Design
+      const isUiUx = /\b(ui\/ux|ui\s+ux|uiux|user\s+interface|designing)\b/i.test(queryClean);
+      if (isUiUx && (faq.question.includes("UI/UX") || faq.question.includes("UI UX")) && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack") || faq.question.toLowerCase().includes("sikhoge"))) {
+        score += 10000;
+      }
+
+      // 2. Full Stack Web Development
+      const isFullStack = /\b(full\s*stack|web\s+dev|web\s+development|frontend|backend)\b/i.test(queryClean);
+      if (isFullStack && faq.question.includes("Full Stack") && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack") || faq.question.toLowerCase().includes("sikhate"))) {
+        score += 10000;
+      }
+
+      // 3. Mobile App Development
+      const isMobileApp = /\b(mobile\s+app|app\s+dev|flutter|dart|app\s+development)\b/i.test(queryClean);
+      if (isMobileApp && faq.question.includes("Mobile App") && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack"))) {
+        score += 10000;
+      }
+
+      // 4. AI & Automation
+      const isAi = /\b(ai\s*&\s*automation|ai\s+automation|artificial\s+intelligence|langchain|openai|n8n)\b/i.test(queryClean);
+      if (isAi && faq.question.includes("AI & Automation") && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack"))) {
+        score += 10000;
+      }
+
+      // 5. Data Science & Analytics
+      const isDataScience = /\b(data\s+science|analytics|pandas|numpy|tableau|scikit)\b/i.test(queryClean);
+      if (isDataScience && faq.question.includes("Data Science") && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack"))) {
+        score += 10000;
+      }
+
+      // 6. Python Programming
+      const isPython = /\bpython\b/i.test(queryClean);
+      if (isPython && faq.question.includes("Python Programming") && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack") || faq.question.toLowerCase().includes("use"))) {
+        score += 10000;
+      }
+
+      // 7. Java Programming
+      const isJava = /\bjava\b/i.test(queryClean) && !/\bjavascript\b/i.test(queryClean);
+      if (isJava && faq.question.includes("Java Programming") && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack"))) {
+        score += 10000;
+      }
+
+      // 8. C/C++ Programming
+      const isCpp = /\b(c\/c\+\+|cpp|c\s*\+\+|c\s+programming)\b/i.test(queryClean);
+      if (isCpp && faq.question.includes("C/C++ Programming") && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack"))) {
+        score += 10000;
+      }
+
+      // 9. Cloud Computing & DevOps
+      const isCloud = /\b(cloud|devops|aws|docker|kubernetes)\b/i.test(queryClean);
+      if (isCloud && faq.question.includes("Cloud Computing") && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack") || faq.question.toLowerCase().includes("hain"))) {
+        score += 10000;
+      }
+
+      // 10. Digital Marketing & SEO
+      const isMarketing = /\b(digital\s+marketing|marketing|seo|google\s+ads|meta\s+ads)\b/i.test(queryClean);
+      if (isMarketing && faq.question.includes("Digital Marketing") && (faq.question.toLowerCase().includes("technolog") || faq.question.toLowerCase().includes("tool") || faq.question.toLowerCase().includes("stack") || faq.question.toLowerCase().includes("tools"))) {
+        score += 10000;
       }
     }
 
